@@ -1,0 +1,7 @@
+*.pdf
+*.o
+*webserver
+*.a
+*.txt
+*tailwind.config.js
+*.log
