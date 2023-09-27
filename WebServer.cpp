@@ -13,6 +13,7 @@ void WebServer::onMessageReceived(int clientSocket, const char* msg) const
 {
 	// Parse out the client's request string e.g. GET /index.html HTTP/1.1
 	std::istringstream iss(msg);
+	std::cout << msg << std::endl;
 	std::vector<std::string> parsed((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
 
 	// Some defaults for output to the client (404 file not found 'page')
@@ -50,11 +51,11 @@ void WebServer::onMessageReceived(int clientSocket, const char* msg) const
 
 	// Write the document back to the client
 	std::ostringstream oss;
-	oss << "HTTP/1.1 " << errorCode << " OK\r\n";
-	oss << "Cache-Control: no-cache, private\r\n";
-	oss << "Content-Type: text/html\r\n";
-	oss << "Content-Length: " << content.size() << "\r\n";
-	oss << "\r\n";
+	oss << "HTTP/1.1 " << errorCode << " OK\n";
+	oss << "Cache-Control: no-cache, private\n";
+	oss << "Content-Type: text/html\n";
+	oss << "Content-Length: " << content.size() << "\n";
+	oss << "\n";
 	oss << content;
 
 	std::string output = oss.str();

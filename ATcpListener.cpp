@@ -61,7 +61,7 @@ void ATcpListener::handleNewConnection(int clientSocket)
 	addrlen = sizeof(remoteaddr);
 	int newfd = accept(clientSocket, (struct sockaddr *)&remoteaddr, &addrlen);
 	if (newfd == -1) 
-		perror("accept");
+		std::cerr << "accept" << std::endl;
 	else
 		this->addToPfds(newfd);
 }
@@ -95,7 +95,7 @@ int ATcpListener::run()
 		int socketCount = this->pfds.size();
 		if (poll_count == -1)
 		{
-			perror("poll");
+			std::cerr << "poll" << std::endl;
 			return -1;
 		}
 		for (int i = 0; i < socketCount; i++)
@@ -108,8 +108,8 @@ int ATcpListener::run()
 				}
 				else
 				{
-					 ssize_t nbytes = recv(pfds[i].fd, buff, sizeof buff, 0);
 					 int sender_fd = this->pfds[i].fd;
+					 ssize_t nbytes = recv(sender_fd, buff, sizeof buff, 0);
 					 if (nbytes <= 0)
 					 {
 							this->onClientDisconnected(sender_fd, i, nbytes);
@@ -128,7 +128,7 @@ int ATcpListener::run()
 void ATcpListener::sendToClient(int clientSocket, const char* msg, int length) const
 {
 	if (send(clientSocket, msg, length, 0) == -1)
-		perror("send");
+		std::cerr << "send" << std::endl;
 }
 
 void ATcpListener::onClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes)
@@ -136,7 +136,7 @@ void ATcpListener::onClientDisconnected(int clientSocket, int socketIndex,ssize_
  	  if (nbytes == 0)
 			std::cerr << "socket " << clientSocket << " hung up" << std::endl; 
 		else
-			perror("recv");
+			std::cerr << "recv" << std::endl;
 		close(this->pfds[socketIndex].fd);
 		this->removeFromPfds(socketIndex);
 }
