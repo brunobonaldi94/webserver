@@ -1,6 +1,5 @@
 #pragma once
 
-#pragma once
 #include "ATcpListener.hpp"
 
 class WebServer : public ATcpListener

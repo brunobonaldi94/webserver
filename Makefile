@@ -6,11 +6,17 @@ CPP				:=	c++
 FLAGS			:=	-g3 -Wall -Werror -Wextra -std=c++98
 MAKE			:=	make
 
-SRCS			:=	ATcpListener.cpp \
-					WebServer.cpp \
-					main.cpp
+# ==============================================================================
 
-INCLUDES		:= -I./includes
+SRCS_DIR		:=	./srcs
+SRCS			:=	$(SRCS_DIR)/ATcpListener.cpp \
+							$(SRCS_DIR)/WebServer.cpp \
+							$(SRCS_DIR)/config/ConfigParser.cpp \
+							$(SRCS_DIR)/config/Context.cpp \
+							$(SRCS_DIR)/config/Directives.cpp \
+							$(SRCS_DIR)/main.cpp
+
+INCLUDES		:= -I./includes/config -I./includes 
 
 OBJS			:=	$(SRCS:.cpp=.o)
 
@@ -33,19 +39,19 @@ all:		$(NAME)
 	@$(CPP) $(FLAGS) $(INCLUDES) -c $< -o $@
 
 $(NAME):			$(OBJS)
-					@echo "$(WHT)Compiling $(NAME)...$(EOC)"
+					@echo -e "$(WHT)Compiling $(NAME)...$(EOC)"
 					@$(CPP) $(FLAGS) $(OBJS) -o $(NAME)
-					@echo "$(GREEN)$(NAME) build completed.$(EOC)"
+					@echo -e "$(GREEN)$(NAME) build completed.$(EOC)"
 
 clean:
-					@echo "$(WHT)Removing .o files...$(EOC)"
+					@echo -e "$(WHT)Removing .o files...$(EOC)"
 					@rm -f $(OBJS) $(RESULT_LOG_FILE) $(INPUT_LOG_FILE)
-					@echo "$(GREEN)Clean done.$(EOC)"
+					@echo -e "$(GREEN)Clean done.$(EOC)"
 
 fclean:		clean
-					@echo "$(WHT)Removing object- and binary -files...$(EOC)"
+					@echo -e "$(WHT)Removing object- and binary -files...$(EOC)"
 					@rm -f $(NAME)
-					@echo "$(GREEN)Fclean done.$(EOC)"
+					@echo -e "$(GREEN)Fclean done.$(EOC)"
 
 re:			fclean all
 

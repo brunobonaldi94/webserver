@@ -41,7 +41,7 @@ int ATcpListener::getListenerSocket(void)
     freeaddrinfo(ai); // All done with this
     if (p == NULL)
         return -1;
-    if (listen(listener, 10) == -1)
+    if (listen(listener, SOMAXCONN) == -1)
         return -1;
     return listener;
 }
