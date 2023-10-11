@@ -12,11 +12,16 @@ SRCS_DIR		:=	./srcs
 SRCS			:=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/WebServer.cpp \
 							$(SRCS_DIR)/config/ConfigParser.cpp \
-							$(SRCS_DIR)/config/Context.cpp \
-							$(SRCS_DIR)/config/Directives.cpp \
+							$(SRCS_DIR)/config/factory/Context.cpp \
+							$(SRCS_DIR)/config/factory/Directive.cpp \
+							$(SRCS_DIR)/config/factory/AContextCreator.cpp \
+							$(SRCS_DIR)/config/factory/ServerContextCreator.cpp \
+							$(SRCS_DIR)/config/factory/LocationContextCreator.cpp \
+							$(SRCS_DIR)/config/factory/ADirectiveCreator.cpp \
+							$(SRCS_DIR)/config/factory/DirectivesCreator.cpp \
 							$(SRCS_DIR)/main.cpp
 
-INCLUDES		:= -I./includes/config -I./includes 
+INCLUDES		:= -I./includes/config/factory -I./includes/config -I./includes 
 
 OBJS			:=	$(SRCS:.cpp=.o)
 
