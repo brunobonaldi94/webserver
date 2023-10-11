@@ -5,10 +5,10 @@
 class ServerContext : public AContext
 {
 public:
-    ServerContext();
+    ServerContext(std::vector<std::string> allowedDirectives, std::vector<std::string> allowedSubContexts);
     ServerContext(ServerContext const & other);
     ~ServerContext();
 
     ServerContext& operator=(ServerContext const & other);
-    bool parseContext();
+    bool ParseContext(std::string &content);
 };

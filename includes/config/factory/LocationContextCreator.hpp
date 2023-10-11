@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AContextCreator.hpp"
+#include "LocationContext.hpp"
 
 class LocationContextCreator : public AContextCreator
 {
@@ -11,5 +12,5 @@ public:
 
     LocationContextCreator& operator=(LocationContextCreator const & other);
 
-    AContext *createContext(std::string const &name) const;
+    AContext *CreateContext() const;
 };

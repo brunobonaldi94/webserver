@@ -21,9 +21,10 @@
 ConfigParser::ConfigParser(const std::string& fileName): _fileName(fileName) 
 {
   std::string contexts[] = {"server", "location"};
-  this->_availableContexts = std::vector<std::string>(contexts, contexts + sizeof(contexts) / sizeof(std::string));
-  std::string directives[] = {"listen", "server_name", "error_page", "client_max_body_size", "limit_except", "root", "index", "autoindex"};
-  this->_availableDirectives = std::vector<std::string>(directives, directives + sizeof(directives) / sizeof(std::string));
+  AContextCreator* contextsCreators[] = {new ServerContextCreator(), new LocationContextCreator()};
+  FillMapFromArray(this->_availableContexts, contexts, contextsCreators, sizeof(contexts) / sizeof(std::string));
+  //std::string directives[] = {"listen", "server_name", "error_page", "client_max_body_size", "limit_except", "root", "index", "autoindex"};
+  //this->_availableDirectives = std::vector<std::string>(directives, directives + sizeof(directives) / sizeof(std::string));
   std::string chars[] = {"{", "}", ";", "\n"};
   this->_allowedChars = std::vector<std::string>(chars, chars + sizeof(chars) / sizeof(std::string));
 }
@@ -35,6 +36,12 @@ ConfigParser::ConfigParser(ConfigParser const & other)
 
 ConfigParser::~ConfigParser()
 {
+  if (this->_availableContexts.size() > 0)
+  {
+    for (std::map<std::string, AContextCreator *>::iterator it = this->_availableContexts.begin(); it != this->_availableContexts.end(); ++it)
+      delete it->second;
+    this->_availableContexts.clear();
+  }
 }
 
 ConfigParser& ConfigParser::operator=(ConfigParser const & other)
@@ -78,46 +85,35 @@ void ConfigParser::ReadFile()
 
 void ConfigParser::ParseConfigFile()
 {
+  std::string word;
   this->ReadFile();
   std::cout << this->_fileContent << std::endl;
   for (std::string::iterator it = this->_fileContent.begin(); it != this->_fileContent.end(); ++it)
   {
-    //if (*it == '{' || *it == '}' || *it == ';' || *it == '\n')
-      //std::cout << *it << std::endl;
-    std::string word;
-    while (std::isspace(*it))
-    {
-      if (it == this->_fileContent.end())
-        return;
-      ++it;
-    }
-    while (!std::isspace(*it))
-    {
-      if (it == this->_fileContent.end())
-        return;
-      word += *it;
-      ++it;
-    }
-    if (this->parseWord(word))
-      std::cout << word << std::endl;
+    AdvaceOnWhiteSpace(it, this->_fileContent);
+    AdvanceOnComment(it, this->_fileContent);
+    word = ExtractWord(it, this->_fileContent, this->_allowedChars);
+    this->_fileContent = std::string(it, this->_fileContent.end());
+    this->ParseContent(this->_fileContent, word);
+    if (this->_fileContent.size() == 0)
+      return;
+    it = this->_fileContent.begin();
+    word.clear();
   }
 }
 
-bool ConfigParser::parseWord(const std::string& word) const
+bool ConfigParser::ParseContent(std::string& content, std::string& word)
 {
-  if (std::find(this->_availableContexts.begin(), this->_availableContexts.end(), word) != this->_availableContexts.end())
+  std::pair<const std::string, AContextCreator*> *contextCreator = SafeFindInMap(this->_availableContexts, word);
+  if (contextCreator != NULL)
   {
-    std::cout << "found context:" << std::endl;
+    this->_serverContexts.push_back(contextCreator->second->CreateContext());
+    this->_serverContexts.back()->ParseContext(content);
     return true;
   }
-  if (std::find(this->_availableDirectives.begin(), this->_availableDirectives.end(), word) != this->_availableDirectives.end())
+  std::pair<const std::string, ADirectiveCreator*> *directiveCreator = SafeFindInMap(this->_availableDirectives, word);
+  if (directiveCreator != NULL)
   {
-    std::cout << "found directive:" << std::endl;
-    return true;
-  }
-  if (std::find(this->_allowedChars.begin(), this->_allowedChars.end(), word) != this->_allowedChars.end())
-  {
-    std::cout << "found char:" << std::endl;
     return true;
   }
   return false;

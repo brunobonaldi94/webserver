@@ -12,7 +12,7 @@ public:
 
     ListenDirectiveCreator& operator=(ListenDirectiveCreator const & other);
 
-    ADirective *createDirective(std::string const &name) const;
+    ADirective *CreateDirective(std::string const &name) const;
 };
 
 class ServerNameDirectiveCreator : public ADirectiveCreator
@@ -24,7 +24,7 @@ public:
 
     ServerNameDirectiveCreator& operator=(ServerNameDirectiveCreator const & other);
 
-    ADirective *createDirective(std::string const &name) const;
+    ADirective *CreateDirective(std::string const &name) const;
 };
 
 class RootDirectiveCreator : public ADirectiveCreator
@@ -36,7 +36,7 @@ public:
 
     RootDirectiveCreator& operator=(RootDirectiveCreator const & other);
 
-    ADirective *createDirective(std::string const &name) const;
+    ADirective *CreateDirective(std::string const &name) const;
 };
 
 class AutoIndexDirectiveCreator : public ADirectiveCreator
@@ -48,7 +48,7 @@ public:
 
     AutoIndexDirectiveCreator& operator=(AutoIndexDirectiveCreator const & other);
 
-    ADirective *createDirective(std::string const &name) const;
+    ADirective *CreateDirective(std::string const &name) const;
 };
 
 class IndexDirectiveCreator : public ADirectiveCreator
@@ -60,7 +60,7 @@ public:
 
     IndexDirectiveCreator& operator=(IndexDirectiveCreator const & other);
 
-    ADirective *createDirective(std::string const &name) const;
+    ADirective *CreateDirective(std::string const &name) const;
 };
 
 class ErrorPageDirectiveCreator : public ADirectiveCreator
@@ -72,7 +72,7 @@ public:
 
     ErrorPageDirectiveCreator& operator=(ErrorPageDirectiveCreator const & other);
 
-    ADirective *createDirective(std::string const &name) const;
+    ADirective *CreateDirective(std::string const &name) const;
 };
 
 class ClientMaxBodySizeDirectiveCreator : public ADirectiveCreator
@@ -84,7 +84,7 @@ public:
 
     ClientMaxBodySizeDirectiveCreator& operator=(ClientMaxBodySizeDirectiveCreator const & other);
 
-    ADirective *createDirective(std::string const &name) const;
+    ADirective *CreateDirective(std::string const &name) const;
 };
 
 class LimitExceptDirectiveCreator : public ADirectiveCreator
@@ -96,5 +96,5 @@ public:
 
     LimitExceptDirectiveCreator& operator=(LimitExceptDirectiveCreator const & other);
 
-    ADirective *createDirective(std::string const &name) const;
+    ADirective *CreateDirective(std::string const &name) const;
 };

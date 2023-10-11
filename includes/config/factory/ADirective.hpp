@@ -14,5 +14,5 @@ public:
  
     virtual ~ADirective();
 
-    virtual bool parseDirective(std::string &line) const = 0;
+    virtual bool ParseDirective(std::string &line) const = 0;
 };

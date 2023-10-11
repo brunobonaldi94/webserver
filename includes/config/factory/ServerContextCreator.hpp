@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AContextCreator.hpp"
+#include "ServerContext.hpp"
 
 class ServerContextCreator : public AContextCreator
 {
@@ -11,5 +12,5 @@ public:
 
     ServerContextCreator& operator=(ServerContextCreator const & other);
 
-    AContext *createContext(std::string const &name) const;
+    AContext *CreateContext() const;
 };

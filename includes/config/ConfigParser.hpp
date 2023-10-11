@@ -7,17 +7,27 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <vector>
+#include <map>
 #include <cctype>
 #include <algorithm>
+#include "AContextCreator.hpp"
+#include "ServerContextCreator.hpp"
+#include "LocationContextCreator.hpp"
+#include "ADirectiveCreator.hpp"
+#include "DirectivesCreator.hpp"
+#include "MapUtils.hpp"
+#include "VectorUtils.hpp"
+#include "StringUtils.hpp"
 
 class ConfigParser
 {
 private:
-    std::string _fileName;
-    std::string _fileContent;
-    std::vector<std::string> _availableContexts;
-    std::vector<std::string> _availableDirectives;
-    std::vector<std::string> _allowedChars;
+    std::string                                 _fileName;
+    std::string                                 _fileContent;
+    std::map<std::string, AContextCreator *>    _availableContexts;
+    std::map<std::string, ADirectiveCreator *>  _availableDirectives;
+    std::vector<std::string>                    _allowedChars;
+    std::vector<AContext *>                     _serverContexts;
 
     void ReadFile();
 
@@ -30,7 +40,7 @@ public:
 
     bool DirectoryExists(const std::string& path);
     void ParseConfigFile();
-    bool parseWord(const std::string& word) const;
+    bool ParseContent(std::string& content, std::string& word);
 
     class NotFoundException : public std::exception
     {

@@ -4,13 +4,11 @@
 
 class AContextCreator
 {
-protected:
-    std::vector<std::string>    _allowedDirectives;
-    std::vector<std::string>    _allowedSubContexts;
 public:
+    AContextCreator();
     virtual ~AContextCreator();
 
-    virtual AContext *createContext() const = 0;
+    virtual AContext *CreateContext() const = 0;
 
-    virtual AContext* parseContext(std::string &content);
+    virtual AContext* ParseContext(std::string &content);
 };

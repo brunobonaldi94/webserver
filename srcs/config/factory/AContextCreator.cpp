@@ -1,11 +1,14 @@
 #include "AContextCreator.hpp"
 
+
+AContextCreator::AContextCreator() {}
+
 AContextCreator::~AContextCreator() {}
 
-AContext* AContextCreator::parseContext(std::string &content)
+AContext* AContextCreator::ParseContext(std::string &content)
 {
-    AContext* context = this->createContext();
-    if (context->parseContext(content) == false)
+    AContext* context = this->CreateContext();
+    if (context->ParseContext(content) == false)
     {
         delete context;
         return (NULL);

@@ -65,6 +65,7 @@
     "typeinfo": "cpp",
     "variant": "cpp",
     "valarray": "cpp",
-    "codecvt": "cpp"
+    "codecvt": "cpp",
+    "*.tpp": "cpp"
   }
 }

@@ -9,9 +9,10 @@ public:
     ListenDirective();
     ~ListenDirective();
 
-    void setPort(int port);
-    void setHost(std::string host);
+    void SetPort(int port);
+    void SetHost(std::string host);
 
-    int getPort() const;
-    std::string getHost() const;
+    int GetPort() const;
+    std::string GetHost() const;
+    bool ParseDirective(std::string line) const;
 };
