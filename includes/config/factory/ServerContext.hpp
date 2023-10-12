@@ -1,11 +1,16 @@
 #pragma once
 
 #include "AContext.hpp"
+#include "StringUtils.hpp"
+#include "VectorUtils.hpp"
+#include "MapUtils.hpp"
+#include "DirectivesCreator.hpp"
+#include "LocationContextCreator.hpp"
 
 class ServerContext : public AContext
 {
 public:
-    ServerContext(std::vector<std::string> allowedDirectives, std::vector<std::string> allowedSubContexts);
+    ServerContext();
     ServerContext(ServerContext const & other);
     ~ServerContext();
 

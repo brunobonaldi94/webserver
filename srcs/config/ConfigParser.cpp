@@ -22,7 +22,7 @@ ConfigParser::ConfigParser(const std::string& fileName): _fileName(fileName)
 {
   std::string contexts[] = {"server", "location"};
   AContextCreator* contextsCreators[] = {new ServerContextCreator(), new LocationContextCreator()};
-  FillMapFromArray(this->_availableContexts, contexts, contextsCreators, sizeof(contexts) / sizeof(std::string));
+  MapUtils<std::string, AContextCreator *>::FillMapFromArray(this->_availableContexts, contexts, contextsCreators, sizeof(contexts) / sizeof(std::string));
   //std::string directives[] = {"listen", "server_name", "error_page", "client_max_body_size", "limit_except", "root", "index", "autoindex"};
   //this->_availableDirectives = std::vector<std::string>(directives, directives + sizeof(directives) / sizeof(std::string));
   std::string chars[] = {"{", "}", ";", "\n"};
@@ -90,9 +90,9 @@ void ConfigParser::ParseConfigFile()
   std::cout << this->_fileContent << std::endl;
   for (std::string::iterator it = this->_fileContent.begin(); it != this->_fileContent.end(); ++it)
   {
-    AdvaceOnWhiteSpace(it, this->_fileContent);
-    AdvanceOnComment(it, this->_fileContent);
-    word = ExtractWord(it, this->_fileContent, this->_allowedChars);
+    StringUtils::AdvaceOnWhiteSpace(it, this->_fileContent);
+    StringUtils::AdvanceOnComment(it, this->_fileContent);
+    word = StringUtils::ExtractWord(it, this->_fileContent, this->_allowedChars);
     this->_fileContent = std::string(it, this->_fileContent.end());
     this->ParseContent(this->_fileContent, word);
     if (this->_fileContent.size() == 0)
@@ -104,14 +104,14 @@ void ConfigParser::ParseConfigFile()
 
 bool ConfigParser::ParseContent(std::string& content, std::string& word)
 {
-  std::pair<const std::string, AContextCreator*> *contextCreator = SafeFindInMap(this->_availableContexts, word);
+  std::pair<const std::string, AContextCreator*> *contextCreator = MapUtils<std::string, AContextCreator *>::SafeFindMap(this->_availableContexts, word);
   if (contextCreator != NULL)
   {
     this->_serverContexts.push_back(contextCreator->second->CreateContext());
     this->_serverContexts.back()->ParseContext(content);
     return true;
   }
-  std::pair<const std::string, ADirectiveCreator*> *directiveCreator = SafeFindInMap(this->_availableDirectives, word);
+  std::pair<const std::string, ADirectiveCreator*> *directiveCreator = MapUtils<std::string, ADirectiveCreator *>::SafeFindMap(this->_availableDirectives, word);
   if (directiveCreator != NULL)
   {
     return true;

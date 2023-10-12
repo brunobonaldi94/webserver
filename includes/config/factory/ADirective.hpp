@@ -7,12 +7,13 @@ class AContext;
 
 class ADirective
 {
-protected:
+private:
   AContext*    _parentContext;
-  
 public:
- 
+    
     virtual ~ADirective();
 
-    virtual bool ParseDirective(std::string &line) const = 0;
+    void SetParentContext(AContext* parentContext);
+    AContext* GetParentContext() const;
+    virtual bool ParseDirective(std::string &line) = 0;
 };

@@ -11,20 +11,21 @@ MAKE			:=	make
 SRCS_DIR		:=	./srcs
 SRCS			:=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/WebServer.cpp \
-							$(SRCS_DIR)/config/ConfigParser.cpp \
 							$(SRCS_DIR)/config/factory/AContext.cpp \
+							$(SRCS_DIR)/config/factory/LocationContext.cpp \
+							$(SRCS_DIR)/config/factory/ServerContext.cpp \
 							$(SRCS_DIR)/config/factory/ADirective.cpp \
 							$(SRCS_DIR)/config/factory/AContextCreator.cpp \
 							$(SRCS_DIR)/config/factory/ServerContextCreator.cpp \
 							$(SRCS_DIR)/config/factory/LocationContextCreator.cpp \
-							$(SRCS_DIR)/config/factory/ServerContext.cpp \
-							$(SRCS_DIR)/config/factory/LocationContext.cpp \
-							$(SRCS_DIR)/config/factory/DirectivesCreator.cpp \
 							$(SRCS_DIR)/config/factory/ADirectiveCreator.cpp \
+							$(SRCS_DIR)/config/factory/DirectivesCreator.cpp \
+							$(SRCS_DIR)/config/factory/Directives.cpp \
 							$(SRCS_DIR)/utils/StringUtils.cpp \
+							$(SRCS_DIR)/config/ConfigParser.cpp \
 							$(SRCS_DIR)/main.cpp
 
-INCLUDES		:= -I./includes/config/factory -I./includes/config -I./includes/utils -I./includes 
+INCLUDES		:= -I./includes/utils -I./includes/config/factory -I./includes/config -I./includes 
 
 OBJS			:=	$(SRCS:.cpp=.o)
 

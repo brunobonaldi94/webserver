@@ -5,9 +5,14 @@
 #include <algorithm>
 
 template <typename T>
-void FillVectorFromArray(std::vector<T> &vector, T values[], int size);
-
-template <typename T>
-T* SafeFindInVector(std::vector<T> &vector, T key);
+class VectorUtils
+{
+private:
+  VectorUtils();
+  ~VectorUtils();
+public:
+  static void FillVectorFromArray(std::vector<T> &vector, T values[], int size);
+  static T* SafeFindVector(std::vector<T> &vector, T key);
+};
 
 #include "../srcs/utils/VectorUtils.tpp"

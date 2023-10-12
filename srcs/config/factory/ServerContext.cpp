@@ -1,7 +1,18 @@
 #include "ServerContext.hpp"
 
-ServerContext::ServerContext(std::vector<std::string> allowedDirectives, std::vector<std::string> allowedSubContexts) : AContext(allowedDirectives, allowedSubContexts, NULL)
+ServerContext::ServerContext(): AContext(NULL)
 {
+    this->SetParentContext(NULL);
+    std::string allowedChars[] = {"{", "}", ";"};
+    VectorUtils<std::string>::FillVectorFromArray(this->_allowedChars, allowedChars, sizeof(allowedChars) / sizeof(std::string));
+    
+    std::string subContexts[] = {"location"};
+    AContextCreator * subContextsCreators[] = {new LocationContextCreator()};
+    MapUtils<std::string, AContextCreator *>::FillMapFromArray(this->_allowedSubContexts, subContexts, subContextsCreators, sizeof(subContexts) / sizeof(std::string));
+    
+    std::string directives[] = {"listen", "server_name", "error_page", "client_max_body_size", "root", "index", "autoindex"};
+    ADirectiveCreator * directivesCreators[] = {new ListenDirectiveCreator(), new ServerNameDirectiveCreator(), new ErrorPageDirectiveCreator(), new ClientMaxBodySizeDirectiveCreator(), new RootDirectiveCreator(), new IndexDirectiveCreator(), new AutoIndexDirectiveCreator()};
+    MapUtils<std::string, ADirectiveCreator *>::FillMapFromArray(this->_allowedDirectives, directives, directivesCreators, sizeof(directives) / sizeof(std::string));
 }
 
 ServerContext::ServerContext(ServerContext const &other) : AContext(other)
@@ -27,14 +38,26 @@ bool ServerContext::ParseContext(std::string &content)
         return (false);
     for (; it != content.end(); it++)
     {
-        while(std::isspace(*it))
-            it++;
-        while (!std::isspace(*it) && *it != '{' && *it != '}' && *it != ';')
-        {
-            word += *it;
-            it++;
-        }
+        StringUtils::AdvaceOnWhiteSpace(it, content);
+        word = StringUtils::ExtractWord(it, content, this->_allowedChars);
         std::cout << word << std::endl;
+        std::pair<const std::string, AContextCreator *> *contextCreator = MapUtils<std::string, AContextCreator *>::SafeFindMap(this->_allowedSubContexts, word);
+        if (contextCreator != NULL)
+        {
+            AContext *subContext = contextCreator->second->CreateContext();
+            subContext->SetParentContext(this);
+            this->AddSubContext(subContext);
+            if (subContext->ParseContext(content))
+                continue;
+        }
+        std::pair<const std::string, ADirectiveCreator *> *directiveCreator = MapUtils<std::string, ADirectiveCreator *>::SafeFindMap(this->_allowedDirectives, word);
+        if (directiveCreator != NULL)
+        {
+            ADirective *directive = directiveCreator->second->CreateDirective();
+            directive->SetParentContext(this);
+            if (directive->ParseDirective(content))
+                continue;
+        }
         word.clear();
     }
     content.erase(content.begin(), it);

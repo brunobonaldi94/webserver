@@ -2,12 +2,12 @@
 
 #include "ADirective.hpp"
 
+class ADirective;
 class ADirectiveCreator
 {
 public:
-    virtual ~ADirectiveCreator();
+    ADirectiveCreator();
+    virtual ~ADirectiveCreator() = 0;
+    virtual ADirective *CreateDirective() const = 0;
 
-    //virtual ADirective *CreateDirective() const = 0;
-
-    virtual ADirective *ParseDirective();
 };

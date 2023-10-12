@@ -1,6 +1,6 @@
 #include "LocationContext.hpp"
 
-LocationContext::LocationContext(std::vector<std::string> allowedDirectives, std::vector<std::string> allowedSubContexts, AContext *parentContext): AContext(allowedDirectives, allowedSubContexts, parentContext) {};
+LocationContext::LocationContext(): AContext() {};
 
 LocationContext::LocationContext(LocationContext const &other): AContext(other) {};
 

@@ -1,13 +1,18 @@
 #pragma once
 
 #include "AContext.hpp"
+#include "StringUtils.hpp"
+#include "VectorUtils.hpp"
+#include "MapUtils.hpp"
+#include "DirectivesCreator.hpp"
 
 class LocationContext : public AContext
 {
-  public:
-    LocationContext(std::vector<std::string> allowedDirectives, std::vector<std::string> allowedSubContexts, AContext* parentContext);
-    LocationContext(LocationContext const &other);
+public:
+    LocationContext();
+    LocationContext(LocationContext const & other);
     ~LocationContext();
-    bool ParseContext(std::string &content);
 
+    LocationContext& operator=(LocationContext const & other);
+    bool ParseContext(std::string &content);
 };

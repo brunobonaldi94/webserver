@@ -1,6 +1,9 @@
 #include "AContext.hpp"
 
-AContext::AContext(std::vector<std::string> allowedDirectives, std::vector<std::string> allowedSubContexts, AContext *parentContext):_parentContext(parentContext), _allowedDirectives(allowedDirectives), _allowedSubContexts(allowedSubContexts) {}
+AContext::AContext(AContext *parentContext) : _parentContext(parentContext)
+{
+    
+}
 
 AContext::AContext(AContext const & other): _parentContext(other._parentContext) 
 {
@@ -52,12 +55,12 @@ AContext *AContext::GetParentContext() const
     return (this->_parentContext);
 }
 
-std::vector<std::string> AContext::GetAllowedDirectives() const
+std::map<std::string, ADirectiveCreator *> AContext::GetAllowedDirectives() const
 {
     return (this->_allowedDirectives);
 }
 
-std::vector<std::string> AContext::GetAllowedSubContexts() const
+std::map<std::string, AContextCreator *> AContext::GetAllowedSubContexts() const
 {
     return (this->_allowedSubContexts);
 }
