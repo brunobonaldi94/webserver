@@ -55,12 +55,12 @@ AContext *AContext::GetParentContext() const
     return (this->_parentContext);
 }
 
-std::map<std::string, ADirectiveCreator *> AContext::GetAllowedDirectives() const
+MapDirCreator AContext::GetAllowedDirectives() const
 {
     return (this->_allowedDirectives);
 }
 
-std::map<std::string, AContextCreator *> AContext::GetAllowedSubContexts() const
+MapContextCreator AContext::GetAllowedSubContexts() const
 {
     return (this->_allowedSubContexts);
 }

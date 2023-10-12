@@ -71,29 +71,36 @@ bool ListenDirective::ValidateHost(std::string host) const
 
 bool ListenDirective::ParseDirective(std::string &line)
 {
-    ADirective::ParseDirective(line);
-    std::vector<std::string> hostPort = StringUtils::Split(line, ":");
-    if (hostPort.size() == 0)
+    try 
+    {
+        ADirective::ParseDirective(line);
+        std::vector<std::string> hostPort = StringUtils::Split(line, ":");
+        if (hostPort.size() == 0)
+            return false;
+        if (hostPort.size() == 1 && this->ValidatePort(hostPort[0]))
+        {
+            this->_host = "0.0.0.0";
+            this->_port = std::atoi(hostPort[0].c_str());
+            return true;
+        }
+        else if (hostPort.size() == 1 && this->ValidateHost(hostPort[0]))
+        {
+            this->_host = hostPort[0];
+            this->_port = 80;
+            return true;
+        }
+        else if (hostPort.size() == 2 && this->ValidateHost(hostPort[0]) && this->ValidatePort(hostPort[1]))
+        {
+            this->_host = hostPort[0];
+            this->_port = std::atoi(hostPort[1].c_str());
+            return true;
+        }
         return false;
-    if (hostPort.size() == 1 && this->ValidatePort(hostPort[0]))
+    } catch (std::exception &e)
     {
-        this->_host = "0.0.0.0";
-        this->_port = std::atoi(hostPort[0].c_str());
-        return true;
+        Logger::debug(e.what(), ERROR, "ListenDirective::ParseDirective");
+        return false;
     }
-    else if (hostPort.size() == 1 && this->ValidateHost(hostPort[0]))
-    {
-        this->_host = hostPort[0];
-        this->_port = 80;
-        return true;
-    }
-    else if (hostPort.size() == 2 && this->ValidateHost(hostPort[0]) && this->ValidatePort(hostPort[1]))
-    {
-        this->_host = hostPort[0];
-        this->_port = std::atoi(hostPort[1].c_str());
-        return true;
-    }
-    return false;
 }
 
 ServerNameDirective::ServerNameDirective()
@@ -211,7 +218,7 @@ bool ErrorPageDirective::ValidateCode(std::string code) const
 bool ErrorPageDirective::ParseDirective(std::string &line)
 {
     ADirective::ParseDirective(line);
-    std::vector<std::string> tokens =StringUtils::Split(line, SPACE);
+    std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
     if (tokens.size() < 2)
         return false;
     if (!this->ValidateCode(tokens[0]))

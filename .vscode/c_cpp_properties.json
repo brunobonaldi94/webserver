@@ -7,6 +7,7 @@
                 "${workspaceFolder}/includes/config/factory",
                 "${workspaceFolder}/includes/config/",
                 "${workspaceFolder}/includes/utils/",
+                "${workspaceFolder}/includes/log",
                 "${workspaceFolder}/includes/"
             ],
             "defines": [],

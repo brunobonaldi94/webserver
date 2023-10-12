@@ -36,12 +36,8 @@ ConfigParser::ConfigParser(ConfigParser const & other)
 
 ConfigParser::~ConfigParser()
 {
-  if (this->_availableContexts.size() > 0)
-  {
-    for (std::map<std::string, AContextCreator *>::iterator it = this->_availableContexts.begin(); it != this->_availableContexts.end(); ++it)
-      delete it->second;
-    this->_availableContexts.clear();
-  }
+    MapUtils<std::string, AContextCreator *>::ClearMap(this->_availableContexts);
+    MapUtils<std::string, ADirectiveCreator *>::ClearMap(this->_availableDirectives);
 }
 
 ConfigParser& ConfigParser::operator=(ConfigParser const & other)
@@ -93,7 +89,6 @@ void ConfigParser::ParseConfigFile()
     StringUtils::AdvaceOnWhiteSpace(it, this->_fileContent);
     StringUtils::AdvanceOnComment(it, this->_fileContent);
     word = StringUtils::ExtractWord(it, this->_fileContent, this->_allowedChars);
-    this->_fileContent = std::string(it, this->_fileContent.end());
     this->ParseContent(this->_fileContent, word);
     if (this->_fileContent.size() == 0)
       return;

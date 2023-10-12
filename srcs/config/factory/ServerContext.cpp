@@ -21,6 +21,8 @@ ServerContext::ServerContext(ServerContext const &other) : AContext(other)
 
 ServerContext::~ServerContext()
 {
+    MapUtils<std::string, AContextCreator *>::ClearMap(this->_allowedSubContexts);
+    MapUtils<std::string, ADirectiveCreator *>::ClearMap(this->_allowedDirectives);
 }
 
 ServerContext &ServerContext::operator=(ServerContext const &other)
@@ -40,7 +42,7 @@ bool ServerContext::ParseContext(std::string &content)
     {
         StringUtils::AdvaceOnWhiteSpace(it, content);
         word = StringUtils::ExtractWord(it, content, this->_allowedChars);
-        std::cout << word << std::endl;
+        Logger::debug(word, INFO,  "ServerContext::ParseContext word = ");
         std::pair<const std::string, AContextCreator *> *contextCreator = MapUtils<std::string, AContextCreator *>::SafeFindMap(this->_allowedSubContexts, word);
         if (contextCreator != NULL)
         {
@@ -55,11 +57,12 @@ bool ServerContext::ParseContext(std::string &content)
         {
             ADirective *directive = directiveCreator->second->CreateDirective();
             directive->SetParentContext(this);
-            if (directive->ParseDirective(content))
+            std::string line = StringUtils::ExtractLine(it, content);
+            if (directive->ParseDirective(line))
                 continue;
         }
         word.clear();
-    }
+    } 
     content.erase(content.begin(), it);
     return (false);
 }

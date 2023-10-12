@@ -24,6 +24,20 @@ void StringUtils::AdvaceOnWhiteSpace(std::string::iterator &it, std::string &fil
     }
 }
 
+void StringUtils::AdvaceOnDelimiters(std::string::iterator &it, std::string &fileContent, std::string delimeters)
+{
+  for (size_t i = 0; i < delimeters.size(); i++)
+  {
+    while (*it == delimeters[i])
+    {
+      if (it == fileContent.end())
+        return;
+      ++it;
+    }
+  }
+}
+
+
 std::string StringUtils::ExtractWord(std::string::iterator &it, std::string &fileContent, std::vector<std::string> &allowedChars)
 {
   std::string word;
@@ -44,6 +58,8 @@ std::string StringUtils::ExtractWord(std::string::iterator &it, std::string &fil
     word += *it;
     ++it;
   }
+  fileContent = std::string(it, fileContent.end());
+  it = fileContent.begin();
   return word;
 }
 
@@ -68,4 +84,22 @@ std::string StringUtils::UpperCase(std::string str)
     upperCaseStr += std::toupper(str[i]);
   }
   return upperCaseStr;
+}
+
+std::string StringUtils::ExtractLine(std::string::iterator &it, std::string &fileContent)
+{
+  std::string line;
+  StringUtils::AdvaceOnDelimiters(it, fileContent, SPACE);
+  for (; it != fileContent.end(); ++it)
+  {    
+    if (*it == '\n')
+    {
+      ++it;
+      fileContent = std::string(it, fileContent.end());
+      it = fileContent.begin();
+      return line;
+    }
+    line += *it;
+  }
+  return line;
 }

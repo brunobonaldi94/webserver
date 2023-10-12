@@ -6,6 +6,7 @@
 #include "AContextCreator.hpp"
 #include "ADirectiveCreator.hpp"
 #include "ADirective.hpp"
+#include "types.hpp"
 
 class ADirective;
 class ADirectiveCreator;
@@ -17,8 +18,8 @@ private:
     std::vector<AContext *>                         _subContexts;
     std::vector<ADirective *>                       _directives;
 protected:
-    std::map<std::string, ADirectiveCreator *>      _allowedDirectives;
-    std::map<std::string, AContextCreator *>        _allowedSubContexts;
+    MapDirCreator      _allowedDirectives;
+    MapContextCreator        _allowedSubContexts;
     std::vector<std::string>                        _allowedChars;
 
 public:
@@ -34,8 +35,8 @@ public:
     void AddSubContext(AContext *subContext);
     AContext *GetParentContext() const;
     void SetParentContext(AContext *parentContext);
-    std::map<std::string, ADirectiveCreator *> GetAllowedDirectives() const;
-    std::map<std::string, AContextCreator *> GetAllowedSubContexts() const;
+    MapDirCreator GetAllowedDirectives() const;
+    MapContextCreator GetAllowedSubContexts() const;
 
     virtual bool ParseContext(std::string &content) = 0;
     

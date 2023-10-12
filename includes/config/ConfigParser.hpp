@@ -18,14 +18,15 @@
 #include "MapUtils.hpp"
 #include "VectorUtils.hpp"
 #include "StringUtils.hpp"
+#include "types.hpp"
 
 class ConfigParser
 {
 private:
     std::string                                 _fileName;
     std::string                                 _fileContent;
-    std::map<std::string, AContextCreator *>    _availableContexts;
-    std::map<std::string, ADirectiveCreator *>  _availableDirectives;
+    MapContextCreator                           _availableContexts;
+    MapDirCreator                               _availableDirectives;
     std::vector<std::string>                    _allowedChars;
     std::vector<AContext *>                     _serverContexts;
 

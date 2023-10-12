@@ -18,9 +18,24 @@ bool ADirective::ParseDirective(std::string &line)
 {
     if (line.empty())
         return false;
-    size_t posNewLineSemiCollon = line.find_first_of(";\n");
-    size_t posSemiCollon = line.find_first_of(";");
-    if (posNewLineSemiCollon == std::string::npos && posSemiCollon == std::string::npos)
+    if (line[line.size() -1] != ';')
+    {
+        throw ADirective::DirectiveSyntaxErrorException("Syntax error: missing ';' at the end of the line");
         return false;
+    }
+    line = line.substr(0, line.size() - 1);
     return true;
+}
+
+ADirective::DirectiveSyntaxErrorException::DirectiveSyntaxErrorException(std::string syntaxErrorMsg): _syntaxErrorMsg(syntaxErrorMsg)
+{
+}
+
+ADirective::DirectiveSyntaxErrorException::~DirectiveSyntaxErrorException() throw()
+{
+}
+
+const char* ADirective::DirectiveSyntaxErrorException::what() const throw()
+{
+    return this->_syntaxErrorMsg.c_str();
 }

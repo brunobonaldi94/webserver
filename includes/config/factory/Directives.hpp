@@ -2,11 +2,11 @@
 
 #include "ADirective.hpp"
 #include "StringUtils.hpp"
+#include "Logger.hpp"
+#include "defines.hpp"
 #include <vector>
 #include <string>
 
-#define SPACE " \t"
- 
 class ListenDirective : public ADirective
 {
 private:

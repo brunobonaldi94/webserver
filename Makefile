@@ -23,9 +23,10 @@ SRCS			:=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/config/factory/Directives.cpp \
 							$(SRCS_DIR)/utils/StringUtils.cpp \
 							$(SRCS_DIR)/config/ConfigParser.cpp \
+							$(SRCS_DIR)/log/Logger.cpp \
 							$(SRCS_DIR)/main.cpp
 
-INCLUDES		:= -I./includes/utils -I./includes/config/factory -I./includes/config -I./includes 
+INCLUDES		:= -I./includes/utils  -I./includes/log -I./includes/config/factory -I./includes/config -I./includes 
 
 OBJS			:=	$(SRCS:.cpp=.o)
 
