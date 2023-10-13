@@ -56,6 +56,8 @@ bool ListenDirective::ValidatePort(std::string port) const
     return true;
 }
 
+//http://nginx.org/en/docs/http/ngx_http_core_module.html#listen
+//check this link to a better validation
 bool ListenDirective::ValidateHost(std::string host) const
 {
     std::vector<std::string> tokens = StringUtils::Split(host, ".");

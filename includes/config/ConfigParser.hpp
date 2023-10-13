@@ -19,6 +19,8 @@
 #include "VectorUtils.hpp"
 #include "StringUtils.hpp"
 #include "types.hpp"
+#include "NotAllowedException.hpp"
+#include "NotFoundException.hpp"
 
 class ConfigParser
 {
@@ -42,24 +44,4 @@ public:
     bool DirectoryExists(const std::string& path);
     void ParseConfigFile();
     bool ParseContent(std::string& content, std::string& word);
-
-    class NotFoundException : public std::exception
-    {
-        private:
-            std::string _objectName;
-        public:
-            NotFoundException(const std::string& objectName);
-            virtual ~NotFoundException() throw();
-            virtual const char* what() const throw();
-    };
-
-    class NotAllowedException : public std::exception
-    {
-        private:
-            std::string _objectName;
-        public:
-            NotAllowedException(const std::string& objectName);
-            virtual ~NotAllowedException() throw();
-            virtual const char* what() const throw();
-    };
 };

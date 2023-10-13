@@ -52,7 +52,7 @@ private:
 
 	std::string										m_ipAddress;	// IP Address server will run on
 	std::string										m_port;			// Port # for the web service
-	int														m_socket;		// Internal FD for the listening socket
+	//int														m_socket;		// Internal FD for the listening socket
 	std::vector<struct pollfd>		pfds;			// Pointer to the pollfd array
 	static const int 							MAXFDS = 100;	// Maximum number of file descriptors
 	int														listenfd;											// File descriptor for the listening socket

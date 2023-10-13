@@ -40,7 +40,7 @@ void StringUtils::AdvaceOnDelimiters(std::string::iterator &it, std::string &fil
 
 std::string StringUtils::ExtractWord(std::string::iterator &it, std::string &fileContent, std::vector<std::string> &allowedChars)
 {
-  std::string word;
+  std::string word = "";
   char prevChar;
   while (VectorUtils<std::string>::SafeFindVector(allowedChars, std::string(1, *it)) != NULL)
   {
@@ -102,6 +102,17 @@ std::string StringUtils::ExtractLine(std::string::iterator &it, std::string &fil
     line += *it;
   }
   return line;
+}
+
+bool StringUtils::CheckNextCharAfterWhiteSpace(std::string::iterator &it, std::string &fileContent, char c)
+{
+  StringUtils::AdvaceOnWhiteSpace(it, fileContent);
+  if (*it == c)
+  {
+    ++it;
+    return true;
+  }
+  return false;
 }
 
 template <typename T>

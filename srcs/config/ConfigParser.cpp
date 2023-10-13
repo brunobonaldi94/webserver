@@ -65,11 +65,11 @@ void ConfigParser::ReadFile()
   {
      std::string path("./config_files/");
     if (!this->DirectoryExists(path))
-      throw ConfigParser::NotFoundException("config_files directory");    
+      throw NotFoundException("config_files directory");    
     std::string fullName = path + this->_fileName;
     std::ifstream file(fullName.c_str());
     if (!file.good())
-      throw ConfigParser::NotFoundException(this->_fileName);
+      throw NotFoundException(this->_fileName);
     std::string contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     this->_fileContent = contents;
   }
@@ -112,32 +112,4 @@ bool ConfigParser::ParseContent(std::string& content, std::string& word)
     return true;
   }
   return false;
-}
-
-
-ConfigParser::NotFoundException::NotFoundException(const std::string& objectName): _objectName(objectName + " not found")
-{
-}
-
-const char* ConfigParser::NotFoundException::what() const throw()
-{
-    return this->_objectName.c_str();
-}
-
-ConfigParser::NotFoundException::~NotFoundException() throw()
-{
-}
-
-
-ConfigParser::NotAllowedException::NotAllowedException(const std::string& objectName): _objectName(objectName + " not allowed directive or context")
-{
-}
-
-const char* ConfigParser::NotAllowedException::what() const throw()
-{
-    return this->_objectName.c_str();
-}
-
-ConfigParser::NotAllowedException::~NotAllowedException() throw()
-{
 }

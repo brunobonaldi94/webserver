@@ -24,6 +24,8 @@ public:
 
   static std::string UpperCase(std::string str);
 
+  static bool CheckNextCharAfterWhiteSpace(std::string::iterator &it, std::string &fileContent, char c);
+
   template <typename T>
   static std::string ConvertNumberToString(T number);
 };

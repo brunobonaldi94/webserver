@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "AContext.hpp"
+#include "SyntaxErrorException.hpp"
 
 class AContext;
 
@@ -17,14 +18,4 @@ public:
     AContext* GetParentContext() const;
     virtual bool ParseDirective(std::string &line) = 0;
     virtual void PrintDirective() const = 0;
-
-    class DirectiveSyntaxErrorException : public std::exception
-    {
-        private:
-          std::string _syntaxErrorMsg;
-        public:
-            DirectiveSyntaxErrorException(std::string syntaxErrorMsg);
-            virtual ~DirectiveSyntaxErrorException() throw();
-            virtual const char* what() const throw();
-    };
 };

@@ -24,9 +24,12 @@ SRCS			:=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/config/ConfigParser.cpp \
 							$(SRCS_DIR)/log/Logger.cpp \
 							$(SRCS_DIR)/utils/StringUtils.cpp \
+							$(SRCS_DIR)/errors/NotAllowedException.cpp \
+							$(SRCS_DIR)/errors/NotFoundException.cpp \
+							$(SRCS_DIR)/errors/SyntaxErrorException.cpp \
 							$(SRCS_DIR)/main.cpp
 
-INCLUDES		:= -I./includes/utils  -I./includes/log -I./includes/config/factory -I./includes/config -I./includes 
+INCLUDES		:= -I./includes/utils  -I./includes/log -I./includes/errors -I./includes/config/factory -I./includes/config -I./includes 
 
 OBJS			:=	$(SRCS:.cpp=.o)
 
@@ -49,19 +52,19 @@ all:		$(NAME)
 	@$(CPP) $(FLAGS) $(INCLUDES) -c $< -o $@
 
 $(NAME):			$(OBJS)
-					@echo -e "$(WHT)Compiling $(NAME)...$(EOC)"
+					@echo "$(WHT)Compiling $(NAME)...$(EOC)"
 					@$(CPP) $(FLAGS) $(OBJS) -o $(NAME)
-					@echo -e "$(GREEN)$(NAME) build completed.$(EOC)"
+					@echo "$(GREEN)$(NAME) build completed.$(EOC)"
 
 clean:
-					@echo -e "$(WHT)Removing .o files...$(EOC)"
+					@echo "$(WHT)Removing .o files...$(EOC)"
 					@rm -f $(OBJS) $(RESULT_LOG_FILE) $(INPUT_LOG_FILE)
-					@echo -e "$(GREEN)Clean done.$(EOC)"
+					@echo "$(GREEN)Clean done.$(EOC)"
 
 fclean:		clean
-					@echo -e "$(WHT)Removing object- and binary -files...$(EOC)"
+					@echo "$(WHT)Removing object- and binary -files...$(EOC)"
 					@rm -f $(NAME)
-					@echo -e "$(GREEN)Fclean done.$(EOC)"
+					@echo "$(GREEN)Fclean done.$(EOC)"
 
 re:			fclean all
 
