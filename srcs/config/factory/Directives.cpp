@@ -103,6 +103,13 @@ bool ListenDirective::ParseDirective(std::string &line)
     }
 }
 
+void ListenDirective::PrintDirective() const
+{
+    std::string port = StringUtils::ConvertNumberToString(this->_port);
+    std::string msg = "host: " + this->_host + " port: " + port;
+    Logger::debug(msg, SUCCESS, "ListenDirective::PrintDirective");
+}
+
 ServerNameDirective::ServerNameDirective()
 {
 }
@@ -146,6 +153,17 @@ bool ServerNameDirective::ParseDirective(std::string &line)
         this->_names.push_back(tokens[i]);
     }
     return true;
+}
+
+void ServerNameDirective::PrintDirective() const
+{
+    std::string names;
+    for (size_t i = 0; i < this->_names.size() - 1; i++)
+    {
+        names += this->_names[i] + " ";
+    }
+    names += this->_names[this->_names.size() - 1];
+    Logger::debug(names, SUCCESS, "ServerNameDirective::PrintDirective");
 }
 
 ErrorPageDirective::ErrorPageDirective()
@@ -228,6 +246,13 @@ bool ErrorPageDirective::ParseDirective(std::string &line)
     return true;
 }
 
+void ErrorPageDirective::PrintDirective() const
+{
+    std::string code = StringUtils::ConvertNumberToString(this->GetCode());
+    std::string msg = "code: " + code + " path: " + this->_path;
+    Logger::debug(msg, SUCCESS, "ErrorPageDirective::PrintDirective");
+}
+
 ClientMaxBodySizeDirective::ClientMaxBodySizeDirective()
 {
 }
@@ -279,12 +304,18 @@ bool ClientMaxBodySizeDirective::ParseDirective(std::string &line)
 {
     ADirective::ParseDirective(line);
     std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
-    if (tokens.size() == 0)
+    if (tokens.size() == 0 || tokens.size() > 1)
         return false;
-    if (!this->ValidateSize(tokens[1]))
+    if (!this->ValidateSize(tokens[0]))
         return false;
-    this->_size = tokens[1];
+    this->_size = tokens[0];
     return true;
+}
+
+void ClientMaxBodySizeDirective::PrintDirective() const
+{
+    std::string msg = "size: " + this->_size;
+    Logger::debug(msg, SUCCESS, "ClientMaxBodySizeDirective::PrintDirective");
 }
 
 IndexDirective::IndexDirective()
@@ -332,6 +363,17 @@ bool IndexDirective::ParseDirective(std::string &line)
     return true;
 }
 
+void IndexDirective::PrintDirective() const
+{
+    std::string index;
+    for (size_t i = 0; i < this->_index.size() - 1; i++)
+    {
+        index += this->_index[i] + " ";
+    }
+    index += this->_index[this->_index.size() - 1];
+    Logger::debug(index, SUCCESS, "IndexDirective::PrintDirective");
+}
+
 RootDirective::RootDirective()
 {
 }
@@ -372,6 +414,12 @@ bool RootDirective::ParseDirective(std::string &line)
         return false;
     this->_path = tokens[0];
     return true;
+}
+
+void RootDirective::PrintDirective() const
+{
+    std::string msg = "path: " + this->_path;
+    Logger::debug(msg, SUCCESS, "RootDirective::PrintDirective");
 }
 
 AutoIndexDirective::AutoIndexDirective()
@@ -419,6 +467,12 @@ bool AutoIndexDirective::ParseDirective(std::string &line)
     else
         return false;
     return true;
+}
+
+void AutoIndexDirective::PrintDirective() const
+{
+    std::string msg = "autoindex: " + std::string(this->_autoIndex ? "on" : "off");
+    Logger::debug(msg, SUCCESS, "AutoIndexDirective::PrintDirective");
 }
 
 LimitExceptDirective::LimitExceptDirective()
@@ -487,4 +541,15 @@ bool LimitExceptDirective::ParseDirective(std::string &line)
         this->_methods.push_back(tokens[i]);
     }
     return true;
+}
+
+void LimitExceptDirective::PrintDirective() const
+{
+    std::string methods;
+    for (size_t i = 0; i < this->_methods.size() - 1; i++)
+    {
+        methods += this->_methods[i] + " ";
+    }
+    methods += this->_methods[this->_methods.size() - 1];
+    Logger::debug(methods, SUCCESS, "LimitExceptDirective::PrintDirective");
 }

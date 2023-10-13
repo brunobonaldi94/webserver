@@ -34,32 +34,42 @@ ServerContext &ServerContext::operator=(ServerContext const &other)
 bool ServerContext::ParseContext(std::string &content)
 {
     std::string word;
+    std::string serverContextName = "server";
     std::string::iterator it = content.begin();
     size_t pos = content.find_first_of("{");
+
     if (pos == std::string::npos)
         return (false);
+
     for (; it != content.end(); it++)
     {
         StringUtils::AdvaceOnWhiteSpace(it, content);
         word = StringUtils::ExtractWord(it, content, this->_allowedChars);
         Logger::debug(word, INFO,  "ServerContext::ParseContext word = ");
-        std::pair<const std::string, AContextCreator *> *contextCreator = MapUtils<std::string, AContextCreator *>::SafeFindMap(this->_allowedSubContexts, word);
+        if (word == serverContextName)
+        {
+            content = serverContextName + " " + content;
+            return (true);
+        }
+        PairContextCreator *contextCreator = MapUtils<std::string, AContextCreator *>::SafeFindMap(this->_allowedSubContexts, word);
         if (contextCreator != NULL)
         {
             AContext *subContext = contextCreator->second->CreateContext();
             subContext->SetParentContext(this);
             this->AddSubContext(subContext);
-            if (subContext->ParseContext(content))
-                continue;
+            if (!subContext->ParseContext(content))
+                throw std::runtime_error("Error: Context " + word + " failed to parse");
         }
-        std::pair<const std::string, ADirectiveCreator *> *directiveCreator = MapUtils<std::string, ADirectiveCreator *>::SafeFindMap(this->_allowedDirectives, word);
+        PairDirCreator *directiveCreator = MapUtils<std::string, ADirectiveCreator *>::SafeFindMap(this->_allowedDirectives, word);
         if (directiveCreator != NULL)
         {
+            std::string line = StringUtils::ExtractLine(it, content);
             ADirective *directive = directiveCreator->second->CreateDirective();
             directive->SetParentContext(this);
-            std::string line = StringUtils::ExtractLine(it, content);
-            if (directive->ParseDirective(line))
-                continue;
+            this->AddDirective(directive);
+            if (!directive->ParseDirective(line))
+                throw std::runtime_error("Error: Directive " + word + " failed to parse");
+            directive->PrintDirective();
         }
         word.clear();
     } 

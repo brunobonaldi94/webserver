@@ -16,6 +16,7 @@ public:
     void SetParentContext(AContext* parentContext);
     AContext* GetParentContext() const;
     virtual bool ParseDirective(std::string &line) = 0;
+    virtual void PrintDirective() const = 0;
 
     class DirectiveSyntaxErrorException : public std::exception
     {

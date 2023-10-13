@@ -103,3 +103,17 @@ std::string StringUtils::ExtractLine(std::string::iterator &it, std::string &fil
   }
   return line;
 }
+
+template <typename T>
+std::string StringUtils::ConvertNumberToString(T number)
+{
+  std::stringstream ss;
+  ss << number;
+  return ss.str();
+}
+
+template std::string StringUtils::ConvertNumberToString<int>(int number);
+template std::string StringUtils::ConvertNumberToString<float>(float number);
+template std::string StringUtils::ConvertNumberToString<double>(double number);
+template std::string StringUtils::ConvertNumberToString<long>(long number);
+template std::string StringUtils::ConvertNumberToString<long long>(long long number);

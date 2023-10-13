@@ -2,6 +2,7 @@
 #pragma once
 
 #include <iostream>
+#include <iomanip>
 #include <time.h>
 
 #define RESET       "\033[0m"

@@ -26,6 +26,7 @@ public:
     bool ValidatePort(std::string port) const;
     bool ValidateHost(std::string host) const;
     bool ParseDirective(std::string &line);
+    void PrintDirective() const;
 };
 
 class ServerNameDirective : public ADirective
@@ -41,6 +42,7 @@ public:
     void AddName(std::string name);
     std::vector<std::string> GetNames() const;
     bool ParseDirective(std::string &line);
+    void PrintDirective() const;
 };
 
 class ErrorPageDirective : public ADirective
@@ -62,6 +64,7 @@ public:
 
     bool ValidateCode(std::string code) const;
     bool ParseDirective(std::string &line);
+    void PrintDirective() const;
 };
 
 class ClientMaxBodySizeDirective : public ADirective
@@ -80,6 +83,7 @@ public:
 
     bool ValidateSize(std::string size) const;
     bool ParseDirective(std::string &line);
+    void PrintDirective() const;
 };
 
 class LimitExceptDirective : public ADirective
@@ -98,6 +102,7 @@ public:
     bool ValidateMethods(std::string methods) const;
 
     bool ParseDirective(std::string &line);
+    void PrintDirective() const;
 };
 
 class RootDirective : public ADirective
@@ -114,6 +119,7 @@ public:
 
     std::string GetPath() const;
     bool ParseDirective(std::string &line);
+    void PrintDirective() const;
 };
 
 class AutoIndexDirective : public ADirective
@@ -130,6 +136,7 @@ public:
 
     bool GetAutoIndex() const;
     bool ParseDirective(std::string &line);
+    void PrintDirective() const;
 };
 
 class IndexDirective : public ADirective
@@ -145,4 +152,5 @@ public:
     void AddIndex(std::string index);
     std::vector<std::string> GetIndex() const;
     bool ParseDirective(std::string &line);
+    void PrintDirective() const;
 };

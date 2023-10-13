@@ -18,8 +18,8 @@ private:
     std::vector<AContext *>                         _subContexts;
     std::vector<ADirective *>                       _directives;
 protected:
-    MapDirCreator      _allowedDirectives;
-    MapContextCreator        _allowedSubContexts;
+    MapDirCreator                                   _allowedDirectives;
+    MapContextCreator                               _allowedSubContexts;
     std::vector<std::string>                        _allowedChars;
 
 public:

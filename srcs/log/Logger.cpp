@@ -47,11 +47,14 @@ std::string Logger::GetDateTime()
 void Logger::debug(const std::string& message, LogTypeEnum type, std::string where)
 {
     LogInfos logInfos = Logger::getColorAndType(type);
-    std::cout << logInfos.logColor
+    std::cout 
+              << logInfos.logColor
               << "[" 
               << logInfos.logType
-              << "] " 
+              << "] "
+              << CYAN
               << where
+              << logInfos.logColor
               << "`"
               << message 
               << "`"
@@ -64,10 +67,10 @@ void Logger::log(const std::string& message, LogTypeEnum type)
     LogInfos logInfos = Logger::getColorAndType(type);
     std::string dateTime = Logger::GetDateTime();
     std::cout << logInfos.logColor
-              << "[" 
-              << logInfos.logType
               << dateTime
-              << " - ] " 
+              << " ["  
+              << logInfos.logType
+              << "]: " 
               << message << " " 
               << RESET << std::endl;
 }

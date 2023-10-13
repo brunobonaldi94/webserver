@@ -23,4 +23,7 @@ public:
   static std::vector<std::string> Split(std::string str, std::string delimiters);
 
   static std::string UpperCase(std::string str);
+
+  template <typename T>
+  static std::string ConvertNumberToString(T number);
 };
