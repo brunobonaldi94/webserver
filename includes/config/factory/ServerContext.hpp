@@ -15,5 +15,5 @@ public:
     ~ServerContext();
 
     ServerContext& operator=(ServerContext const & other);
-    bool ParseContext(std::string &content);
+    void ParseContext(std::string &content);
 };

@@ -10,7 +10,7 @@
 class ListenDirective : public ADirective
 {
 private:
-    int         _port;
+    std::string _port;
     std::string _host;
 public:
     ListenDirective();
@@ -20,12 +20,12 @@ public:
 
     void SetPort(int port);
     void SetHost(std::string host);
-    int GetPort() const;
+    std::string GetPort() const;
     std::string GetHost() const;
 
     bool ValidatePort(std::string port) const;
     bool ValidateHost(std::string host) const;
-    bool ParseDirective(std::string &line);
+    void ParseDirective(std::string &line);
     void PrintDirective() const;
 };
 
@@ -41,14 +41,14 @@ public:
 
     void AddName(std::string name);
     std::vector<std::string> GetNames() const;
-    bool ParseDirective(std::string &line);
+    void ParseDirective(std::string &line);
     void PrintDirective() const;
 };
 
 class ErrorPageDirective : public ADirective
 {
 private:
-    int _code;
+    std::string _code;
     std::string _path;
 public:
     ErrorPageDirective();
@@ -59,11 +59,11 @@ public:
     void SetCode(int code);
     void SetPath(std::string path);
 
-    int GetCode() const;
+    std::string GetCode() const;
     std::string GetPath() const;
 
     bool ValidateCode(std::string code) const;
-    bool ParseDirective(std::string &line);
+    void ParseDirective(std::string &line);
     void PrintDirective() const;
 };
 
@@ -82,7 +82,7 @@ public:
     std::string GetSize() const;
 
     bool ValidateSize(std::string size) const;
-    bool ParseDirective(std::string &line);
+    void ParseDirective(std::string &line);
     void PrintDirective() const;
 };
 
@@ -101,7 +101,7 @@ public:
 
     bool ValidateMethods(std::string methods) const;
 
-    bool ParseDirective(std::string &line);
+    void ParseDirective(std::string &line);
     void PrintDirective() const;
 };
 
@@ -118,7 +118,7 @@ public:
     void SetPath(std::string path);
 
     std::string GetPath() const;
-    bool ParseDirective(std::string &line);
+    void ParseDirective(std::string &line);
     void PrintDirective() const;
 };
 
@@ -135,7 +135,7 @@ public:
     void SetAutoIndex(bool autoIndex);
 
     bool GetAutoIndex() const;
-    bool ParseDirective(std::string &line);
+    void ParseDirective(std::string &line);
     void PrintDirective() const;
 };
 
@@ -151,6 +151,6 @@ public:
 
     void AddIndex(std::string index);
     std::vector<std::string> GetIndex() const;
-    bool ParseDirective(std::string &line);
+    void ParseDirective(std::string &line);
     void PrintDirective() const;
 };

@@ -39,6 +39,6 @@ public:
     ConfigParser& operator=(ConfigParser const & other);
 
     bool DirectoryExists(const std::string& path);
-    void ParseConfigFile();
+    bool ParseConfigFile();
     bool ParseContent(std::string& content, std::string& word);
 };

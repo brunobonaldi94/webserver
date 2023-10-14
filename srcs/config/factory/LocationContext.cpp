@@ -28,39 +28,39 @@ std::string LocationContext::GetUri() const
     return (this->uri);
 }
 
-bool LocationContext::ParseContext(std::string &content)
+void LocationContext::ParseContext(std::string &content)
 {
     std::string::iterator it = content.begin();
     std::string word;
+    bool locationHasCloseCurlyBraces = false;
     bool locationHasSlash = StringUtils::CheckNextCharAfterWhiteSpace(it, content, '/');
     if (!locationHasSlash)
-        return (false);
+        throw SyntaxErrorException("Location context must have a slash `/` for uri");
 
-    std::string uri = StringUtils::ExtractWord(it, content, this->_allowedChars);
-    this->SetUri(uri);
+    std::string uri = StringUtils::ExtractWord(it, content);
+    this->SetUri("/" + uri);
 
     bool locationHasOpenCurlyBraces = StringUtils::CheckNextCharAfterWhiteSpace(it, content, '{');
     if (!locationHasOpenCurlyBraces)
-        return (false);
+        throw SyntaxErrorException("Location context must have an open curly braces `{`");
 
     for (; it != content.end(); it++)
     {
         StringUtils::AdvaceOnWhiteSpace(it, content);
         if (*it == '{')
-        {
             throw SyntaxErrorException("Duplicated {");
-            return (false);
-        }
         if (*it == '}')
         {
             it++;
+            locationHasCloseCurlyBraces = true;
             break;
         }
-        word = StringUtils::ExtractWord(it, content, this->_allowedChars);
-        Logger::debug(word, INFO,  "LocationContext::ParseContext word = ");
-        AContext::HandleContextCreation(content, word);
-        AContext::HandleDirectiveCreation(it, content, word);
+        word = StringUtils::ExtractWord(it, content);
+        Logger::Debug("LocationContext::ParseContext word = ", INFO, word);
+        AContext::HandleContextCreation(content, word, "location");
+        AContext::HandleDirectiveCreation(it, content, word, "location");
     }
+    if (!locationHasCloseCurlyBraces)
+        throw SyntaxErrorException("Location context must have a close curly braces `}`");
     content.erase(content.begin(), it);
-    return (true);
 }

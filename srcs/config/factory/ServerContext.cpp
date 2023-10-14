@@ -31,35 +31,34 @@ ServerContext &ServerContext::operator=(ServerContext const &other)
     return (*this);
 }
 
-bool ServerContext::ParseContext(std::string &content)
+void ServerContext::ParseContext(std::string &content)
 {
     std::string word;
-    std::string serverContextName = "server";
+    bool locationHasCloseCurlyBraces = false;
     std::string::iterator it = content.begin();
 
     bool serverHasOpenCurlyBraces = StringUtils::CheckNextCharAfterWhiteSpace(it, content, '{');
     if (!serverHasOpenCurlyBraces)
-        return (false);
+        throw SyntaxErrorException("Server context must have an open curly braces `{`");
 
     for (; it != content.end(); it++)
     {
         if (*it == '{')
-        {
             throw SyntaxErrorException("Duplicated {");
-            return (false);
-        }
         if (*it == '}')
         {
             it++;
+            locationHasCloseCurlyBraces = true;
             break;
         }
         StringUtils::AdvaceOnWhiteSpace(it, content);
         word = StringUtils::ExtractWord(it, content);
-        Logger::debug(word, INFO,  "ServerContext::ParseContext word = ");
-        AContext::HandleContextCreation(content, word);
-        AContext::HandleDirectiveCreation(it, content, word);
+        Logger::Debug("ServerContext::ParseContext word = ", INFO, word);
+        AContext::HandleContextCreation(content, word, "server");
+        AContext::HandleDirectiveCreation(it, content, word, "server");
         word.clear();
     }
+    if (!locationHasCloseCurlyBraces)
+        throw SyntaxErrorException("Server context must have a close curly braces `}`");
     content.erase(content.begin(), it);
-    return (true);
 }

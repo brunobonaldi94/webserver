@@ -24,5 +24,5 @@ public:
     void SetUri(std::string uri);
     std::string GetUri() const;
 
-    bool ParseContext(std::string &content);
+    void ParseContext(std::string &content);
 };

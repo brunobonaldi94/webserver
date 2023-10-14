@@ -6,6 +6,8 @@
 #include <time.h>
 #include "defines.hpp"
 
+class Ostream;
+
 #define RESET       "\033[0m"
 #define BLACK       "\033[30m"              /* Black */
 #define RED         "\033[31m"              /* Red */
@@ -44,9 +46,12 @@ class Logger
 private:
     Logger();
     ~Logger();
-    static LogInfos getColorAndType(LogTypeEnum type);
+    static LogInfos GetColorAndType(LogTypeEnum type);
+    static std::ostream* SetStream(LogTypeEnum type);
     static std::string GetDateTime();
+
 public:
-    static void log(const std::string& message, LogTypeEnum type);
-    static void debug(const std::string& message, LogTypeEnum type, std::string where);
+    static void Log(LogTypeEnum type, const std::string& message);
+    static void Debug(const std::string& where, LogTypeEnum type,const std::string& message);
+    static void PrintMessage(LogTypeEnum type, const std::string& message);
 };

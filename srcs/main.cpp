@@ -10,7 +10,8 @@ int main(int argc, char *argv[])
 	}
 	std::string fileName = argv[1];
 	ConfigParser configParser(fileName);
-	configParser.ParseConfigFile();
+	if (!configParser.ParseConfigFile())
+		return -1;
 
 	std::string ipAddress("0.0.0.0");
 	std::string port("8080");

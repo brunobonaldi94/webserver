@@ -38,7 +38,7 @@ std::string ListenDirective::GetHost() const
     return this->_host;
 }
 
-int ListenDirective::GetPort() const
+std::string ListenDirective::GetPort() const
 {
     return this->_port;
 }
@@ -71,45 +71,35 @@ bool ListenDirective::ValidateHost(std::string host) const
     return true;
 }
 
-bool ListenDirective::ParseDirective(std::string &line)
+void ListenDirective::ParseDirective(std::string &line)
 {
-    try 
+    ADirective::ParseDirective(line);
+    std::vector<std::string> hostPort = StringUtils::Split(line, ":");
+    if (hostPort.size() == 0)
+        throw SyntaxErrorException("No host:port specified");
+    if (hostPort.size() == 1 && this->ValidatePort(hostPort[0]))
     {
-        ADirective::ParseDirective(line);
-        std::vector<std::string> hostPort = StringUtils::Split(line, ":");
-        if (hostPort.size() == 0)
-            return false;
-        if (hostPort.size() == 1 && this->ValidatePort(hostPort[0]))
-        {
-            this->_host = "0.0.0.0";
-            this->_port = std::atoi(hostPort[0].c_str());
-            return true;
-        }
-        else if (hostPort.size() == 1 && this->ValidateHost(hostPort[0]))
-        {
-            this->_host = hostPort[0];
-            this->_port = 80;
-            return true;
-        }
-        else if (hostPort.size() == 2 && this->ValidateHost(hostPort[0]) && this->ValidatePort(hostPort[1]))
-        {
-            this->_host = hostPort[0];
-            this->_port = std::atoi(hostPort[1].c_str());
-            return true;
-        }
-        return false;
-    } catch (std::exception &e)
-    {
-        Logger::debug(e.what(), ERROR, "ListenDirective::ParseDirective");
-        return false;
+        this->_host = "0.0.0.0";
+        this->_port = hostPort[0];
     }
+    else if (hostPort.size() == 1 && this->ValidateHost(hostPort[0]))
+    {
+        this->_host = hostPort[0];
+        this->_port = "80";
+    }
+    else if (hostPort.size() == 2 && this->ValidateHost(hostPort[0]) && this->ValidatePort(hostPort[1]))
+    {
+        this->_host = hostPort[0];
+        this->_port = hostPort[1];
+    }
+    else
+        throw SyntaxErrorException("Invalid host:port " + line);
 }
 
 void ListenDirective::PrintDirective() const
 {
-    std::string port = StringUtils::ConvertNumberToString(this->_port);
-    std::string msg = "host: " + this->_host + " port: " + port;
-    Logger::debug(msg, SUCCESS, "ListenDirective::PrintDirective");
+    std::string msg = "host: " + this->_host + " port: " + this->_port;
+    Logger::Debug("ListenDirective::PrintDirective", SUCCESS, msg);
 }
 
 ServerNameDirective::ServerNameDirective()
@@ -144,28 +134,23 @@ std::vector<std::string> ServerNameDirective::GetNames() const
     return this->_names;
 }
 
-bool ServerNameDirective::ParseDirective(std::string &line)
+void ServerNameDirective::ParseDirective(std::string &line)
 {
     ADirective::ParseDirective(line);
     std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
     if (tokens.size() == 0)
-        return false;
+        throw SyntaxErrorException("No server name specified");
     for (size_t i = 0; i < tokens.size(); i++)
-    {
         this->_names.push_back(tokens[i]);
-    }
-    return true;
 }
 
 void ServerNameDirective::PrintDirective() const
 {
     std::string names;
     for (size_t i = 0; i < this->_names.size() - 1; i++)
-    {
         names += this->_names[i] + " ";
-    }
     names += this->_names[this->_names.size() - 1];
-    Logger::debug(names, SUCCESS, "ServerNameDirective::PrintDirective");
+    Logger::Debug("ServerNameDirective::PrintDirective", SUCCESS, names);
 }
 
 ErrorPageDirective::ErrorPageDirective()
@@ -201,7 +186,7 @@ void ErrorPageDirective::SetPath(std::string path)
     this->_path = path;
 }
 
-int ErrorPageDirective::GetCode() const
+std::string ErrorPageDirective::GetCode() const
 {
     return this->_code;
 }
@@ -235,24 +220,22 @@ bool ErrorPageDirective::ValidateCode(std::string code) const
 }
 
 
-bool ErrorPageDirective::ParseDirective(std::string &line)
+void ErrorPageDirective::ParseDirective(std::string &line)
 {
     ADirective::ParseDirective(line);
     std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
     if (tokens.size() < 2)
-        return false;
+        throw SyntaxErrorException("Invalid error_page directive - " + line);
     if (!this->ValidateCode(tokens[0]))
-        return false;
-    this->_code = std::atoi(tokens[0].c_str());
+        throw SyntaxErrorException("Invalid error_page code - " + tokens[0]);
+    this->_code = tokens[0];
     this->_path = tokens[1];
-    return true;
 }
 
 void ErrorPageDirective::PrintDirective() const
 {
-    std::string code = StringUtils::ConvertNumberToString(this->GetCode());
-    std::string msg = "code: " + code + " path: " + this->_path;
-    Logger::debug(msg, SUCCESS, "ErrorPageDirective::PrintDirective");
+    std::string msg = "code: " + this->_code + " path: " + this->_path;
+    Logger::Debug("ErrorPageDirective::PrintDirective", SUCCESS, msg);
 }
 
 ClientMaxBodySizeDirective::ClientMaxBodySizeDirective()
@@ -302,22 +285,21 @@ bool ClientMaxBodySizeDirective::ValidateSize(std::string size) const
     return true;
 }
 
-bool ClientMaxBodySizeDirective::ParseDirective(std::string &line)
+void ClientMaxBodySizeDirective::ParseDirective(std::string &line)
 {
     ADirective::ParseDirective(line);
     std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
     if (tokens.size() == 0 || tokens.size() > 1)
-        return false;
+        throw SyntaxErrorException("Invalid client_max_body_size directive - " + line);
     if (!this->ValidateSize(tokens[0]))
-        return false;
+        throw SyntaxErrorException("Invalid client_max_body_size size - " + tokens[0]);
     this->_size = tokens[0];
-    return true;
 }
 
 void ClientMaxBodySizeDirective::PrintDirective() const
 {
     std::string msg = "size: " + this->_size;
-    Logger::debug(msg, SUCCESS, "ClientMaxBodySizeDirective::PrintDirective");
+    Logger::Debug("ClientMaxBodySizeDirective::PrintDirective", SUCCESS, msg);
 }
 
 IndexDirective::IndexDirective()
@@ -336,9 +318,7 @@ IndexDirective::~IndexDirective()
 IndexDirective& IndexDirective::operator=(IndexDirective const & other)
 {
     if (this != &other)
-    {
         this->_index = other._index;
-    }
     return (*this);
 }
 
@@ -352,28 +332,23 @@ std::vector<std::string> IndexDirective::GetIndex() const
     return this->_index;
 }
 
-bool IndexDirective::ParseDirective(std::string &line)
+void IndexDirective::ParseDirective(std::string &line)
 {
     ADirective::ParseDirective(line);
     std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
     if (tokens.size() == 0)
-        return false;
+        throw SyntaxErrorException("No index specified");
     for (size_t i = 0; i < tokens.size(); i++)
-    {
         this->_index.push_back(tokens[i]);
-    }
-    return true;
 }
 
 void IndexDirective::PrintDirective() const
 {
     std::string index;
     for (size_t i = 0; i < this->_index.size() - 1; i++)
-    {
         index += this->_index[i] + " ";
-    }
     index += this->_index[this->_index.size() - 1];
-    Logger::debug(index, SUCCESS, "IndexDirective::PrintDirective");
+    Logger::Debug("IndexDirective::PrintDirective", SUCCESS, index);
 }
 
 RootDirective::RootDirective()
@@ -392,9 +367,7 @@ RootDirective::~RootDirective()
 RootDirective& RootDirective::operator=(RootDirective const & other)
 {
     if (this != &other)
-    {
         this->_path = other._path;
-    }
     return (*this);
 }
 
@@ -408,20 +381,19 @@ std::string RootDirective::GetPath() const
     return this->_path;
 }
 
-bool RootDirective::ParseDirective(std::string &line)
+void RootDirective::ParseDirective(std::string &line)
 {
     ADirective::ParseDirective(line);
     std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
     if (tokens.size() != 1)
-        return false;
+        throw SyntaxErrorException("Invalid root directive - " + line);
     this->_path = tokens[0];
-    return true;
 }
 
 void RootDirective::PrintDirective() const
 {
     std::string msg = "path: " + this->_path;
-    Logger::debug(msg, SUCCESS, "RootDirective::PrintDirective");
+    Logger::Debug("RootDirective::PrintDirective", SUCCESS, msg);
 }
 
 AutoIndexDirective::AutoIndexDirective()
@@ -440,9 +412,7 @@ AutoIndexDirective::~AutoIndexDirective()
 AutoIndexDirective& AutoIndexDirective::operator=(AutoIndexDirective const & other)
 {
     if (this != &other)
-    {
         this->_autoIndex = other._autoIndex;
-    }
     return (*this);
 }
 
@@ -456,25 +426,24 @@ bool AutoIndexDirective::GetAutoIndex() const
     return this->_autoIndex;
 }
 
-bool AutoIndexDirective::ParseDirective(std::string &line)
+void AutoIndexDirective::ParseDirective(std::string &line)
 {
     ADirective::ParseDirective(line);
     std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
     if (tokens.size() != 1)
-        return false;
+        throw SyntaxErrorException("Invalid autoindex directive - " + line);
     if (tokens[0] == "on")
         this->_autoIndex = true;
     else if (tokens[0] == "off")
         this->_autoIndex = false;
     else
-        return false;
-    return true;
+        throw SyntaxErrorException("Invalid autoindex directive - " + line);
 }
 
 void AutoIndexDirective::PrintDirective() const
 {
     std::string msg = "autoindex: " + std::string(this->_autoIndex ? "on" : "off");
-    Logger::debug(msg, SUCCESS, "AutoIndexDirective::PrintDirective");
+    Logger::Debug("AutoIndexDirective::PrintDirective", SUCCESS, msg);
 }
 
 LimitExceptDirective::LimitExceptDirective()
@@ -493,9 +462,7 @@ LimitExceptDirective::~LimitExceptDirective()
 LimitExceptDirective& LimitExceptDirective::operator=(LimitExceptDirective const & other)
 {
     if (this != &other)
-    {
         this->_methods = other._methods;
-    }
     return (*this);
 }
 
@@ -532,26 +499,23 @@ bool LimitExceptDirective::ValidateMethods(std::string methods) const
     return true;
 }
 
-bool LimitExceptDirective::ParseDirective(std::string &line)
+void LimitExceptDirective::ParseDirective(std::string &line)
 {
     ADirective::ParseDirective(line);
     std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
     if (tokens.size() == 0)
-        return false;
+        throw SyntaxErrorException("No method specified");
+    if (!this->ValidateMethods(line))
+        throw SyntaxErrorException("Invalid method - " + line);
     for (size_t i = 0; i < tokens.size(); i++)
-    {
         this->_methods.push_back(tokens[i]);
-    }
-    return true;
 }
 
 void LimitExceptDirective::PrintDirective() const
 {
     std::string methods;
     for (size_t i = 0; i < this->_methods.size() - 1; i++)
-    {
         methods += this->_methods[i] + " ";
-    }
     methods += this->_methods[this->_methods.size() - 1];
-    Logger::debug(methods, SUCCESS, "LimitExceptDirective::PrintDirective");
+    Logger::Debug("LimitExceptDirective::PrintDirective", SUCCESS, methods);
 }

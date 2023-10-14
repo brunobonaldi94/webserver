@@ -79,7 +79,7 @@ int ATcpListener::init()
 		return -1;
 	}
 	this->addToPfds(this->listenfd);
-	Logger::log("Listening on port " + this->m_port, INFO);
+	Logger::Log(INFO, "Listening on port " + this->m_port);
 	return 0;
 }
 

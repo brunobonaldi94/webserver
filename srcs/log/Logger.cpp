@@ -8,7 +8,7 @@ Logger::~Logger()
 {
 }
 
-LogInfos Logger::getColorAndType(LogTypeEnum type)
+LogInfos Logger::GetColorAndType(LogTypeEnum type)
 {
     std::string logType;
     std::string logColor;
@@ -44,37 +44,62 @@ std::string Logger::GetDateTime()
     return buf;
 }
 
-void Logger::debug(const std::string& message, LogTypeEnum type, std::string where)
+std::ostream* Logger::SetStream(LogTypeEnum type)
+{
+    if (type == ERROR)
+       return &std::cerr;
+    return &std::cout;
+}
+
+void Logger::Debug(const std::string& where, LogTypeEnum type,const std::string& message)
 {
     if (!DEBUG)
         return ;
-    LogInfos logInfos = Logger::getColorAndType(type);
-    std::cout 
-              << logInfos.logColor
-              << "[" 
-              << logInfos.logType
-              << "] "
-              << CYAN
-              << where
-              << logInfos.logColor
-              << "`"
-              << message 
-              << "`"
-              << RESET << std::endl;
+    LogInfos logInfos = Logger::GetColorAndType(type);
+    std::ostream *stream = Logger::SetStream(type);
+    *stream 
+            << logInfos.logColor
+            << "[" 
+            << logInfos.logType
+            << "] "
+            << CYAN
+            << where
+            << logInfos.logColor
+            << "`"
+            << message 
+            << "`"
+            << RESET 
+            << std::endl;
 }
 
-void Logger::log(const std::string& message, LogTypeEnum type)
+void Logger::Log(LogTypeEnum type, const std::string& message)
 {
 
-    LogInfos logInfos = Logger::getColorAndType(type);
+    LogInfos logInfos = Logger::GetColorAndType(type);
     std::string dateTime = Logger::GetDateTime();
-    std::cout << logInfos.logColor
-              << dateTime
-              << " ["  
-              << logInfos.logType
-              << "]: " 
-              << message << " " 
-              << RESET << std::endl;
+    std::ostream *stream = Logger::SetStream(type);
+    *stream 
+            << logInfos.logColor
+            << dateTime
+            << " ["  
+            << logInfos.logType
+            << "]: " 
+            << message << " " 
+            << RESET << std::endl;
+}
+
+void Logger::PrintMessage(LogTypeEnum type, const std::string& message)
+{
+    LogInfos logInfos = Logger::GetColorAndType(type);
+    std::ostream *stream = Logger::SetStream(type);
+    *stream 
+            << logInfos.logColor
+            << "[" 
+            << logInfos.logType
+            << "] "
+            << message 
+            << RESET 
+            << std::endl;
 }
 
 LogInfos::LogInfos(std::string logColor, std::string logType)
@@ -82,3 +107,4 @@ LogInfos::LogInfos(std::string logColor, std::string logType)
     this->logColor = logColor;
     this->logType = logType;
 }
+

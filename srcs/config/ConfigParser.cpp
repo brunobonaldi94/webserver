@@ -52,39 +52,41 @@ bool ConfigParser::DirectoryExists(const std::string& path)
 void ConfigParser::ReadFile()
 {
 
-  try 
-  {
-     std::string path("./config_files/");
-    if (!this->DirectoryExists(path))
-      throw NotFoundException("config_files directory");    
-    std::string fullName = path + this->_fileName;
-    std::ifstream file(fullName.c_str());
-    if (!file.good())
-      throw NotFoundException(this->_fileName);
-    std::string contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    this->_fileContent = contents;
-  }
-  catch(const std::exception& e)
-  {
-		std::cerr << e.what() << std::endl;
-  }
+  std::string path("./config_files/");
+  if (!this->DirectoryExists(path))
+    throw NotFoundException("config_files directory");    
+  std::string fullName = path + this->_fileName;
+  std::ifstream file(fullName.c_str());
+  if (!file.good())
+    throw NotFoundException(this->_fileName);
+  std::string contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+  this->_fileContent = contents;
 }
 
-void ConfigParser::ParseConfigFile()
+bool ConfigParser::ParseConfigFile()
 {
-  std::string word;
-  this->ReadFile();
-  Logger::debug(this->_fileContent, INFO, "ConfigParser::ParseConfigFile _fileContent = ");
-  for (std::string::iterator it = this->_fileContent.begin(); it != this->_fileContent.end(); ++it)
+  try 
   {
-    StringUtils::AdvaceOnWhiteSpace(it, this->_fileContent);
-    StringUtils::AdvanceOnComment(it, this->_fileContent);
-    word = StringUtils::ExtractWord(it, this->_fileContent);
-    this->ParseContent(this->_fileContent, word);
-    if (this->_fileContent.size() == 0)
-      return;
-    it = this->_fileContent.begin();
-    word.clear();
+    std::string word;
+    this->ReadFile();
+    Logger::Debug("ConfigParser::ParseConfigFile _fileContent = ", INFO, this->_fileContent);
+    for (std::string::iterator it = this->_fileContent.begin(); it != this->_fileContent.end(); ++it)
+    {
+      StringUtils::AdvaceOnWhiteSpace(it, this->_fileContent);
+      StringUtils::AdvanceOnComment(it, this->_fileContent);
+      word = StringUtils::ExtractWord(it, this->_fileContent);
+      this->ParseContent(this->_fileContent, word);
+      if (this->_fileContent.size() == 0)
+        return true;
+      it = this->_fileContent.begin();
+      word.clear();
+    }
+    return true;
+  } 
+  catch(const std::exception& e) 
+  {
+    Logger::PrintMessage(ERROR, e.what());
+    return false;
   }
 }
 

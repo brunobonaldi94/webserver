@@ -43,9 +43,9 @@ public:
     MapDirCreator GetAllowedDirectives() const;
     MapContextCreator GetAllowedSubContexts() const;
 
-    void HandleContextCreation(std::string &content, std::string &word);
-    void HandleDirectiveCreation(std::string::iterator &it, std::string &content, std::string &word);
+    void HandleContextCreation(std::string &content, std::string &word, std::string contextName = "");
+    void HandleDirectiveCreation(std::string::iterator &it, std::string &content, std::string &word, std::string directiveName = "");
 
-    virtual bool ParseContext(std::string &content) = 0;
+    virtual void ParseContext(std::string &content) = 0;
     
 };

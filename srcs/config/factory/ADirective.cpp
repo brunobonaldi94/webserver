@@ -14,15 +14,11 @@ AContext* ADirective::GetParentContext() const
     return _parentContext;
 }
 
-bool ADirective::ParseDirective(std::string &line)
+void ADirective::ParseDirective(std::string &line)
 {
     if (line.empty())
-        return false;
+        throw SyntaxErrorException("Syntax error: empty line");
     if (line[line.size() -1] != ';')
-    {
-        throw SyntaxErrorException("Syntax error: missing ';' at the end of the line");
-        return false;
-    }
+        throw SyntaxErrorException("Syntax error: missing ';' at the end of the line -" + line);
     line = line.substr(0, line.size() - 1);
-    return true;
 }
