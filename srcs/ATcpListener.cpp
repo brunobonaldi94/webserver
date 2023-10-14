@@ -10,7 +10,6 @@ ATcpListener::ATcpListener(std::string ipAddress, std::string port) :
 {
 }
 
-
 int ATcpListener::getListenerSocket(void)
 {
     int listener;     // Listening socket descriptor
@@ -80,12 +79,12 @@ int ATcpListener::init()
 		return -1;
 	}
 	this->addToPfds(this->listenfd);
+	Logger::log("Listening on port " + this->m_port, INFO);
 	return 0;
 }
 
 int ATcpListener::run()
 {
-	// this will be changed by the \quit command (see below, bonus not in video!)
 	bool running = true;
 	char buff[4096];
 	while (running)

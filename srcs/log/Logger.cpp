@@ -46,6 +46,8 @@ std::string Logger::GetDateTime()
 
 void Logger::debug(const std::string& message, LogTypeEnum type, std::string where)
 {
+    if (!DEBUG)
+        return ;
     LogInfos logInfos = Logger::getColorAndType(type);
     std::cout 
               << logInfos.logColor

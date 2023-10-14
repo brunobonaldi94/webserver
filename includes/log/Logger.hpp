@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <time.h>
+#include "defines.hpp"
 
 #define RESET       "\033[0m"
 #define BLACK       "\033[30m"              /* Black */

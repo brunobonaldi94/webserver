@@ -51,24 +51,16 @@ bool LocationContext::ParseContext(std::string &content)
             throw SyntaxErrorException("Duplicated {");
             return (false);
         }
-        word = StringUtils::ExtractWord(it, content, this->_allowedChars);
-        PairContextCreator *contextCreator = MapUtils<std::string, AContextCreator *>::SafeFindMap(this->_allowedSubContexts, word);
-        if (contextCreator && contextCreator->second == NULL)
-            throw NotAllowedException("Context " + word + " not allowed in location context");
-        PairDirCreator *directiveCreator = MapUtils<std::string, ADirectiveCreator *>::SafeFindMap(this->_allowedDirectives, word);
-        if (directiveCreator && directiveCreator->second == NULL)
-            throw NotAllowedException("Directive " + word + " not allowed in location context");
-        if (directiveCreator != NULL)
+        if (*it == '}')
         {
-            std::string line = StringUtils::ExtractLine(it, content);
-            ADirective *directive = directiveCreator->second->CreateDirective();
-            directive->SetParentContext(this);
-            this->AddDirective(directive);
-            if (!directive->ParseDirective(line))
-                throw SyntaxErrorException("Error: Directive " + word + " failed to parse");
-            directive->PrintDirective();
+            it++;
+            break;
         }
+        word = StringUtils::ExtractWord(it, content, this->_allowedChars);
+        Logger::debug(word, INFO,  "LocationContext::ParseContext word = ");
+        AContext::HandleContextCreation(content, word);
+        AContext::HandleDirectiveCreation(it, content, word);
     }
     content.erase(content.begin(), it);
-    return (false);
+    return (true);
 }

@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include "Logger.hpp"
 
 class ATcpListener
 {

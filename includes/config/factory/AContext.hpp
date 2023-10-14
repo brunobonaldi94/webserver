@@ -3,10 +3,15 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <typeinfo>
 #include "AContextCreator.hpp"
 #include "ADirectiveCreator.hpp"
 #include "ADirective.hpp"
 #include "types.hpp"
+#include "NotAllowedException.hpp"
+#include "NotFoundException.hpp"
+#include "SyntaxErrorException.hpp"
+#include "StringUtils.hpp"
 
 class ADirective;
 class ADirectiveCreator;
@@ -37,6 +42,9 @@ public:
     void SetParentContext(AContext *parentContext);
     MapDirCreator GetAllowedDirectives() const;
     MapContextCreator GetAllowedSubContexts() const;
+
+    void HandleContextCreation(std::string &content, std::string &word);
+    void HandleDirectiveCreation(std::string::iterator &it, std::string &content, std::string &word);
 
     virtual bool ParseContext(std::string &content) = 0;
     

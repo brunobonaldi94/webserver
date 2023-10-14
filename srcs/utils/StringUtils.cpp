@@ -63,6 +63,19 @@ std::string StringUtils::ExtractWord(std::string::iterator &it, std::string &fil
   return word;
 }
 
+std::string StringUtils::ExtractWord(std::string::iterator &it, std::string &fileContent)
+{
+  std::string word = "";
+  while (!std::isspace(*it))
+  {
+    word += *it;
+    ++it;
+  }
+  fileContent = std::string(it, fileContent.end());
+  it = fileContent.begin();
+  return word;
+}
+
 std::vector<std::string> StringUtils::Split(std::string str, std::string delimiters)
 {
 	std::stringstream ss(str);

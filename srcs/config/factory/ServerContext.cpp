@@ -36,41 +36,30 @@ bool ServerContext::ParseContext(std::string &content)
     std::string word;
     std::string serverContextName = "server";
     std::string::iterator it = content.begin();
+
     bool serverHasOpenCurlyBraces = StringUtils::CheckNextCharAfterWhiteSpace(it, content, '{');
     if (!serverHasOpenCurlyBraces)
         return (false);
 
     for (; it != content.end(); it++)
     {
+        if (*it == '{')
+        {
+            throw SyntaxErrorException("Duplicated {");
+            return (false);
+        }
+        if (*it == '}')
+        {
+            it++;
+            break;
+        }
         StringUtils::AdvaceOnWhiteSpace(it, content);
-        word = StringUtils::ExtractWord(it, content, this->_allowedChars);
+        word = StringUtils::ExtractWord(it, content);
         Logger::debug(word, INFO,  "ServerContext::ParseContext word = ");
-        PairContextCreator *contextCreator = MapUtils<std::string, AContextCreator *>::SafeFindMap(this->_allowedSubContexts, word);
-        if (contextCreator && contextCreator->second == NULL)
-            throw NotAllowedException("Error: Context " + word + " not allowed in server context");
-        if (contextCreator != NULL)
-        {
-            AContext *subContext = contextCreator->second->CreateContext();
-            subContext->SetParentContext(this);
-            this->AddSubContext(subContext);
-            if (!subContext->ParseContext(content))
-                throw NotAllowedException("Error: Context " + word + " failed to parse");
-        }
-        PairDirCreator *directiveCreator = MapUtils<std::string, ADirectiveCreator *>::SafeFindMap(this->_allowedDirectives, word);
-        if (directiveCreator && directiveCreator->second == NULL)
-            throw NotAllowedException("Error: Directive " + word + " not allowed in server context");
-        if (directiveCreator != NULL)
-        {
-            std::string line = StringUtils::ExtractLine(it, content);
-            ADirective *directive = directiveCreator->second->CreateDirective();
-            directive->SetParentContext(this);
-            this->AddDirective(directive);
-            if (!directive->ParseDirective(line))
-                throw SyntaxErrorException("Error: Directive " + word + " failed to parse");
-            directive->PrintDirective();
-        }
+        AContext::HandleContextCreation(content, word);
+        AContext::HandleDirectiveCreation(it, content, word);
         word.clear();
-    } 
+    }
     content.erase(content.begin(), it);
-    return (false);
+    return (true);
 }

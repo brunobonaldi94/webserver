@@ -27,9 +27,6 @@ class ConfigParser
 private:
     std::string                                 _fileName;
     std::string                                 _fileContent;
-    MapContextCreator                           _availableContexts;
-    MapDirCreator                               _availableDirectives;
-    std::vector<std::string>                    _allowedChars;
     std::vector<AContext *>                     _serverContexts;
 
     void ReadFile();
