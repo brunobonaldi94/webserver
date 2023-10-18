@@ -19,13 +19,12 @@ class AContextCreator;
 class AContext
 {
 private:
-    AContext*                                       _parentContext;
-    std::vector<AContext *>                         _subContexts;
-    std::vector<ADirective *>                       _directives;
+    AContext*                                           _parentContext;
+    std::map<std::string, std::vector<AContext *> >     _subContexts;
+    std::map<std::string, std::vector<ADirective *> >   _directives;
 protected:
-    MapDirCreator                                   _allowedDirectives;
-    MapContextCreator                               _allowedSubContexts;
-    std::vector<std::string>                        _allowedChars;
+    MapDirCreator                                       _allowedDirectives;
+    MapContextCreator                                   _allowedSubContexts;
 
 public:
     AContext(AContext *parentContext = NULL);
@@ -34,10 +33,10 @@ public:
 
     AContext& operator=(AContext const & other);
 
-    std::vector<ADirective *> GetDirectives() const;
-    void AddDirective(ADirective *directive);
-    std::vector<AContext *> GetSubContexts() const;
-    void AddSubContext(AContext *subContext);
+    std::map<std::string,std::vector<ADirective *> >  GetDirectives() const;
+    void AddDirective(std::string name, ADirective *directive);
+    std::map<std::string,std::vector<AContext *> > GetSubContexts() const;
+    void AddSubContext(std::string name, AContext *subContext);
     AContext *GetParentContext() const;
     void SetParentContext(AContext *parentContext);
     MapDirCreator GetAllowedDirectives() const;

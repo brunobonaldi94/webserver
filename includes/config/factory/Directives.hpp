@@ -154,3 +154,25 @@ public:
     void ParseDirective(std::string &line);
     void PrintDirective() const;
 };
+
+class CgiDirective : public ADirective
+{
+private:
+    std::string _extension;
+    std::string _binaryPath;
+public:
+    CgiDirective();
+    ~CgiDirective();
+    CgiDirective(CgiDirective const & other);
+    CgiDirective& operator=(CgiDirective const & other);
+
+    void SetExtension(std::string extension);
+    void SetBinaryPath(std::string binaryPath);
+
+    std::string GetExtension() const;
+    std::string GetBinaryPath() const;
+    bool ValidateExtension(std::string extension) const;
+
+    void ParseDirective(std::string &line);
+    void PrintDirective() const;
+};

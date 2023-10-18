@@ -82,7 +82,7 @@ bool ConfigParser::ParseConfigFile()
       word.clear();
     }
     return true;
-  } 
+  }
   catch(const std::exception& e) 
   {
     Logger::PrintMessage(ERROR, e.what());

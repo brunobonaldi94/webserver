@@ -98,3 +98,15 @@ public:
 
     ADirective *CreateDirective() const;
 };
+
+class CgiDirectiveCreator : public ADirectiveCreator
+{
+public:
+    CgiDirectiveCreator();
+    CgiDirectiveCreator(CgiDirectiveCreator const & other);
+    ~CgiDirectiveCreator();
+
+    CgiDirectiveCreator& operator=(CgiDirectiveCreator const & other);
+
+    ADirective *CreateDirective() const;
+};

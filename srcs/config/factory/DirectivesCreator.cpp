@@ -103,3 +103,29 @@ ADirective *ClientMaxBodySizeDirectiveCreator::CreateDirective() const
 {
     return new ClientMaxBodySizeDirective();
 }
+
+CgiDirectiveCreator::CgiDirectiveCreator()
+{
+}
+
+CgiDirectiveCreator::~CgiDirectiveCreator()
+{
+}
+
+CgiDirectiveCreator::CgiDirectiveCreator(CgiDirectiveCreator const &other)
+{
+    *this = other;
+}
+
+CgiDirectiveCreator &CgiDirectiveCreator::operator=(CgiDirectiveCreator const &other)
+{
+    (void)other;
+    return (*this);
+}
+
+ADirective *CgiDirectiveCreator::CreateDirective() const
+{
+    return new CgiDirective();
+}
+
+

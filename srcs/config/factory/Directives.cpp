@@ -519,3 +519,74 @@ void LimitExceptDirective::PrintDirective() const
     methods += this->_methods[this->_methods.size() - 1];
     Logger::Debug("LimitExceptDirective::PrintDirective", SUCCESS, methods);
 }
+
+CgiDirective::CgiDirective()
+{
+}
+
+CgiDirective::CgiDirective(CgiDirective const & other)
+{
+    *this = other;
+}
+
+CgiDirective::~CgiDirective()
+{
+}
+
+CgiDirective& CgiDirective::operator=(CgiDirective const & other)
+{
+    if (this != &other)
+    {
+        this->_binaryPath = other._binaryPath;
+        this->_extension = other._extension;
+    }
+    return (*this);
+}
+
+void CgiDirective::SetBinaryPath(std::string binaryPath)
+{
+    this->_binaryPath = binaryPath;
+}
+
+void CgiDirective::SetExtension(std::string extension)
+{
+    this->_extension = extension;
+}
+
+std::string CgiDirective::GetBinaryPath() const
+{
+    return this->_binaryPath;
+}
+
+std::string CgiDirective::GetExtension() const
+{
+    return this->_extension;
+}
+
+bool CgiDirective::ValidateExtension(std::string extension) const
+{
+    if (extension[0] != '.')
+        return false;
+    for (size_t i = 1; i < extension.size(); i++)
+    {
+        if (!std::isalnum(extension[i]))
+            return false;
+    }
+    return true;
+}
+
+void CgiDirective::ParseDirective(std::string &line)
+{
+    ADirective::ParseDirective(line);
+    std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
+    if (tokens.size() != 2 && !this->ValidateExtension(tokens[0]))
+        throw SyntaxErrorException("Invalid cgi directive - " + line);
+    this->_extension = tokens[0];
+    this->_binaryPath = tokens[1];
+}
+
+void CgiDirective::PrintDirective() const
+{
+    std::string msg = "extension: " + this->_extension + " binary path: " + this->_binaryPath;
+    Logger::Debug("CgiDirective::PrintDirective", SUCCESS, msg);
+}

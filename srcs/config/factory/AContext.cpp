@@ -25,14 +25,14 @@ AContext& AContext::operator=(AContext const & other)
     return (*this);
 }
 
-void AContext::AddDirective(ADirective *directive)
+void AContext::AddDirective(std::string name, ADirective *directive)
 {
-    this->_directives.push_back(directive);
+    this->_directives[name].push_back(directive);
 }
 
-void AContext::AddSubContext(AContext *subContext)
+void AContext::AddSubContext(std::string name, AContext *subContext)
 {
-    this->_subContexts.push_back(subContext);
+    this->_subContexts[name].push_back(subContext);
 }
 
 void AContext::SetParentContext(AContext *parentContext)
@@ -40,12 +40,12 @@ void AContext::SetParentContext(AContext *parentContext)
     this->_parentContext = parentContext;
 }
 
-std::vector<ADirective *> AContext::GetDirectives() const
+std::map<std::string,std::vector<ADirective *> >  AContext::GetDirectives() const
 {
     return this->_directives;
 }
 
-std::vector<AContext *> AContext::GetSubContexts() const
+std::map<std::string,std::vector<AContext *> > AContext::GetSubContexts() const
 {
     return this->_subContexts;
 }
@@ -75,7 +75,7 @@ void AContext::HandleContextCreation(std::string &content, std::string &word, st
     {
         AContext *subContext = contextCreator->second->CreateContext();
         subContext->SetParentContext(this);
-        this->AddSubContext(subContext);
+        this->AddSubContext(contextCreator->first, subContext);
         subContext->ParseContext(content);
     }
 }
@@ -91,7 +91,7 @@ void AContext::HandleDirectiveCreation(std::string::iterator &it, std::string &c
         std::string line = StringUtils::ExtractLine(it, content);
         ADirective *directive = directiveCreator->second->CreateDirective();
         directive->SetParentContext(this);
-        this->AddDirective(directive);
+        this->AddDirective(directiveCreator->first, directive);
         directive->ParseDirective(line);
         directive->PrintDirective();
     }
