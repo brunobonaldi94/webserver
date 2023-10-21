@@ -1,7 +1,8 @@
 # ==============================================================================
 # VARIABLES
 # ==============================================================================
-NAME			:=	webserver
+NAME			:=	webserv
+NAME_TEST	:= webserv_test
 CPP				:=	c++
 FLAGS			:=	-g3 -Wall -Werror -Wextra -std=c++98
 MAKE			:=	make
@@ -9,7 +10,7 @@ MAKE			:=	make
 # ==============================================================================
 
 SRCS_DIR		:=	./srcs
-SRCS			:=	$(SRCS_DIR)/ATcpListener.cpp \
+BASE_SRCS :=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/WebServer.cpp \
 							$(SRCS_DIR)/config/factory/AContext.cpp \
 							$(SRCS_DIR)/config/factory/LocationContext.cpp \
@@ -27,11 +28,16 @@ SRCS			:=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/errors/NotAllowedException.cpp \
 							$(SRCS_DIR)/errors/NotFoundException.cpp \
 							$(SRCS_DIR)/errors/SyntaxErrorException.cpp \
-							$(SRCS_DIR)/main.cpp
 
-INCLUDES		:= -I./includes/utils  -I./includes/log -I./includes/errors -I./includes/config/factory -I./includes/config -I./includes 
+SRCS = $(BASE_SRCS) $(SRCS_DIR)/main.cpp
+
+SRCS_TEST = $(BASE_SRCS) $(SRCS_DIR)/tests/main.cpp $(SRCS_DIR)/tests/ConfigParserTest.cpp 
+
+INCLUDES		:= -I./includes/utils  -I./includes/log -I./includes/errors -I./includes/config/factory -I./includes/config -I./includes  -I./includes/tests
 
 OBJS			:=	$(SRCS:.cpp=.o)
+
+OBJS_TEST	:=	$(SRCS_TEST:.cpp=.o)
 
 # ==============================================================================
 # COLORS
@@ -56,23 +62,36 @@ $(NAME):			$(OBJS)
 					@$(CPP) $(FLAGS) $(OBJS) -o $(NAME)
 					@echo "$(GREEN)$(NAME) build completed.$(EOC)"
 
+test: $(NAME_TEST)
+
+$(NAME_TEST): $(OBJS_TEST)
+	@echo "$(WHT)Compiling $(NAME_TEST)...$(EOC)"
+	@$(CPP) $(FLAGS) $(INCLUDES) $(OBJS_TEST) -o $(NAME_TEST)
+	@echo "$(GREEN)$(NAME_TEST) build completed.$(EOC)"
+
 clean:
 					@echo "$(WHT)Removing .o files...$(EOC)"
-					@rm -f $(OBJS) $(RESULT_LOG_FILE) $(INPUT_LOG_FILE)
+					@rm -f $(OBJS) $(MEMCHECK_LOG_FILE) $(OBJS_TEST)
 					@echo "$(GREEN)Clean done.$(EOC)"
 
 fclean:		clean
 					@echo "$(WHT)Removing object- and binary -files...$(EOC)"
-					@rm -f $(NAME)
+					@rm -f $(NAME) $(NAME_TEST)
 					@echo "$(GREEN)Fclean done.$(EOC)"
 
 re:			fclean all
 
 run:	all
 	./$(NAME)
+
+run_test: test
+	./$(NAME_TEST)
 	
 valgrind:
 			@valgrind -s --leak-check=full --show-leak-kinds=all \
 			--track-origins=yes --log-fd=9 ./$(NAME) webserver.conf 9>memcheck.log
 
 .PHONY:		all clean fclean re run
+
+exec:
+	echo $@

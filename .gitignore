@@ -1,6 +1,7 @@
 *.pdf
 *.o
 *webserver
+*webserv
 *.a
 *.txt
 *tailwind.config.js
