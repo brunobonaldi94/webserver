@@ -14,6 +14,7 @@ class BaseHTTPRequestHandler {
 
     private:
 		std::ostringstream headersBuffer;
+		int statusCode;
 
 };
 
