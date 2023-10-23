@@ -69,6 +69,8 @@ bool ConfigParser::ParseConfigFile()
   {
     std::string word;
     this->ReadFile();
+    if (this->_fileContent.size() == 0)
+      throw SyntaxErrorException("Empty file");
     Logger::Debug("ConfigParser::ParseConfigFile _fileContent = ", INFO, this->_fileContent);
     for (std::string::iterator it = this->_fileContent.begin(); it != this->_fileContent.end(); ++it)
     {
