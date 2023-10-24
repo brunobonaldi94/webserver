@@ -12,7 +12,7 @@ public:
 protected:
 
 	// Handler for client disconnections
-	void onClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes);
+	void OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes);
 	// Handler for when a message is received from the client
-	void onMessageReceived(int clientSocket, const char* msg) const;
+	void OnMessageReceived(int clientSocket, const char* msg) const;
 };

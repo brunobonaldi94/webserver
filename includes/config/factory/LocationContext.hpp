@@ -25,4 +25,5 @@ public:
     std::string GetUri() const;
 
     void ParseContext(std::string &content);
+    void PrintContext();
 };

@@ -71,7 +71,6 @@ bool ConfigParser::ParseConfigFile()
     this->ReadFile();
     if (this->_fileContent.size() == 0)
       throw SyntaxErrorException("Empty file");
-    Logger::Debug("ConfigParser::ParseConfigFile _fileContent = ", INFO, this->_fileContent);
     for (std::string::iterator it = this->_fileContent.begin(); it != this->_fileContent.end(); ++it)
     {
       StringUtils::AdvaceOnWhiteSpace(it, this->_fileContent);
@@ -79,10 +78,11 @@ bool ConfigParser::ParseConfigFile()
       word = StringUtils::ExtractWord(it, this->_fileContent);
       this->ParseContent(this->_fileContent, word);
       if (this->_fileContent.size() == 0)
-        return true;
+        break;
       it = this->_fileContent.begin();
       word.clear();
     }
+    this->PrintContexts();
     return true;
   }
   catch(const std::exception& e) 
@@ -90,6 +90,16 @@ bool ConfigParser::ParseConfigFile()
     Logger::PrintMessage(ERROR, e.what());
     return false;
   }
+}
+
+void ConfigParser::AddServerContext(AContext *serverContext)
+{
+  this->_serverContexts.push_back(serverContext);
+}
+
+std::vector<AContext *> ConfigParser::GetServerContexts() const
+{
+  return this->_serverContexts;
 }
 
 bool ConfigParser::ParseContent(std::string& content, std::string& word)
@@ -100,7 +110,16 @@ bool ConfigParser::ParseContent(std::string& content, std::string& word)
     return false;
   }
   ServerContext *serverContext = new ServerContext();
-  this->_serverContexts.push_back(serverContext);
+  this->AddServerContext(serverContext);
   serverContext->ParseContext(content);
   return true;
+}
+
+void ConfigParser::PrintContexts() const
+{
+  std::vector<AContext *> serverContexts = this->GetServerContexts();
+	for (std::vector<AContext *>::iterator it = serverContexts.begin(); it != serverContexts.end(); ++it)
+	{
+		(*it)->PrintContext();
+	}
 }

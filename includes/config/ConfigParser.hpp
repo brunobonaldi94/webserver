@@ -38,7 +38,12 @@ public:
 
     ConfigParser& operator=(ConfigParser const & other);
 
+    std::vector<AContext *> GetServerContexts() const;
+    void AddServerContext(AContext *serverContext);
+
+
     bool DirectoryExists(const std::string& path);
     bool ParseConfigFile();
     bool ParseContent(std::string& content, std::string& word);
+    void PrintContexts() const;
 };

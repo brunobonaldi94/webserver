@@ -14,6 +14,11 @@ void StringUtils::AdvanceOnComment(std::string::iterator &it, std::string &fileC
     }
 }
 
+void StringUtils::PrintSeparator()
+{
+	std::cout << std::string(100, '-') << std::endl;
+}
+
 void StringUtils::AdvaceOnWhiteSpace(std::string::iterator &it, std::string &fileContent)
 {
     while (std::isspace(*it))
@@ -127,6 +132,8 @@ bool StringUtils::CheckNextCharAfterWhiteSpace(std::string::iterator &it, std::s
   }
   return false;
 }
+
+
 
 template <typename T>
 std::string StringUtils::ConvertNumberToString(T number)

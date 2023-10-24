@@ -1,6 +1,6 @@
 #include "AContext.hpp"
 
-AContext::AContext(AContext *parentContext) : _parentContext(parentContext)
+AContext::AContext(AContext *parentContext, std::string contextName) : _parentContext(parentContext), _contextName(contextName)
 {
     
 }
@@ -50,6 +50,16 @@ std::map<std::string,std::vector<AContext *> > AContext::GetSubContexts() const
     return this->_subContexts;
 }
 
+void AContext::SetContextName(std::string contextName)
+{
+    this->_contextName = contextName;
+}
+
+std::string AContext::GetContextName() const
+{
+    return (this->_contextName);
+}
+
 AContext *AContext::GetParentContext() const
 {
     return (this->_parentContext);
@@ -93,6 +103,36 @@ void AContext::HandleDirectiveCreation(std::string::iterator &it, std::string &c
         directive->SetParentContext(this);
         this->AddDirective(directiveCreator->first, directive);
         directive->ParseDirective(line);
-        directive->PrintDirective();
     }
+}
+
+void AContext::PrintContext()
+{
+    std::cout << "Context: " << this->_contextName << std::endl;
+    if (this->GetParentContext())
+        std::cout << "Parent context: " << this->GetParentContext()->_contextName << std::endl;
+    else
+        std::cout << "Parent context: NULL" << std::endl;
+    StringUtils::PrintSeparator();
+    std::cout << "Directives: " << std::endl;
+    for (std::map<std::string, std::vector<ADirective *> >::iterator it = this->_directives.begin(); it != this->_directives.end(); ++it)
+    {
+        Logger::Debug("Directive name = ", INFO, it->first);
+        for (std::vector<ADirective *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+        {
+            if ((*it2)->GetParentContext())
+                Logger::Debug("Parent context = ", INFO, (*it2)->GetParentContext()->_contextName);
+            else
+                Logger::Debug("Parent context = ", INFO, "NULL");
+            (*it2)->PrintDirective();
+        }
+    }
+    std::cout << "SubContexts: " << std::endl;
+    for (std::map<std::string, std::vector<AContext *> >::iterator it = this->_subContexts.begin(); it != this->_subContexts.end(); ++it)
+    {
+        Logger::Debug("SubContext name = ", INFO, it->first);
+        for (std::vector<AContext *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+            (*it2)->PrintContext();
+    }
+    StringUtils::PrintSeparator();
 }

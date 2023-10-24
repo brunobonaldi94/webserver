@@ -12,14 +12,13 @@ int main(int argc, char *argv[])
 	ConfigParser configParser(fileName);
 	if (!configParser.ParseConfigFile())
 		return -1;
-
 	std::string ipAddress("0.0.0.0");
 	std::string port("8080");
 	WebServer webServer(ipAddress, port);
-	if (webServer.init() != 0)
+	if (webServer.Init() != 0)
 		return -1;
 
-	webServer.run();
+	webServer.Run();
 
 	return 0;
 }

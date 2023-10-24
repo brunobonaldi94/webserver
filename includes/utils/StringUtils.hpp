@@ -13,6 +13,7 @@ public:
   static void AdvanceOnComment(std::string::iterator &it, std::string &fileContent);
   static void AdvaceOnWhiteSpace(std::string::iterator &it, std::string &fileContent);
   static void AdvaceOnDelimiters(std::string::iterator &it, std::string &fileContent, std::string delimeters);
+  static void PrintSeparator();
   static std::string ExtractWord(std::string::iterator &it, std::string &fileContent, std::vector<std::string> &allowedChars);
   static std::string ExtractWord(std::string::iterator &it, std::string &fileContent);
   static std::string ExtractLine(std::string::iterator &it, std::string &fileContent);

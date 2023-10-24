@@ -10,42 +10,64 @@ ATcpListener::ATcpListener(std::string ipAddress, std::string port) :
 {
 }
 
-int ATcpListener::getListenerSocket(void)
+struct addrinfo * ATcpListener::GetAddressInfo(void)
 {
-    int listener;     // Listening socket descriptor
-    int yes = 1;        // For setsockopt() SO_REUSEADDR, below
-    int rv;
-    struct addrinfo hints, *ai, *p;
+		int rv;
+		struct addrinfo hints, *servinfo;
+		memset(&hints, 0, sizeof hints);
+		hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_flags = AI_PASSIVE; // use my IP
+		if ((rv = getaddrinfo(this->m_ipAddress.c_str(), this->m_port.c_str(), &hints, &servinfo)) != 0) 
+		{
+				std::cerr << "getaddrinfo: " << gai_strerror(rv) << std::endl;
+				return NULL;
+		}
+		return servinfo;
+}
 
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, this->m_port.c_str(), &hints, &ai)) != 0) {
-				std::cerr << "selectserver: " << gai_strerror(rv) << std::endl;
-        return -1;
-    }
-    for(p = ai; p != NULL; p = p->ai_next) 
+int ATcpListener::BindSocket(struct addrinfo *addrinfo)
+{
+	 struct addrinfo *p;
+	 int yes = 1;
+	 int listener; 
+	 for(p = addrinfo; p != NULL; p = p->ai_next) 
 		{
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (listener < 0) 
             continue;
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
+        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0)
+				{
             close(listener);
             continue;
         }
         break;
     }
-    freeaddrinfo(ai); // All done with this
-    if (p == NULL)
-        return -1;
+		freeaddrinfo(addrinfo);
+		if (p == NULL)
+		{
+				std::cerr << "Failed to bind socket" << std::endl;
+				return -1;
+		}
+		return listener;
+}
+
+int ATcpListener::GetListenerSocket(void)
+{
+    int listener;
+    struct addrinfo *ai;
+
+    ai = this->GetAddressInfo();
+    listener = this->BindSocket(ai);
+		if (listener == -1)
+				return -1;
     if (listen(listener, SOMAXCONN) == -1)
         return -1;
     return listener;
 }
 
-void ATcpListener::addToPfds(int newfd)
+void ATcpListener::AddToPfds(int newfd)
 {
 		struct pollfd pfd;
 		pfd.fd = newfd;
@@ -53,7 +75,7 @@ void ATcpListener::addToPfds(int newfd)
 		this->pfds.push_back(pfd);
 }
 
-void ATcpListener::handleNewConnection(int clientSocket)
+void ATcpListener::HandleNewConnection(int clientSocket)
 {
 	struct sockaddr_storage remoteaddr; // client address
 	socklen_t addrlen;
@@ -62,28 +84,28 @@ void ATcpListener::handleNewConnection(int clientSocket)
 	if (newfd == -1) 
 		std::cerr << "accept" << std::endl;
 	else
-		this->addToPfds(newfd);
+		this->AddToPfds(newfd);
 }
 
-void ATcpListener::removeFromPfds(int i)
+void ATcpListener::RemoveFromPfds(int i)
 {
 		this->pfds.erase(this->pfds.begin() + i);
 }
 
-int ATcpListener::init()
+int ATcpListener::Init()
 {
-	this->listenfd = this->getListenerSocket();
+	this->listenfd = this->GetListenerSocket();
 	if (this->listenfd == -1)
 	{
 		std::cerr << "Failed to create listener socket" << std::endl;
 		return -1;
 	}
-	this->addToPfds(this->listenfd);
+	this->AddToPfds(this->listenfd);
 	Logger::Log(INFO, "Listening on port " + this->m_port);
 	return 0;
 }
 
-int ATcpListener::run()
+int ATcpListener::Run()
 {
 	bool running = true;
 	char buff[4096];
@@ -103,7 +125,7 @@ int ATcpListener::run()
 			{
 				if (this->pfds[i].fd == this->listenfd)
 				{
-					this->handleNewConnection(this->pfds[i].fd);
+					this->HandleNewConnection(this->pfds[i].fd);
 				}
 				else
 				{
@@ -111,11 +133,11 @@ int ATcpListener::run()
 					 ssize_t nbytes = recv(sender_fd, buff, sizeof buff, 0);
 					 if (nbytes <= 0)
 					 {
-							this->onClientDisconnected(sender_fd, i, nbytes);
+							this->OnClientDisconnected(sender_fd, i, nbytes);
 					 }
 					 else
 					 {
-						 this->onMessageReceived(sender_fd, buff);
+						 this->OnMessageReceived(sender_fd, buff);
 					 }
 
 				}
@@ -124,18 +146,18 @@ int ATcpListener::run()
 	}
 	return 0;
 }
-void ATcpListener::sendToClient(int clientSocket, const char* msg, int length) const
+void ATcpListener::SendToClient(int clientSocket, const char* msg, int length) const
 {
 	if (send(clientSocket, msg, length, 0) == -1)
 		std::cerr << "send" << std::endl;
 }
 
-void ATcpListener::onClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes)
+void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes)
 {
  	  if (nbytes == 0)
 			std::cerr << "socket " << clientSocket << " hung up" << std::endl; 
 		else
 			std::cerr << "recv" << std::endl;
 		close(this->pfds[socketIndex].fd);
-		this->removeFromPfds(socketIndex);
+		this->RemoveFromPfds(socketIndex);
 }

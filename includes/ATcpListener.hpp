@@ -25,31 +25,33 @@ public:
 	ATcpListener(std::string ipAddress, std::string port);
 
 	// Initialize the listener
-	int init();
+	int Init();
 
 	// Run the listener
-	int run();
+	int Run();
 
 protected:
 
 	// Handler for client connections
-	virtual void handleNewConnection(int clientSocket);
+	virtual void HandleNewConnection(int clientSocket);
 
 	// Handler for client disconnections
 
-	virtual void onClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
+	virtual void OnClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
 
 	// Handler for when a message is received from the client
-	virtual void onMessageReceived(int clientSocket, const char* msg) const = 0;
+	virtual void OnMessageReceived(int clientSocket, const char* msg) const = 0;
 
 	// Send a message to a client
-	void sendToClient(int clientSocket, const char* msg, int length) const;
+	void SendToClient(int clientSocket, const char* msg, int length) const;
 
 private:
 
-	int getListenerSocket(void);
-	void addToPfds(int newfd);
-	void removeFromPfds(int i);
+	int GetListenerSocket(void);
+	struct addrinfo* GetAddressInfo(void);
+	int BindSocket(struct addrinfo*  addrinfo);
+	void AddToPfds(int newfd);
+	void RemoveFromPfds(int i);
 
 	std::string										m_ipAddress;	// IP Address server will run on
 	std::string										m_port;			// Port # for the web service

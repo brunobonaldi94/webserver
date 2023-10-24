@@ -9,7 +9,7 @@
 #include "WebServer.hpp"
 
 // Handler for when a message is received from the client
-void WebServer::onMessageReceived(int clientSocket, const char* msg) const
+void WebServer::OnMessageReceived(int clientSocket, const char* msg) const
 {
 	// Parse out the client's request string e.g. GET /index.html HTTP/1.1
 	std::istringstream iss(msg);
@@ -60,12 +60,12 @@ void WebServer::onMessageReceived(int clientSocket, const char* msg) const
 
 	std::string output = oss.str();
 	int size = output.size() + 1;
-	this->sendToClient(clientSocket, output.c_str(), size);
+	this->SendToClient(clientSocket, output.c_str(), size);
 }
 
 // Handler for client disconnections
-void WebServer::onClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
+void WebServer::OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
 {
-	ATcpListener::onClientDisconnected(clientSocket, socketIndex, nbytes);
+	ATcpListener::OnClientDisconnected(clientSocket, socketIndex, nbytes);
 	std::cout << "Client disconnected: " << clientSocket << std::endl;
 }

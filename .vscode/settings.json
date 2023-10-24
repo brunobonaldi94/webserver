@@ -66,6 +66,9 @@
     "variant": "cpp",
     "valarray": "cpp",
     "codecvt": "cpp",
-    "*.tpp": "cpp"
+    "*.tpp": "cpp",
+    "csignal": "cpp",
+    "set": "cpp",
+    "unordered_set": "cpp"
   }
 }

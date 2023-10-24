@@ -12,6 +12,7 @@
 #include "NotFoundException.hpp"
 #include "SyntaxErrorException.hpp"
 #include "StringUtils.hpp"
+#include "Logger.hpp"
 
 class ADirective;
 class ADirectiveCreator;
@@ -25,9 +26,10 @@ private:
 protected:
     MapDirCreator                                       _allowedDirectives;
     MapContextCreator                                   _allowedSubContexts;
+    std::string                                        _contextName;
 
 public:
-    AContext(AContext *parentContext = NULL);
+    AContext(AContext *parentContext = NULL, std::string contextName = "");
     AContext(AContext const & other);
     virtual ~AContext();
 
@@ -42,9 +44,13 @@ public:
     MapDirCreator GetAllowedDirectives() const;
     MapContextCreator GetAllowedSubContexts() const;
 
+    void SetContextName(std::string contextName);
+    std::string GetContextName() const;
+
     void HandleContextCreation(std::string &content, std::string &word, std::string contextName = "");
     void HandleDirectiveCreation(std::string::iterator &it, std::string &content, std::string &word, std::string directiveName = "");
 
+    virtual void PrintContext() = 0;
     virtual void ParseContext(std::string &content) = 0;
     
 };

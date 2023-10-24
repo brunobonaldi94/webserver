@@ -16,4 +16,5 @@ public:
 
     ServerContext& operator=(ServerContext const & other);
     void ParseContext(std::string &content);
+    void PrintContext();
 };
