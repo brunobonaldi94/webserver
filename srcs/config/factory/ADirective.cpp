@@ -22,3 +22,8 @@ void ADirective::ParseDirective(std::string &line)
         throw SyntaxErrorException("Syntax error: missing ';' at the end of the line -" + line);
     line = line.substr(0, line.size() - 1);
 }
+
+bool ADirective::SetDefaultFromParent()
+{
+    return true;
+}

@@ -18,4 +18,6 @@ public:
     AContext* GetParentContext() const;
     virtual void ParseDirective(std::string &line) = 0;
     virtual void PrintDirective() const = 0;
+    virtual void FillDefaultValues() = 0;
+    virtual bool SetDefaultFromParent();
 };

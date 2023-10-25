@@ -64,3 +64,9 @@ void ServerContext::PrintContext()
 {
     AContext::PrintContext();
 }
+
+void ServerContext::FillDefaultValues()
+{
+    std::map<std::string, std::vector<ADirective *> > directives = this->GetDirectives();
+    // missing implementation
+}

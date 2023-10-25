@@ -26,4 +26,5 @@ public:
 
     void ParseContext(std::string &content);
     void PrintContext();
+    void FillDefaultValues();
 };

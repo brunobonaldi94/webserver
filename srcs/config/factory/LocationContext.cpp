@@ -82,3 +82,43 @@ void LocationContext::PrintContext()
         }
     }
 }
+
+void LocationContext::FillDefaultValues()
+{
+    std::map<std::string, std::vector<ADirective *> > directives = this->GetDirectives();
+    if (MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "root") == NULL)
+    {
+        RootDirective *rootDirective = new RootDirective();
+        rootDirective->SetParentContext(this);
+        this->AddDirective("root", rootDirective);
+        rootDirective->FillDefaultValues();
+    }
+    if (MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "index") == NULL)
+    {
+        IndexDirective *indexDirective = new IndexDirective();
+        indexDirective->SetParentContext(this);
+        this->AddDirective("index", indexDirective);
+        indexDirective->FillDefaultValues();
+    }
+    if (MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "autoindex") == NULL)
+    {
+        AutoIndexDirective *autoIndexDirective = new AutoIndexDirective();
+        autoIndexDirective->SetParentContext(this);
+        this->AddDirective("autoindex", autoIndexDirective);
+        autoIndexDirective->FillDefaultValues();
+    }
+    if (MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "limit_except") == NULL)
+    {
+        LimitExceptDirective *limitExceptDirective = new LimitExceptDirective();
+        limitExceptDirective->SetParentContext(this);
+        this->AddDirective("limit_except", limitExceptDirective);
+        limitExceptDirective->FillDefaultValues();
+    }
+    if (MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "cgi") == NULL)
+    {
+        CgiDirective *cgiDirective = new CgiDirective();
+        cgiDirective->SetParentContext(this);
+        this->AddDirective("cgi", cgiDirective);
+        cgiDirective->FillDefaultValues();
+    }
+}

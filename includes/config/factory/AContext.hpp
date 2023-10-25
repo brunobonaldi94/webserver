@@ -50,6 +50,7 @@ public:
     void HandleContextCreation(std::string &content, std::string &word, std::string contextName = "");
     void HandleDirectiveCreation(std::string::iterator &it, std::string &content, std::string &word, std::string directiveName = "");
 
+    virtual void FillDefaultValues() = 0;
     virtual void PrintContext() = 0;
     virtual void ParseContext(std::string &content) = 0;
     
