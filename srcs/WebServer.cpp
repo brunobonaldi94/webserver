@@ -48,10 +48,11 @@ void WebServer::onMessageReceived(int clientSocket, const char* msg)
 	}
 
 	f.close();
-	
+	errorCode = errorCode;
 
 	// Write the document back to the client
-	this->requestHandler.sendResponse(errorCode, "");
+	HTTPStatus status;
+	this->requestHandler.sendResponse(status.OK.code, status.OK.description);
 	this->requestHandler.sendHeader("Cache-Control", "no-cache, private");
 	this->requestHandler.sendHeader("Content-Type", "text/html");
 	this->requestHandler.sendHeader("Content-Length", content.size());

@@ -2,6 +2,7 @@
 
 #include "ATcpListener.hpp"
 #include "requests/RequestHandler.hpp"
+#include "requests/HTTPStatus.hpp"
 
 class WebServer : public ATcpListener
 {

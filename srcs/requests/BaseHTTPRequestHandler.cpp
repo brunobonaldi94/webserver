@@ -2,8 +2,7 @@
 
 
 void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message) {
-	(void) message;
-	this->headersBuffer << "HTTP/1.1 " << statusCode << " OK" << std::endl;
+	this->headersBuffer << "HTTP/1.1 " << statusCode << " " << message << std::endl;
 }
 
 void BaseHTTPRequestHandler::endHeaders() {
@@ -22,3 +21,4 @@ const std::string BaseHTTPRequestHandler::headersBufferToString() const {
 	const std::string headersBufferStr = this->headersBuffer.str();
 	return headersBufferStr;
 }
+
