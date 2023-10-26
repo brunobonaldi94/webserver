@@ -1,5 +1,6 @@
 #include "WebServer.hpp"
 #include "ConfigParser.hpp"
+#include "requests/BaseHTTPRequestHandler.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -15,7 +16,8 @@ int main(int argc, char *argv[])
 
 	std::string ipAddress("0.0.0.0");
 	std::string port("8080");
-	WebServer webServer(ipAddress, port);
+	RequestHandler requestHandler;
+	WebServer webServer(ipAddress, port, requestHandler);
 	if (webServer.init() != 0)
 		return -1;
 

@@ -5,8 +5,8 @@
 #include <stdio.h>
 
 
-ATcpListener::ATcpListener(std::string ipAddress, std::string port) :
-	m_ipAddress(ipAddress), m_port(port)
+ATcpListener::ATcpListener(std::string ipAddress, std::string port, RequestHandler r) :
+    requestHandler(r), m_ipAddress(ipAddress), m_port(port)
 {
 }
 
@@ -115,7 +115,7 @@ int ATcpListener::run()
 					 }
 					 else
 					 {
-						 this->onMessageReceived(sender_fd, buff);
+						this->onMessageReceived(sender_fd, buff);
 					 }
 
 				}

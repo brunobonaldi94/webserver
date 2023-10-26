@@ -9,7 +9,7 @@
 #include "WebServer.hpp"
 
 // Handler for when a message is received from the client
-void WebServer::onMessageReceived(int clientSocket, const char* msg) const
+void WebServer::onMessageReceived(int clientSocket, const char* msg) 
 {
 	// Parse out the client's request string e.g. GET /index.html HTTP/1.1
 	std::istringstream iss(msg);
@@ -48,19 +48,20 @@ void WebServer::onMessageReceived(int clientSocket, const char* msg) const
 	}
 
 	f.close();
+	
 
 	// Write the document back to the client
-	std::ostringstream oss;
-	oss << "HTTP/1.1 " << errorCode << " OK\n";
-	oss << "Cache-Control: no-cache, private\n";
-	oss << "Content-Type: text/html\n";
-	oss << "Content-Length: " << content.size() << "\n";
-	oss << "\n";
-	oss << content;
+	this->requestHandler.sendResponse(errorCode, "");
+	this->requestHandler.sendHeader("Cache-Control", "no-cache, private");
+	this->requestHandler.sendHeader("Content-Type", "text/html");
+	this->requestHandler.sendHeader("Content-Length", content.size());
+	this->requestHandler.endHeaders();
+	this->requestHandler.writeContent(content);
 
-	std::string output = oss.str();
-	int size = output.size() + 1;
-	this->sendToClient(clientSocket, output.c_str(), size);
+	this->sendToClient(
+		clientSocket, 
+		this->requestHandler.headersBufferToString().c_str(), 
+		this->requestHandler.headersBufferToString().size());
 }
 
 // Handler for client disconnections

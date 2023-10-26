@@ -16,13 +16,14 @@
 #include <sstream>
 #include <vector>
 #include "Logger.hpp"
+#include "requests/RequestHandler.hpp"
 
 class ATcpListener
 {
 
 public:
 
-	ATcpListener(std::string ipAddress, std::string port);
+	ATcpListener(std::string ipAddress, std::string port, RequestHandler r);
 
 	// Initialize the listener
 	int init();
@@ -40,10 +41,12 @@ protected:
 	virtual void onClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
 
 	// Handler for when a message is received from the client
-	virtual void onMessageReceived(int clientSocket, const char* msg) const = 0;
+	virtual void onMessageReceived(int clientSocket, const char* msg) = 0;
 
 	// Send a message to a client
 	void sendToClient(int clientSocket, const char* msg, int length) const;
+	
+	RequestHandler requestHandler;
 
 private:
 

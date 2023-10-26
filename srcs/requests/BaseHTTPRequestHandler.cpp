@@ -1,11 +1,17 @@
 #include "BaseHTTPRequestHandler.hpp"
 
-void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message) {
 
+void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message) {
+	(void) message;
+	this->headersBuffer << "HTTP/1.1 " << statusCode << " OK" << std::endl;
 }
 
-void BaseHTTPRequestHandler::sendHeader(std::string key, std::string value) {
-	this->headersBuffer <<  key << ": " << value << std::endl;
+void BaseHTTPRequestHandler::endHeaders() {
+	this->headersBuffer << std::endl;
+}
+
+void BaseHTTPRequestHandler::writeContent(const std::string content) {
+	this->headersBuffer << content;
 }
 
 void BaseHTTPRequestHandler::sendError() {
@@ -13,7 +19,6 @@ void BaseHTTPRequestHandler::sendError() {
 }
 
 const std::string BaseHTTPRequestHandler::headersBufferToString() const {
-	return this->headersBuffer.str();
+	const std::string headersBufferStr = this->headersBuffer.str();
+	return headersBufferStr;
 }
-
-
