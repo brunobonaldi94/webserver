@@ -51,15 +51,15 @@ void WebServer::OnMessageReceived(int clientSocket, const char* msg) const
 
 	// Write the document back to the client
 	std::ostringstream oss;
-	oss << "HTTP/1.1 " << errorCode << " OK\n";
-	oss << "Cache-Control: no-cache, private\n";
-	oss << "Content-Type: text/html\n";
-	oss << "Content-Length: " << content.size() << "\n";
-	oss << "\n";
+	oss << "HTTP/1.1 " << errorCode << " OK" << CRLF;
+	oss << "Cache-Control: no-cache, private" << CRLF;
+	oss << "Content-Type: text/html" << CRLF;
+	oss << "Content-Length: " << content.size() << CRLF;
+	oss << CRLF;
 	oss << content;
 
 	std::string output = oss.str();
-	int size = output.size() + 1;
+	int size = output.size();
 	this->SendToClient(clientSocket, output.c_str(), size);
 }
 

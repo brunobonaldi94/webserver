@@ -27,3 +27,17 @@ bool ADirective::SetDefaultFromParent()
 {
     return true;
 }
+
+AContext * ADirective::GetContextUpToLevel(unsigned int level) const
+{
+    if (level <= 0)
+        return NULL;
+    --level;
+    AContext *context = this->GetParentContext();
+    while (level > 0)
+    {
+        context = context->GetParentContext();
+        level--;
+    }
+    return context;
+}

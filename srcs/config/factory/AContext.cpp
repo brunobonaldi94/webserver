@@ -27,7 +27,7 @@ AContext& AContext::operator=(AContext const & other)
 
 void AContext::AddDirective(std::string name, ADirective *directive)
 {
-    this->_directives[name].push_back(directive);
+    this->_directives[name] = directive;
 }
 
 void AContext::AddSubContext(std::string name, AContext *subContext)
@@ -40,12 +40,11 @@ void AContext::SetParentContext(AContext *parentContext)
     this->_parentContext = parentContext;
 }
 
-std::map<std::string,std::vector<ADirective *> >  AContext::GetDirectives() const
+MapDirectives AContext::GetDirectives() const
 {
     return this->_directives;
 }
-
-std::map<std::string,std::vector<AContext *> > AContext::GetSubContexts() const
+MapContexts AContext::GetSubContexts() const
 {
     return this->_subContexts;
 }
@@ -115,24 +114,38 @@ void AContext::PrintContext()
         std::cout << "Parent context: NULL" << std::endl;
     StringUtils::PrintSeparator();
     std::cout << "Directives: " << std::endl;
-    for (std::map<std::string, std::vector<ADirective *> >::iterator it = this->_directives.begin(); it != this->_directives.end(); ++it)
+    for (MapDirectives::iterator it = this->_directives.begin(); it != this->_directives.end(); ++it)
     {
         Logger::Debug("Directive name = ", INFO, it->first);
-        for (std::vector<ADirective *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
-        {
-            if ((*it2)->GetParentContext())
-                Logger::Debug("Parent context = ", INFO, (*it2)->GetParentContext()->_contextName);
-            else
-                Logger::Debug("Parent context = ", INFO, "NULL");
-            (*it2)->PrintDirective();
-        }
+        if (it->second->GetParentContext())
+            Logger::Debug("Parent context = ", INFO, it->second->GetParentContext()->_contextName);
+        else
+            Logger::Debug("Parent context = ", INFO, "NULL");
+        it->second->PrintDirective();
+
     }
     std::cout << "SubContexts: " << std::endl;
-    for (std::map<std::string, std::vector<AContext *> >::iterator it = this->_subContexts.begin(); it != this->_subContexts.end(); ++it)
+    for (MapContexts::iterator it = this->_subContexts.begin(); it != this->_subContexts.end(); ++it)
     {
         Logger::Debug("SubContext name = ", INFO, it->first);
         for (std::vector<AContext *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
             (*it2)->PrintContext();
     }
     StringUtils::PrintSeparator();
+}
+
+void AContext::FillDefaultValuesDirectives()
+{
+    MapDirectives directives = this->GetDirectives();
+    for (MapDirCreator::iterator it = this->_allowedDirectives.begin(); it != this->_allowedDirectives.end(); ++it)
+    {
+        std::string directiveName = it->first;
+        if (MapUtils<std::string, ADirective*>::SafeFindMap(directives, directiveName) == NULL && it->second != NULL)
+        {
+            ADirective *directive = it->second->CreateDirective();
+            directive->SetParentContext(this);
+            this->AddDirective(directiveName, directive);
+            directive->FillDefaultValues();
+        }
+    }
 }

@@ -46,4 +46,5 @@ public:
     bool ParseConfigFile();
     bool ParseContent(std::string& content, std::string& word);
     void PrintContexts() const;
+    void FillDefaultValues();
 };

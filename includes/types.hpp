@@ -13,5 +13,6 @@ typedef  std::map<std::string, ADirectiveCreator *> MapDirCreator;
 typedef  std::pair<const std::string, ADirectiveCreator *> PairDirCreator;
 typedef  std::map<std::string, AContextCreator *> MapContextCreator;
 typedef  std::pair<const std::string, AContextCreator *> PairContextCreator;
-typedef  std::map<std::string,std::vector<ADirective *> > MapDirectives;
-typedef  std::pair<const std::string, std::vector<ADirective *> > PairDirectives; 
+typedef  std::map<std::string, ADirective*> MapDirectives;
+typedef  std::pair<const std::string, ADirective *> PairDirectives; 
+typedef  std::map<std::string, std::vector<AContext *> > MapContexts;

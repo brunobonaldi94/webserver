@@ -21,12 +21,12 @@ class AContext
 {
 private:
     AContext*                                           _parentContext;
-    std::map<std::string, std::vector<AContext *> >     _subContexts;
-    std::map<std::string, std::vector<ADirective *> >   _directives;
+    MapContexts                                         _subContexts;
+    MapDirectives                                       _directives;
 protected:
     MapDirCreator                                       _allowedDirectives;
     MapContextCreator                                   _allowedSubContexts;
-    std::string                                        _contextName;
+    std::string                                         _contextName;
 
 public:
     AContext(AContext *parentContext = NULL, std::string contextName = "");
@@ -35,9 +35,9 @@ public:
 
     AContext& operator=(AContext const & other);
 
-    std::map<std::string,std::vector<ADirective *> >  GetDirectives() const;
+    MapDirectives  GetDirectives() const;
     void AddDirective(std::string name, ADirective *directive);
-    std::map<std::string,std::vector<AContext *> > GetSubContexts() const;
+    MapContexts GetSubContexts() const;
     void AddSubContext(std::string name, AContext *subContext);
     AContext *GetParentContext() const;
     void SetParentContext(AContext *parentContext);
@@ -49,7 +49,7 @@ public:
 
     void HandleContextCreation(std::string &content, std::string &word, std::string contextName = "");
     void HandleDirectiveCreation(std::string::iterator &it, std::string &content, std::string &word, std::string directiveName = "");
-
+    void FillDefaultValuesDirectives();
     virtual void FillDefaultValues() = 0;
     virtual void PrintContext() = 0;
     virtual void ParseContext(std::string &content) = 0;

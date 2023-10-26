@@ -16,6 +16,8 @@ public:
 
     void SetParentContext(AContext* parentContext);
     AContext* GetParentContext() const;
+
+    AContext *GetContextUpToLevel(unsigned int level) const;
     virtual void ParseDirective(std::string &line) = 0;
     virtual void PrintDirective() const = 0;
     virtual void FillDefaultValues() = 0;

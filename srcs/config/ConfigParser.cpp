@@ -83,6 +83,11 @@ bool ConfigParser::ParseConfigFile()
       word.clear();
     }
     this->PrintContexts();
+    StringUtils::PrintSeparator();
+    StringUtils::PrintSeparator();
+    StringUtils::PrintSeparator();
+    this->FillDefaultValues();
+    this->PrintContexts();
     return true;
   }
   catch(const std::exception& e) 
@@ -122,4 +127,13 @@ void ConfigParser::PrintContexts() const
 	{
 		(*it)->PrintContext();
 	}
+}
+
+void ConfigParser::FillDefaultValues()
+{
+  std::vector<AContext *> serverContexts = this->GetServerContexts();
+  for (std::vector<AContext *>::iterator it = serverContexts.begin(); it != serverContexts.end(); ++it)
+  {
+    (*it)->FillDefaultValues();
+  }
 }

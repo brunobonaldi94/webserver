@@ -261,13 +261,14 @@ void ErrorPageDirective::FillDefaultValues()
 
 bool ErrorPageDirective::SetDefaultFromParent()
 {
-    if (this->GetParentContext() == NULL)
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
         return false;
-    MapDirectives directives = this->GetParentContext()->GetDirectives();
-    PairDirectives *parentErrorPage = MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "error_page");
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentErrorPage = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "error_page");
     if (parentErrorPage == NULL)
         return false;
-    ErrorPageDirective *errorPageDirective = dynamic_cast<ErrorPageDirective *>(parentErrorPage->second[0]);
+    ErrorPageDirective *errorPageDirective = dynamic_cast<ErrorPageDirective *>(parentErrorPage->second);
     if (!errorPageDirective)
         return false;
     this->_code = errorPageDirective->GetCode();
@@ -348,13 +349,14 @@ void ClientMaxBodySizeDirective::FillDefaultValues()
 
 bool ClientMaxBodySizeDirective::SetDefaultFromParent()
 {
-    if (this->GetParentContext() == NULL)
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
         return false;
-    MapDirectives directives = this->GetParentContext()->GetDirectives();
-    PairDirectives *parentClientMaxBodySize = MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "client_max_body_size");
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentClientMaxBodySize = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "client_max_body_size");
     if (parentClientMaxBodySize == NULL)
         return false;
-    ClientMaxBodySizeDirective *clientMaxBodySizeDirective = dynamic_cast<ClientMaxBodySizeDirective *>(parentClientMaxBodySize->second[0]);
+    ClientMaxBodySizeDirective *clientMaxBodySizeDirective = dynamic_cast<ClientMaxBodySizeDirective *>(parentClientMaxBodySize->second);
     if (!clientMaxBodySizeDirective)
         return false;
     if (clientMaxBodySizeDirective)
@@ -420,13 +422,14 @@ void IndexDirective::FillDefaultValues()
 
 bool IndexDirective::SetDefaultFromParent()
 {
-    if (this->GetParentContext() == NULL)
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
         return false;
-    MapDirectives directives = this->GetParentContext()->GetDirectives();
-    PairDirectives *parentIndex = MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "index");
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentIndex = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "index");
     if (parentIndex == NULL)
         return false;
-    IndexDirective *indexDirective = dynamic_cast<IndexDirective *>(parentIndex->second[0]);
+    IndexDirective *indexDirective = dynamic_cast<IndexDirective *>(parentIndex->second);
     if (!indexDirective)
         return false;
     if (indexDirective)
@@ -488,13 +491,14 @@ void RootDirective::FillDefaultValues()
 
 bool RootDirective::SetDefaultFromParent()
 {
-    if (this->GetParentContext() == NULL)
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
         return false;
-    MapDirectives directives = this->GetParentContext()->GetDirectives();
-    PairDirectives *parentRoot = MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "root");
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentRoot = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "root");
     if (parentRoot == NULL)
         return false;
-    RootDirective *rootDirective = dynamic_cast<RootDirective *>(parentRoot->second[0]);
+    RootDirective *rootDirective = dynamic_cast<RootDirective *>(parentRoot->second);
     if (!rootDirective)
         return false;
     this->_path = rootDirective->GetPath();
@@ -560,13 +564,14 @@ void AutoIndexDirective::FillDefaultValues()
 
 bool AutoIndexDirective::SetDefaultFromParent()
 {
-    if (this->GetParentContext() == NULL)
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
         return false;
-    MapDirectives directives = this->GetParentContext()->GetDirectives();
-    PairDirectives *parentAutoIndex = MapUtils<std::string, std::vector<ADirective *> >::SafeFindMap(directives, "autoindex");
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentAutoIndex = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "autoindex");
     if (parentAutoIndex == NULL)
         return false;
-    AutoIndexDirective *autoIndexDirective = dynamic_cast<AutoIndexDirective *>(parentAutoIndex->second[0]);
+    AutoIndexDirective *autoIndexDirective = dynamic_cast<AutoIndexDirective *>(parentAutoIndex->second);
     if (!autoIndexDirective)
         return false;
     this->_autoIndex = autoIndexDirective->GetAutoIndex();
@@ -733,15 +738,17 @@ void CgiDirective::FillDefaultValues()
 
 bool CgiDirective::SetDefaultFromParent()
 {
-    if (this->GetParentContext() == NULL)
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
         return false;
-    std::vector<ADirective *> directives = this->GetParentContext()->GetDirectives()["cgi"];
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentCgiDirective = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "cgi");
     if (directives.size() == 0)
         return false;
-    CgiDirective *parentCgiDirective = dynamic_cast<CgiDirective *>(directives[0]);
+    CgiDirective *cgiDirective = dynamic_cast<CgiDirective *>(parentCgiDirective->second);
     if (!parentCgiDirective)
         return false;
-    this->_extension = parentCgiDirective->GetExtension();
-    this->_binaryPath = parentCgiDirective->GetBinaryPath();
+    this->_extension = cgiDirective->GetExtension();
+    this->_binaryPath = cgiDirective->GetBinaryPath();
     return true;
 }

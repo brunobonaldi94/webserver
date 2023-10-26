@@ -67,6 +67,12 @@ void ServerContext::PrintContext()
 
 void ServerContext::FillDefaultValues()
 {
-    std::map<std::string, std::vector<ADirective *> > directives = this->GetDirectives();
-    // missing implementation
+    AContext::FillDefaultValuesDirectives();
+    MapContexts subContexts = this->GetSubContexts();
+    for (MapContexts::iterator it = subContexts.begin(); it != subContexts.end(); ++it)
+    {
+        std::vector<AContext *> contexts = it->second;
+        for (std::vector<AContext *>::iterator it2 = contexts.begin(); it2 != contexts.end(); ++it2)
+            (*it2)->FillDefaultValues();
+    }
 }
