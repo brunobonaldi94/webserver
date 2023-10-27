@@ -16,9 +16,8 @@ struct StatusCode {
 
 class HTTPStatus {
     public:
-        HTTPStatus();
-        StatusCode OK;
-        StatusCode NOT_FOUND;
+        static StatusCode OK;
+        static StatusCode NOT_FOUND;
 };
 
 #endif

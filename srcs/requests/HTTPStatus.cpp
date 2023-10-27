@@ -1,8 +1,8 @@
 #include "HTTPStatus.hpp"
 
-HTTPStatus::HTTPStatus() : 
-    OK(200, "OK", "Request fulfilled, document follows"), 
-    NOT_FOUND(404, "Not Found", "Nothing matches the given URI") {}
+
+StatusCode HTTPStatus::OK(200, "OK", "Request was successful.");
+StatusCode HTTPStatus::NOT_FOUND(404, "Not Found", "The requested resource was not found.");
 
 std::ostream& operator<<(std::ostream& os, const StatusCode& status) {
     os << status.code << std::endl;
