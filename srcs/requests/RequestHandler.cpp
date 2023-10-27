@@ -16,7 +16,13 @@ RequestHandler& RequestHandler::operator=(const RequestHandler& other) {
 }
 
 void RequestHandler::doGET() {
-	
+    std::string content = this->getContent("wwwroot/index.html");
+    this->sendResponse(HTTPStatus::OK.code, HTTPStatus::OK.description);
+	this->sendHeader("Cache-Control", "no-cache, private");
+	this->sendHeader("Content-Type", "text/html");
+	this->sendHeader("Content-Length", content.size());
+	this->endHeaders();
+	this->writeContent(content);
 }
 
 void RequestHandler::doPOST() {

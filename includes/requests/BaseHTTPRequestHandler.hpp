@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <string>
 #include "HTTPStatus.hpp"
 
@@ -17,11 +18,10 @@ class BaseHTTPRequestHandler {
 		const std::string headersBufferToString() const;
 	
 	protected:
+		std::string getContent(const std::string path);
 
     private:
 		std::ostringstream headersBuffer;
-		size_t _size;
-
 };
 
 template <typename T>

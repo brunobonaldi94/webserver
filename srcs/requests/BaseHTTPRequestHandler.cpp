@@ -22,3 +22,17 @@ const std::string BaseHTTPRequestHandler::headersBufferToString() const {
 	return headersBufferStr;
 }
 
+std::string BaseHTTPRequestHandler::getContent(const std::string path) {
+    std::string content  = "";
+	char const *file = path.c_str();
+	std::ifstream f(file);
+
+	if (f.good())
+	{
+		std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+		return str;
+	}
+    f.close();
+    return content;
+}
+
