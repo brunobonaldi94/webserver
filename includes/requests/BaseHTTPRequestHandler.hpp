@@ -4,20 +4,24 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <string>
+#include <string.h>
+#include <vector>
+#include <iterator> 
+#include <stdlib.h>
 #include "HTTPStatus.hpp"
 
 class BaseHTTPRequestHandler {
     public:
+		const std::string headersBufferToString() const;
+		bool parseRequest(const char* request) const;
+	
+	protected:
 		void sendResponse(int statusCode, std::string message);
 		template <typename T>
 		void sendHeader(std::string key, T value);
 		void endHeaders();
 		void sendError();
 		void writeContent(const std::string content);
-		const std::string headersBufferToString() const;
-	
-	protected:
 		std::string getContent(const std::string path);
 
     private:

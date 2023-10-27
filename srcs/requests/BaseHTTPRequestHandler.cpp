@@ -17,6 +17,16 @@ void BaseHTTPRequestHandler::sendError() {
 
 }
 
+bool BaseHTTPRequestHandler::parseRequest(const char* request) const {
+	std::istringstream iss(request);
+	std::cout << request << std::endl;
+	std::vector<std::string> parsed((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
+
+	if (parsed.size() >= 3 && parsed[0] == "GET")
+		return true;
+	return false;
+}
+
 const std::string BaseHTTPRequestHandler::headersBufferToString() const {
 	const std::string headersBufferStr = this->headersBuffer.str();
 	return headersBufferStr;
