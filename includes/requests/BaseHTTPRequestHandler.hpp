@@ -23,11 +23,16 @@ class BaseHTTPRequestHandler {
 		void endHeaders();
 		void sendError();
 		void writeContent(const std::string content);
+		void setRequestLines(const std::vector<std::string> requestLines);
 		std::string getContent(const std::string path);
 
 
     private:
 		std::ostringstream headersBuffer;
+
+		std::string requestMethod;
+		std::string path;
+		std::string requestVersion;
 };
 
 template <typename T>

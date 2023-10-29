@@ -28,16 +28,24 @@ void BaseHTTPRequestHandler::clearHeadersBuffers() {
 	this->headersBuffer.clear();
 }
 
+void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requestLines) {
+	this->requestMethod = requestLines[0];
+	this->path = requestLines[1];
+	this->requestVersion = requestLines[2];
+}
+
 bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 	std::istringstream iss(request);
 	std::cout << request << std::endl;
-	std::vector<std::string> parsed((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
+	std::vector<std::string> requestLines((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
 
-	if (parsed[1] != "/") {
+	this->setRequestLines(requestLines);
+
+	if (this->path != "/") {
 		this->sendError();
 		return false;
 	}
-	if (parsed.size() >= 3 && parsed[0] == "GET")
+	if (requestLines.size() >= 3 && this->requestMethod == "GET")
 		return true;
 	return false;
 }
