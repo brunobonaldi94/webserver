@@ -13,7 +13,8 @@
 class BaseHTTPRequestHandler {
     public:
 		const std::string headersBufferToString() const;
-		bool parseRequest(const char* request) const;
+		bool parseRequest(const char* request) ;
+		void clearHeadersBuffers();
 	
 	protected:
 		void sendResponse(int statusCode, std::string message);
@@ -23,6 +24,7 @@ class BaseHTTPRequestHandler {
 		void sendError();
 		void writeContent(const std::string content);
 		std::string getContent(const std::string path);
+
 
     private:
 		std::ostringstream headersBuffer;

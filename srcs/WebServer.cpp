@@ -11,12 +11,13 @@
 // Handler for when a message is received from the client
 void WebServer::onMessageReceived(int clientSocket, const char* msg) 
 {
-	if (this->requestHandler.parseRequest(msg))
+	if (this->requestHandler.parseRequest(msg) == true)
 		this->requestHandler.doGET();
 	this->sendToClient(
 		clientSocket, 
 		this->requestHandler.headersBufferToString().c_str(), 
 		this->requestHandler.headersBufferToString().size());
+	this->requestHandler.clearHeadersBuffers();
 }
 
 // Handler for client disconnections

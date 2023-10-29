@@ -14,14 +14,29 @@ void BaseHTTPRequestHandler::writeContent(const std::string content) {
 }
 
 void BaseHTTPRequestHandler::sendError() {
-
+	std::string content = "<h1>404 Not Found</h1>";
+    this->sendResponse(HTTPStatus::NOT_FOUND.code, HTTPStatus::NOT_FOUND.description);
+	this->sendHeader("Cache-Control", "no-cache, private");
+	this->sendHeader("Content-Type", "text/html");
+	this->sendHeader("Content-Length", content.size());
+	this->endHeaders();
+	this->writeContent(content);
 }
 
-bool BaseHTTPRequestHandler::parseRequest(const char* request) const {
+void BaseHTTPRequestHandler::clearHeadersBuffers() {
+	this->headersBuffer.str("");
+	this->headersBuffer.clear();
+}
+
+bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 	std::istringstream iss(request);
 	std::cout << request << std::endl;
 	std::vector<std::string> parsed((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
 
+	if (parsed[1] != "/") {
+		this->sendError();
+		return false;
+	}
 	if (parsed.size() >= 3 && parsed[0] == "GET")
 		return true;
 	return false;
