@@ -53,5 +53,4 @@ public:
     virtual void FillDefaultValues() = 0;
     virtual void PrintContext() = 0;
     virtual void ParseContext(std::string &content) = 0;
-    
 };

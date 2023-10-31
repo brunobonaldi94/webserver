@@ -16,24 +16,29 @@
 #include <sstream>
 #include <vector>
 #include "Logger.hpp"
+#include "StringUtils.hpp"
+#include "ServerContext.hpp"
 
 class ATcpListener
 {
 
 public:
 
-	ATcpListener(std::string ipAddress, std::string port);
+	ATcpListener(std::vector<AContext *> serverContexts);
 
 	// Initialize the listener
-	int Init();
+	bool Init();
 
 	// Run the listener
-	int Run();
+	bool Run();
 
 protected:
 
 	// Handler for client connections
 	virtual void HandleNewConnection(int clientSocket);
+
+	// Handler for client connections
+	virtual void HandleOnGoingConnection(int clientSocket, int socketIndex);
 
 	// Handler for client disconnections
 
@@ -47,17 +52,18 @@ protected:
 
 private:
 
-	int GetListenerSocket(void);
-	struct addrinfo* GetAddressInfo(void);
+	int GetListenerSocket(AContext * serverContext);
+	struct addrinfo* GetAddressInfo(std::string ipAddress, std::string port);
 	int BindSocket(struct addrinfo*  addrinfo);
+	bool IsListeningSocket(int fd);
 	void AddToPfds(int newfd);
 	void RemoveFromPfds(int i);
 
-	std::string										m_ipAddress;	// IP Address server will run on
-	std::string										m_port;			// Port # for the web service
+	std::vector<AContext *>  m_serverContexts;
 	//int														m_socket;		// Internal FD for the listening socket
+	char 													m_buffer[4096];	// Buffer for incoming data
 	std::vector<struct pollfd>		pfds;			// Pointer to the pollfd array
 	static const int 							MAXFDS = 100;	// Maximum number of file descriptors
-	int														listenfd;											// File descriptor for the listening socket
+	std::vector<int>							listenFds;
 	
 };

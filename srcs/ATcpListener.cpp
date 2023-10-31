@@ -5,12 +5,12 @@
 #include <stdio.h>
 
 
-ATcpListener::ATcpListener(std::string ipAddress, std::string port) :
-	m_ipAddress(ipAddress), m_port(port)
+ATcpListener::ATcpListener(std::vector<AContext *> serverContexts) :
+	m_serverContexts(serverContexts)
 {
 }
 
-struct addrinfo * ATcpListener::GetAddressInfo(void)
+struct addrinfo * ATcpListener::GetAddressInfo(std::string ipAddress, std::string port)
 {
 		int rv;
 		struct addrinfo hints, *servinfo;
@@ -18,7 +18,7 @@ struct addrinfo * ATcpListener::GetAddressInfo(void)
 		hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE; // use my IP
-		if ((rv = getaddrinfo(this->m_ipAddress.c_str(), this->m_port.c_str(), &hints, &servinfo)) != 0) 
+		if ((rv = getaddrinfo(ipAddress.c_str(), port.c_str(), &hints, &servinfo)) != 0) 
 		{
 				std::cerr << "getaddrinfo: " << gai_strerror(rv) << std::endl;
 				return NULL;
@@ -47,24 +47,39 @@ int ATcpListener::BindSocket(struct addrinfo *addrinfo)
 		freeaddrinfo(addrinfo);
 		if (p == NULL)
 		{
-				std::cerr << "Failed to bind socket" << std::endl;
+				Logger::Log(ERROR, "Failed to bind socket");
 				return -1;
 		}
 		return listener;
 }
 
-int ATcpListener::GetListenerSocket(void)
+int ATcpListener::GetListenerSocket(AContext * serverContext)
 {
     int listener;
     struct addrinfo *ai;
-
-    ai = this->GetAddressInfo();
+		ServerContext *serverContextCast = dynamic_cast<ServerContext *>(serverContext);
+		if (serverContextCast == NULL)
+		{
+				Logger::Log(ERROR, "Failed to cast server context");
+				return -1;
+		}
+		ListenDirective *listenDirective = dynamic_cast<ListenDirective *>(serverContextCast->GetDirectives()["listen"]);
+    ai = this->GetAddressInfo(listenDirective->GetHost(), listenDirective->GetPort());
     listener = this->BindSocket(ai);
 		if (listener == -1)
 				return -1;
     if (listen(listener, SOMAXCONN) == -1)
         return -1;
+		Logger::Log(INFO, "Listening on host - " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
     return listener;
+}
+
+bool ATcpListener::IsListeningSocket(int fd)
+{
+	int *found = VectorUtils<int>::SafeFindVector(this->listenFds, fd);
+	if (found == NULL)
+		return false;
+	return true;
 }
 
 void ATcpListener::AddToPfds(int newfd)
@@ -82,7 +97,7 @@ void ATcpListener::HandleNewConnection(int clientSocket)
 	addrlen = sizeof(remoteaddr);
 	int newfd = accept(clientSocket, (struct sockaddr *)&remoteaddr, &addrlen);
 	if (newfd == -1) 
-		std::cerr << "accept" << std::endl;
+		Logger::Log(ERROR, "accept");
 	else
 		this->AddToPfds(newfd);
 }
@@ -92,72 +107,76 @@ void ATcpListener::RemoveFromPfds(int i)
 		this->pfds.erase(this->pfds.begin() + i);
 }
 
-int ATcpListener::Init()
+bool ATcpListener::Init()
 {
-	this->listenfd = this->GetListenerSocket();
-	if (this->listenfd == -1)
+	for (std::vector<AContext *>::iterator it = this->m_serverContexts.begin(); it != this->m_serverContexts.end(); it++)
 	{
-		std::cerr << "Failed to create listener socket" << std::endl;
-		return -1;
+		int listenFd = this->GetListenerSocket(*it);
+		if (listenFd == -1)
+		{
+			Logger::Log(ERROR, "Failed to create listener socket");
+			return false;
+		}
+		this->listenFds.push_back(listenFd);
 	}
-	this->AddToPfds(this->listenfd);
-	Logger::Log(INFO, "Listening on port " + this->m_port);
-	return 0;
+	for (std::vector<int>::iterator it = this->listenFds.begin(); it != this->listenFds.end(); it++)
+		this->AddToPfds(*it);
+	return true;
 }
 
-int ATcpListener::Run()
+void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
+{
+	ssize_t nbytes = recv(clientSocket, this->m_buffer, sizeof this->m_buffer, 0);
+	if (nbytes > 0)
+	{
+		this->OnMessageReceived(clientSocket, this->m_buffer);
+		return ;
+	}
+	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);
+}
+
+
+
+bool ATcpListener::Run()
 {
 	bool running = true;
-	char buff[4096];
 	while (running)
 	{
-	
 		int poll_count = poll(&this->pfds[0], this->pfds.size(), -1);
 		int socketCount = this->pfds.size();
 		if (poll_count == -1)
 		{
-			std::cerr << "poll" << std::endl;
-			return -1;
+			Logger::Log(ERROR, "poll error");
+			return false;
 		}
 		for (int i = 0; i < socketCount; i++)
 		{
 			if (this->pfds[i].revents & POLLIN)
 			{
-				if (this->pfds[i].fd == this->listenfd)
-				{
+				if (this->IsListeningSocket(this->pfds[i].fd))
 					this->HandleNewConnection(this->pfds[i].fd);
-				}
 				else
-				{
-					 int sender_fd = this->pfds[i].fd;
-					 ssize_t nbytes = recv(sender_fd, buff, sizeof buff, 0);
-					 if (nbytes <= 0)
-					 {
-							this->OnClientDisconnected(sender_fd, i, nbytes);
-					 }
-					 else
-					 {
-						 this->OnMessageReceived(sender_fd, buff);
-					 }
-
-				}
+					this->HandleOnGoingConnection(this->pfds[i].fd, i);
 			}
 		}	
 	}
-	return 0;
+	return true;
 }
 void ATcpListener::SendToClient(int clientSocket, const char* msg, int length) const
 {
 	if (send(clientSocket, msg, length, 0) == -1)
-		std::cerr << "send" << std::endl;
+		Logger::Log(ERROR, "send");
 }
 
-void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes)
+void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
 {
  	  if (nbytes == 0)
-			std::cerr << "socket " << clientSocket << " hung up" << std::endl; 
+			Logger::Debug(
+				"ATcpListener::OnClientDisconnected",
+				INFO,
+				"socket " + StringUtils::ConvertNumberToString(clientSocket) + " hung up");
 		else
-			std::cerr << "recv" << std::endl;
+			Logger::Log(ERROR, "recv");
 		close(this->pfds[socketIndex].fd);
 		this->RemoveFromPfds(socketIndex);
 }

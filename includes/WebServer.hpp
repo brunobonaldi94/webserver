@@ -6,8 +6,8 @@ class WebServer : public ATcpListener
 {
 public:
 
-	WebServer(std::string ipAddress, std::string port) :
-		ATcpListener(ipAddress, port) { }
+	WebServer(std::vector<AContext *> serverContexts) :
+		ATcpListener(serverContexts) { }
 
 protected:
 

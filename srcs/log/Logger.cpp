@@ -80,10 +80,11 @@ void Logger::Log(LogTypeEnum type, const std::string& message)
     std::ostream *stream = Logger::SetStream(type);
     *stream 
             << logInfos.logColor
-            << dateTime
             << " ["  
-            << logInfos.logType
+            << dateTime
             << "]: " 
+            << logInfos.logType
+            << " - "
             << message << " " 
             << RESET << std::endl;
 }
