@@ -16,3 +16,12 @@ T* VectorUtils<T>::SafeFindVector(std::vector<T> &vector, T key)
 
     return &(*it);
 }
+
+template <typename T>
+void VectorUtils<T>::SafeRemoveVector(std::vector<T> &vector, T key)
+{
+    typename std::vector<T>::iterator it = std::find(vector.begin(), vector.end(), key);
+    if (it == vector.end())
+        return ;
+    vector.erase(it);
+}

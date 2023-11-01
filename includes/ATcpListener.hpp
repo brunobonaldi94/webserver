@@ -45,7 +45,7 @@ protected:
 	virtual void OnClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
 
 	// Handler for when a message is received from the client
-	virtual void OnMessageReceived(int clientSocket, const char* msg) const = 0;
+	virtual void OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) const = 0;
 
 	// Send a message to a client
 	void SendToClient(int clientSocket, const char* msg, int length) const;
@@ -58,12 +58,17 @@ private:
 	bool IsListeningSocket(int fd);
 	void AddToPfds(int newfd);
 	void RemoveFromPfds(int i);
+	void AddToListenFds(int newfd, ServerContext * serverContext);
+	void RemoveFromListenFds(int i);
+	void AddToSocketFdToServerContext(int newfd, ServerContext * serverContext);
+	void RemoveFromSocketFdToServerContext(int i);
 
 	std::vector<AContext *>  m_serverContexts;
 	//int														m_socket;		// Internal FD for the listening socket
 	char 													m_buffer[4096];	// Buffer for incoming data
 	std::vector<struct pollfd>		pfds;			// Pointer to the pollfd array
 	static const int 							MAXFDS = 100;	// Maximum number of file descriptors
-	std::vector<int>							listenFds;
+	std::map<int, ServerContext*> listenFds;
+	std::map<int, ServerContext*> m_socketFdToServerContext;
 	
 };

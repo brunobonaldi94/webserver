@@ -26,3 +26,12 @@ void MapUtils<T, K>::ClearMap(std::map<T, K> &map)
             delete it->second;
     map.clear();
 }
+
+template <typename T, typename K>
+void MapUtils<T, K>::SafeRemoveMap(std::map<T, K> &map, T key)
+{
+    typename std::map<T, K>::iterator it = map.find(key);
+    if (it == map.end())
+        return ;
+    map.erase(it);
+}

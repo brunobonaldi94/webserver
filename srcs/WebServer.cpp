@@ -9,9 +9,11 @@
 #include "WebServer.hpp"
 
 // Handler for when a message is received from the client
-void WebServer::OnMessageReceived(int clientSocket, const char* msg) const
+void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) const
 {
 	// Parse out the client's request string e.g. GET /index.html HTTP/1.1
+	ListenDirective *listenDirective = dynamic_cast<ListenDirective *>(serverContext->GetDirectives()["listen"]);
+	Logger::Log(INFO, "Received from client: " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
 	std::istringstream iss(msg);
 	std::cout << msg << std::endl;
 	std::vector<std::string> parsed((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());

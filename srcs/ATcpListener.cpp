@@ -76,7 +76,7 @@ int ATcpListener::GetListenerSocket(AContext * serverContext)
 
 bool ATcpListener::IsListeningSocket(int fd)
 {
-	int *found = VectorUtils<int>::SafeFindVector(this->listenFds, fd);
+	std::pair<const int, ServerContext*> *found = MapUtils<int, ServerContext*>::SafeFindMap(this->listenFds, fd);
 	if (found == NULL)
 		return false;
 	return true;
@@ -90,6 +90,26 @@ void ATcpListener::AddToPfds(int newfd)
 		this->pfds.push_back(pfd);
 }
 
+void ATcpListener::AddToListenFds(int newfd, ServerContext *serverContext)
+{
+		this->listenFds[newfd] = serverContext;
+}
+
+void ATcpListener::RemoveFromListenFds(int i)
+{
+		MapUtils<int, ServerContext *>::SafeRemoveMap(this->listenFds, i);
+}
+
+void ATcpListener::AddToSocketFdToServerContext(int newfd, ServerContext *serverContext)
+{
+		this->m_socketFdToServerContext[newfd] = serverContext;
+}
+
+void ATcpListener::RemoveFromSocketFdToServerContext(int i)
+{
+		MapUtils<int, ServerContext *>::SafeRemoveMap(this->m_socketFdToServerContext, i);
+}
+
 void ATcpListener::HandleNewConnection(int clientSocket)
 {
 	struct sockaddr_storage remoteaddr; // client address
@@ -99,7 +119,10 @@ void ATcpListener::HandleNewConnection(int clientSocket)
 	if (newfd == -1) 
 		Logger::Log(ERROR, "accept");
 	else
+	{
 		this->AddToPfds(newfd);
+		this->AddToSocketFdToServerContext(newfd, this->listenFds[clientSocket]);
+	}
 }
 
 void ATcpListener::RemoveFromPfds(int i)
@@ -117,10 +140,10 @@ bool ATcpListener::Init()
 			Logger::Log(ERROR, "Failed to create listener socket");
 			return false;
 		}
-		this->listenFds.push_back(listenFd);
+		this->AddToListenFds(listenFd, dynamic_cast<ServerContext *>(*it));
 	}
-	for (std::vector<int>::iterator it = this->listenFds.begin(); it != this->listenFds.end(); it++)
-		this->AddToPfds(*it);
+	for (std::map<int, ServerContext *>::iterator it = this->listenFds.begin(); it != this->listenFds.end(); it++)
+		this->AddToPfds(it->first);
 	return true;
 }
 
@@ -129,13 +152,11 @@ void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 	ssize_t nbytes = recv(clientSocket, this->m_buffer, sizeof this->m_buffer, 0);
 	if (nbytes > 0)
 	{
-		this->OnMessageReceived(clientSocket, this->m_buffer);
+		this->OnMessageReceived(this->m_socketFdToServerContext[clientSocket], clientSocket, this->m_buffer);
 		return ;
 	}
 	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);
 }
-
-
 
 bool ATcpListener::Run()
 {
@@ -179,4 +200,5 @@ void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex, ssize
 			Logger::Log(ERROR, "recv");
 		close(this->pfds[socketIndex].fd);
 		this->RemoveFromPfds(socketIndex);
+		this->RemoveFromSocketFdToServerContext(clientSocket);
 }

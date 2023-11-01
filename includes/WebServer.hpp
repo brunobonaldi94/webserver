@@ -14,5 +14,5 @@ protected:
 	// Handler for client disconnections
 	void OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes);
 	// Handler for when a message is received from the client
-	void OnMessageReceived(int clientSocket, const char* msg) const;
+	void OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) const;
 };
