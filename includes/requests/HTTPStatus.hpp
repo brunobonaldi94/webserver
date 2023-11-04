@@ -19,6 +19,7 @@ class HTTPStatus {
         static StatusCode OK;
         static StatusCode NOT_FOUND;
         static StatusCode BAD_REQUEST;
+        static StatusCode HTTP_VERSION_NOT_SUPPORTED;
 };
 
 #endif

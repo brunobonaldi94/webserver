@@ -6,7 +6,7 @@ port = 8080
 connection = socket.create_connection((host, port))
 
 # Envie uma solicitação HTTP inválida
-request = "GET / HTP/1.1 \r\n"
+request = "GET / HTTP/1.0 \r\n"
 request += "Host: localhost\r\n"
 request += "\r\n"  # Cabeçalhos finalizados
 connection.send(request.encode())

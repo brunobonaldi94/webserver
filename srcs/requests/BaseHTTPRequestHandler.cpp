@@ -37,25 +37,34 @@ bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 	
 	std::istringstream iss(request);
 	//log request message
-	//std::cout << request << std::endl;
+	std::cout << request << std::endl;
 	std::vector<std::string> requestLines((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
 	this->setRequestLines(requestLines);
 
 	if (requestLines.size() == 0)
 		return false;
-	
+	std::vector<std::string> versionNumber;
 	if (requestLines.size() >= 3) {
 		try {
 			std::string baseVersion = "HTTP/";
 			if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
 				throw std::invalid_argument("");
-			std::string baseVersionNumber = StringUtils::Split(this->requestVersion, "/")[1];
-			std::vector<std::string> versionNumber = StringUtils::Split(baseVersionNumber, ".");
-			if (versionNumber.size() != 2)
-				throw std::invalid_argument("");
+			std::vector<std::string> baseVersionNumberVector = StringUtils::Split(this->requestVersion, "/");
+			if (baseVersionNumberVector.size() != 2)
+				throw std::runtime_error("");
+			std::string baseVersionNumber = baseVersionNumberVector[1];
+			versionNumber = StringUtils::Split(baseVersionNumber, ".");
+			if (versionNumber.size() != 2  || 
+				(versionNumber.size() == 2 && versionNumber[0] == ""))
+				throw std::runtime_error("");
 		}
-		catch(const std::invalid_argument& e) {
+		catch(const std::exception& e) {
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+			return false;
+		}
+		if (std::atoi(versionNumber[0].c_str()) != 1 || 
+			std::atoi(versionNumber[1].c_str()) != 1) {
+			this->sendError("<h1>HTTP Version Not Supported</h1>", HTTPStatus::HTTP_VERSION_NOT_SUPPORTED);
 			return false;
 		}
 		

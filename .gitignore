@@ -6,3 +6,4 @@
 *.txt
 *tailwind.config.js
 *.log
+srcs/tests/functionals/__pycache__/
