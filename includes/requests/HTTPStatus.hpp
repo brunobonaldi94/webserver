@@ -18,6 +18,7 @@ class HTTPStatus {
     public:
         static StatusCode OK;
         static StatusCode NOT_FOUND;
+        static StatusCode BAD_REQUEST;
 };
 
 #endif

@@ -8,6 +8,8 @@
 #include <vector>
 #include <iterator> 
 #include <stdlib.h>
+#include <stdexcept>
+#include "StringUtils.hpp"
 #include "HTTPStatus.hpp"
 
 class BaseHTTPRequestHandler {
@@ -21,7 +23,7 @@ class BaseHTTPRequestHandler {
 		template <typename T>
 		void sendHeader(std::string key, T value);
 		void endHeaders();
-		void sendError();
+		void sendError(const std::string& content, const StatusCode& status);
 		void writeContent(const std::string content);
 		void setRequestLines(const std::vector<std::string> requestLines);
 		std::string getContent(const std::string path);

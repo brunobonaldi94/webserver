@@ -13,9 +13,8 @@ void BaseHTTPRequestHandler::writeContent(const std::string content) {
 	this->headersBuffer << content;
 }
 
-void BaseHTTPRequestHandler::sendError() {
-	std::string content = "<h1>404 Not Found</h1>";
-    this->sendResponse(HTTPStatus::NOT_FOUND.code, HTTPStatus::NOT_FOUND.description);
+void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status) {
+    this->sendResponse(status.code, status.description);
 	this->sendHeader("Cache-Control", "no-cache, private");
 	this->sendHeader("Content-Type", "text/html");
 	this->sendHeader("Content-Length", content.size());
@@ -35,14 +34,35 @@ void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requ
 }
 
 bool BaseHTTPRequestHandler::parseRequest(const char* request) {
+	
 	std::istringstream iss(request);
-	std::cout << request << std::endl;
+	//log request message
+	//std::cout << request << std::endl;
 	std::vector<std::string> requestLines((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
-
 	this->setRequestLines(requestLines);
 
+	if (requestLines.size() == 0)
+		return false;
+	
+	if (requestLines.size() >= 3) {
+		try {
+			std::string baseVersion = "HTTP/";
+			if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
+				throw std::invalid_argument("");
+			std::string baseVersionNumber = StringUtils::Split(this->requestVersion, "/")[1];
+			std::vector<std::string> versionNumber = StringUtils::Split(baseVersionNumber, ".");
+			if (versionNumber.size() != 2)
+				throw std::invalid_argument("");
+		}
+		catch(const std::invalid_argument& e) {
+			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+			return false;
+		}
+		
+	}
+
 	if (this->path != "/") {
-		this->sendError();
+		this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
 		return false;
 	}
 	if (requestLines.size() >= 3 && this->requestMethod == "GET")
