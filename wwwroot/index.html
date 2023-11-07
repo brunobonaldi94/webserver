@@ -6,6 +6,8 @@
     <title>Web Server!</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="components/header-component.js" type="text/javascript" defer></script>
+    <script src="components/main-component.js" type="text/javascript" defer></script>
     <script>
     tailwind.config = {
         theme: {
@@ -221,18 +223,15 @@
    </script>
 </head>
 <body class="bg-teal-800">
-   <header class="[clip-path:polygon(0_0,100%_0,100%_65vh,_0_100%)] h-[85vh] bg-gray-100 space-y-2 flex flex-col">
-    <nav class="flex gap-5 p-8">
-        <a href="index.html" class="text-lg hover:-translate-y-1 transition-all p-1 hover:text-gray-800">Home</a>
-        <a href="foo.html" class="text-lg hover:-translate-y-1 transition-all p-1 hover:text-gray-800">Foo</a>
-    </nav>
-    <div class="h-full flex items-center justify-center">
-        <div class="hover:skew-x-[24deg] hover:bg-gradient-to-r rounded-lg from-teal-700 hover:to-teal-900 transition-all shadow-md border-b">
-            <h1 class="w-full text-gray-800 border-teal-800/60 font-bold text-center text-5xl p-2 transition-all hover:skew-x-[-24deg] hover:text-white ">
-                Welcome to the Webserver - bbonaldi, harndt, sjhony-x
-            </h1>   
+   <main-component>
+        <header-component></header-component>
+        <div class="h-full flex items-center justify-center">
+            <div class="hover:skew-x-[24deg] hover:bg-gradient-to-r rounded-lg from-teal-700 hover:to-teal-900 transition-all shadow-md border-b">
+                <h1 class="w-full text-gray-800 border-teal-800/60 font-bold text-center text-5xl p-2 transition-all hover:skew-x-[-24deg] hover:text-white ">
+                    Welcome to the Webserver - bbonaldi, harndt, sjhony-x
+                </h1>   
+            </div>
         </div>
-    </div>
-   </header>
+   </main-component>
 </body>
 </html>

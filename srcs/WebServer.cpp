@@ -12,7 +12,7 @@
 void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) const
 {
 	// Parse out the client's request string e.g. GET /index.html HTTP/1.1
-	ListenDirective *listenDirective = dynamic_cast<ListenDirective *>(serverContext->GetDirectives()["listen"]);
+	ListenDirective *listenDirective = serverContext->GetListenDirective();
 	Logger::Log(INFO, "Received from client: " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
 	std::istringstream iss(msg);
 	std::cout << msg << std::endl;

@@ -149,3 +149,16 @@ void AContext::FillDefaultValuesDirectives()
         }
     }
 }
+
+ADirective *AContext::GetDirective(std::string name)
+{
+    PairDirCreator *directivePairCreator = 
+        MapUtils<std::string, ADirectiveCreator *>::SafeFindMap(this->_allowedDirectives, name);
+    if (directivePairCreator == NULL || directivePairCreator->second == NULL)
+        throw NotAllowedException(name + " directive not allowed in " + this->_contextName + " context");
+    PairDirectives *directivePair = 
+        MapUtils<std::string, ADirective *>::SafeFindMap(this->_directives, name);
+    if (directivePair == NULL)
+        return (NULL);
+    return (directivePair->second);
+}

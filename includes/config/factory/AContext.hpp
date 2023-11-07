@@ -44,6 +44,8 @@ public:
     MapDirCreator GetAllowedDirectives() const;
     MapContextCreator GetAllowedSubContexts() const;
 
+    ADirective *GetDirective(std::string name);
+
     void SetContextName(std::string contextName);
     std::string GetContextName() const;
 
