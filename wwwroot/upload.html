@@ -6,7 +6,7 @@
   <title>Upload</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="components/header-component.js" type="text/javascript" defer></script>
-  <script src="components/main-component.js" type="text/javascript" defer></script>
+  <script src="components/mask-component.js" type="text/javascript" defer></script>
   <script>
   tailwind.config = {
       theme: {
@@ -222,21 +222,27 @@
  </script>
 </head>
 <body class="bg-teal-800">
-  <main-component>
+  <mask-component>
     <header-component></header-component>
-    <form class="border border-teal-300 shadow-md p-8">
-        <label class="block">
-            <span class="sr-only">Choose profile photo</span>
-            <input type="file" class="block w-full text-sm text-slate-500
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-full file:border-0
-            file:text-sm file:font-semibold
-            file:bg-teal-800 file:text-white
-            hover:file:bg-teal-900
-            cursor-pointer
-            "/>
-        </label>
-    </form>
-  </main-component>
+    <main class="max-w-[1440px] m-auto p-8">
+        <form action="#" method="post" enctype="multipart/form-data"
+            class="border border-teal-300 shadow-md p-8 w-full rounded-md min-w-[25vw] flex flex-col space-y-2">
+            <h3 class="border-b border-gray-400/50 text-3xl text-gray-700 mb-2 pb-1">Upload Form</h3>
+            <label class="block">
+                <span class="sr-only">Choose profile photo</span>
+                <input id="file" name="file" 
+                    type="file" class="block w-full text-sm text-slate-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-teal-800 file:text-white
+                    hover:file:bg-teal-900
+                    cursor-pointer"
+                />
+            </label>
+            <button type="submit" class="bg-teal-900 text-white p-2 rounded-md ml-auto">Submit</button>
+        </form>
+    </main>
+  </mask-component>
 </body>
 </html>

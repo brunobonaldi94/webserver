@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="components/header-component.js" type="text/javascript" defer></script>
-    <script src="components/main-component.js" type="text/javascript" defer></script>
+    <script src="components/mask-component.js" type="text/javascript" defer></script>
     <script>
     tailwind.config = {
         theme: {
@@ -223,7 +223,7 @@
    </script>
 </head>
 <body class="bg-teal-800">
-   <main-component>
+   <mask-component>
         <header-component></header-component>
         <div class="h-full flex items-center justify-center">
             <div class="hover:skew-x-[24deg] hover:bg-gradient-to-r rounded-lg from-teal-700 hover:to-teal-900 transition-all shadow-md border-b">
@@ -232,6 +232,6 @@
                 </h1>   
             </div>
         </div>
-   </main-component>
+   </mask-component>
 </body>
 </html>

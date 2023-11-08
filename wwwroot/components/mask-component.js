@@ -1,4 +1,4 @@
-class MainComponent extends HTMLDivElement {
+class MaskComponent extends HTMLElement {
   constructor() {
     super();
     this.onMutation = this.onMutation.bind(this);
@@ -37,5 +37,8 @@ class MainComponent extends HTMLDivElement {
     });
   }
 }
+function addCustomElement(){
+  customElements.define('mask-component', MaskComponent);
+}
 
-customElements.define('main-component', MainComponent, { extends: 'div' });
+addCustomElement();

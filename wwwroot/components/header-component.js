@@ -1,4 +1,4 @@
-class HeaderComponent extends HTMLDivElement {
+class HeaderComponent extends HTMLElement {
     constructor() {
         super();
         this.innerHTML = `
@@ -11,4 +11,8 @@ class HeaderComponent extends HTMLDivElement {
     }
 }
 
-customElements.define('header-component', HeaderComponent, { extends: 'div' });
+function addCustomElement(){
+  customElements.define('header-component', HeaderComponent);
+}
+
+addCustomElement();
