@@ -2,7 +2,7 @@ class MaskComponent extends HTMLElement {
   constructor() {
     super();
     this.onMutation = this.onMutation.bind(this);
-    this.className = "[clip-path:polygon(0_0,100%_0,100%_65vh,_0_100%)] h-[85vh] bg-gray-100 space-y-2 flex flex-col"
+    this.className = "lg:[clip-path:polygon(0_0,100%_0,100%_70vh,_0_100%)] md:[clip-path:polygon(0_0,100%_0,100%_75vh,_0_100%)] lg:h-[85vh] md:h-[80vh] bg-gray-100 space-y-2 flex flex-col"
     // this.innerHTML = `
     //   <main  class="[clip-path:polygon(0_0,100%_0,100%_65vh,_0_100%)] h-[85vh] bg-gray-100 space-y-2 flex flex-col">
     //   </main>

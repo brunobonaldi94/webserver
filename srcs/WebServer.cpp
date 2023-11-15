@@ -8,6 +8,10 @@
 #include <iterator>
 #include "WebServer.hpp"
 
+WebServer::WebServer(std::vector<AContext *> serverContexts) : ATcpListener(serverContexts)
+{
+}
+
 // Handler for when a message is received from the client
 void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) const
 {
@@ -37,6 +41,7 @@ void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket
 	}
 
 	// Open the document in the local file system
+	//std::string fullPath("wwwroot/" + htmlFile);
 	std::string fullPath("wwwroot/" + htmlFile);
 	char const *file = fullPath.c_str();
 	std::ifstream f(file);

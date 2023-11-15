@@ -6,8 +6,7 @@ class WebServer : public ATcpListener
 {
 public:
 
-	WebServer(std::vector<AContext *> serverContexts) :
-		ATcpListener(serverContexts) { }
+	WebServer(std::vector<AContext *> serverContexts);
 
 protected:
 
