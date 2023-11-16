@@ -18,8 +18,17 @@
 
 #include "ConfigParser.hpp"
 
-ConfigParser::ConfigParser(const std::string& fileName): _fileName(fileName) 
+ConfigParser::ConfigParser(const std::string& fileName)
 {
+  std::string fileExtension(FILE_EXTENSION);
+  if (fileName.size() == 0)
+    throw SyntaxErrorException("Empty file name");
+  if (fileName.size() <= fileExtension.size())
+    throw SyntaxErrorException("Wrong file name");
+  std::string shouldBeConfExtension = fileName.substr(fileName.size() - fileExtension.size());
+  if (shouldBeConfExtension != fileExtension)
+    throw SyntaxErrorException("Wrong file extension");
+  this->_fileName = fileName;
 }
 
 ConfigParser::ConfigParser(ConfigParser const & other)
