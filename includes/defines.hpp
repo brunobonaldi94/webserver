@@ -5,3 +5,5 @@
 #define CRLF "\r\n"
 
 #define FILE_EXTENSION ".conf"
+#define ERROR_CODE -1
+#define SUCCESS_CODE 0
