@@ -1,17 +1,20 @@
 #pragma once
 
 #include "ATcpListener.hpp"
+#include "requests/RequestHandler.hpp"
+#include "requests/HTTPStatus.hpp"
 
 class WebServer : public ATcpListener
 {
-public:
+	public:
 
-	WebServer(std::vector<AContext *> serverContexts);
+	WebServer(RequestHandler requestHandler, std::vector<AContext *> serverContexts);
 
-protected:
+
+	protected:
 
 	// Handler for client disconnections
 	void OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes);
 	// Handler for when a message is received from the client
-	void OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) const;
+	void OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg);
 };

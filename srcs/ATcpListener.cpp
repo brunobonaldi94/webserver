@@ -4,9 +4,8 @@
 #include <sstream>
 #include <stdio.h>
 
-
-ATcpListener::ATcpListener(std::vector<AContext *> serverContexts) :
-	m_serverContexts(serverContexts)
+ATcpListener::ATcpListener(RequestHandler requestHandler, std::vector<AContext *> serverContexts) :
+	requestHandler(requestHandler), m_serverContexts(serverContexts) 
 {
 }
 
@@ -158,6 +157,26 @@ void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);
 }
 
+void ATcpListener::SendToClient(int clientSocket, const char* msg, int length) const
+{
+	if (send(clientSocket, msg, length, 0) == -1)
+		Logger::Log(ERROR, "send");
+}
+
+void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
+{
+ 	  if (nbytes == 0)
+			Logger::Debug(
+				"ATcpListener::OnClientDisconnected",
+				INFO,
+				"socket " + StringUtils::ConvertNumberToString(clientSocket) + " hung up");
+		else
+			Logger::Log(ERROR, "recv");
+		close(this->pfds[socketIndex].fd);
+		this->RemoveFromPfds(socketIndex);
+		this->RemoveFromSocketFdToServerContext(clientSocket);
+}
+
 bool ATcpListener::Run()
 {
 	bool running = true;
@@ -182,23 +201,4 @@ bool ATcpListener::Run()
 		}	
 	}
 	return true;
-}
-void ATcpListener::SendToClient(int clientSocket, const char* msg, int length) const
-{
-	if (send(clientSocket, msg, length, 0) == -1)
-		Logger::Log(ERROR, "send");
-}
-
-void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
-{
- 	  if (nbytes == 0)
-			Logger::Debug(
-				"ATcpListener::OnClientDisconnected",
-				INFO,
-				"socket " + StringUtils::ConvertNumberToString(clientSocket) + " hung up");
-		else
-			Logger::Log(ERROR, "recv");
-		close(this->pfds[socketIndex].fd);
-		this->RemoveFromPfds(socketIndex);
-		this->RemoveFromSocketFdToServerContext(clientSocket);
 }

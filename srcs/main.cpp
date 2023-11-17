@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
 			if (!configParser.ParseConfigFile())
 				return ERROR_CODE;
 			std::vector<AContext *> serverContexts = configParser.GetServerContexts();
-			WebServer webServ(serverContexts);
+			RequestHandler requestHandler;
+			WebServer webServ(requestHandler, serverContexts);
 			if (!webServ.Init())
 				return ERROR_CODE;
 			if (!webServ.Run())

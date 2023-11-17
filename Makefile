@@ -28,12 +28,15 @@ BASE_SRCS :=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/errors/NotAllowedException.cpp \
 							$(SRCS_DIR)/errors/NotFoundException.cpp \
 							$(SRCS_DIR)/errors/SyntaxErrorException.cpp \
+							$(SRCS_DIR)/requests/BaseHTTPRequestHandler.cpp \
+							$(SRCS_DIR)/requests/RequestHandler.cpp \
+							$(SRCS_DIR)/requests/HTTPStatus.cpp \
 
 SRCS = $(BASE_SRCS) $(SRCS_DIR)/main.cpp
 
 SRCS_TEST = $(BASE_SRCS) $(SRCS_DIR)/tests/main.cpp $(SRCS_DIR)/tests/ConfigParserTest.cpp 
 
-INCLUDES		:= -I./includes/utils  -I./includes/log -I./includes/errors -I./includes/config/factory -I./includes/config -I./includes  -I./includes/tests
+INCLUDES		:= -I./includes/utils  -I./includes/log -I./includes/errors -I./includes/config/factory -I./includes/config -I./includes/requests -I./includes  -I./includes/tests
 
 OBJS			:=	$(SRCS:.cpp=.o)
 

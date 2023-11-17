@@ -1,21 +1,28 @@
 #include "RequestHandler.hpp"
 
-void BaseHTTPRequestHandler::send_response(int statusCode, std::string message) {
+RequestHandler::RequestHandler(){
 
 }
 
-void BaseHTTPRequestHandler::send_header(std::string key, std::string value) {
-	this->headers_buffer <<  key << ": " << value << std::endl;
-	std::cout << this->headers_buffer.str() << std::endl;
+RequestHandler::RequestHandler(const RequestHandler& other) {
+    (void) other;
 }
 
-void BaseHTTPRequestHandler::send_error() {
-
+RequestHandler& RequestHandler::operator=(const RequestHandler& other) {
+    if (this != &other) {
+        
+    }
+    return *this;
 }
 
 void RequestHandler::doGET() {
-	this->send_header("Cache-Control", "no-cache, private");
-	this->send_header("Content-type", "text/html");
+    std::string content = this->getContent("wwwroot/index.html");
+    this->sendResponse(HTTPStatus::OK.code, HTTPStatus::OK.description);
+	this->sendHeader("Cache-Control", "no-cache, private");
+	this->sendHeader("Content-Type", "text/html");
+	this->sendHeader("Content-Length", content.size());
+	this->endHeaders();
+	this->writeContent(content);
 }
 
 void RequestHandler::doPOST() {

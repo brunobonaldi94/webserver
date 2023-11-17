@@ -16,6 +16,7 @@
 #include <sstream>
 #include <vector>
 #include "Logger.hpp"
+#include "requests/RequestHandler.hpp"
 #include "StringUtils.hpp"
 #include "ServerContext.hpp"
 
@@ -24,7 +25,7 @@ class ATcpListener
 
 public:
 
-	ATcpListener(std::vector<AContext *> serverContexts);
+	ATcpListener(RequestHandler requestHandler, std::vector<AContext *> serverContexts);
 
 	// Initialize the listener
 	bool Init();
@@ -45,10 +46,12 @@ protected:
 	virtual void OnClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
 
 	// Handler for when a message is received from the client
-	virtual void OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) const = 0;
+	virtual void OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) = 0;
 
 	// Send a message to a client
 	void SendToClient(int clientSocket, const char* msg, int length) const;
+
+	RequestHandler requestHandler;
 
 private:
 
@@ -63,8 +66,9 @@ private:
 	void AddToSocketFdToServerContext(int newfd, ServerContext * serverContext);
 	void RemoveFromSocketFdToServerContext(int i);
 
-	std::vector<AContext *>  m_serverContexts;
+
 	//int														m_socket;		// Internal FD for the listening socket
+	std::vector<AContext *> 			m_serverContexts;
 	char 													m_buffer[4096];	// Buffer for incoming data
 	std::vector<struct pollfd>		pfds;			// Pointer to the pollfd array
 	static const int 							MAXFDS = 100;	// Maximum number of file descriptors
