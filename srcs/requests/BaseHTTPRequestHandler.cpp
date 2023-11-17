@@ -13,6 +13,10 @@ void BaseHTTPRequestHandler::writeContent(const std::string content) {
 	this->headersBuffer << content;
 }
 
+std::string BaseHTTPRequestHandler::GetPath() const {
+	return this->path;
+}
+
 void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status) {
     this->sendResponse(status.code, status.description);
 	this->sendHeader("Cache-Control", "no-cache, private");
@@ -70,10 +74,10 @@ bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 		
 	}
 
-	if (this->path != "/") {
-		this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
-		return false;
-	}
+	// if (this->path != "/") {
+	// 	this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+	// 	return false;
+	// }
 	if (requestLines.size() >= 3 && this->requestMethod == "GET")
 		return true;
 	return false;
@@ -84,15 +88,16 @@ const std::string BaseHTTPRequestHandler::headersBufferToString() const {
 	return headersBufferStr;
 }
 
-std::string BaseHTTPRequestHandler::getContent(const std::string path) {
-    std::string content  = "";
+std::string BaseHTTPRequestHandler::getContent(const std::string path, bool& foundContent) {
+	std::string content  = "";
 	char const *file = path.c_str();
 	std::ifstream f(file);
-
+	foundContent = false;
 	if (f.good())
 	{
 		std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-		return str;
+		foundContent = true;
+		content = str;
 	}
   f.close();
   return content;

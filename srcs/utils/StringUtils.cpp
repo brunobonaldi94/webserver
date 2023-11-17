@@ -42,7 +42,6 @@ void StringUtils::AdvaceOnDelimiters(std::string::iterator &it, std::string &fil
   }
 }
 
-
 std::string StringUtils::ExtractWord(std::string::iterator &it, std::string &fileContent, std::vector<std::string> &allowedChars)
 {
   std::string word = "";

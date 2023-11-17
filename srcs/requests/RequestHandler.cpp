@@ -16,7 +16,13 @@ RequestHandler& RequestHandler::operator=(const RequestHandler& other) {
 }
 
 void RequestHandler::doGET() {
-    std::string content = this->getContent("wwwroot/index.html");
+    std::string path = this->GetPath();
+    if (path == "/")
+        path = "/index.html";
+    bool foundContent = false;
+    std::string content = this->getContent("wwwroot/" + path, foundContent);
+    if (foundContent == false)
+        return this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
     this->sendResponse(HTTPStatus::OK.code, HTTPStatus::OK.description);
 	this->sendHeader("Cache-Control", "no-cache, private");
 	this->sendHeader("Content-Type", "text/html");
