@@ -13,6 +13,7 @@ private:
 public:
   static void FillVectorFromArray(std::vector<T> &vector, T values[], int size);
   static T* SafeFindVector(std::vector<T> &vector, T key);
+  static bool hasElement(std::vector<T> &container, T &element);
 };
 
 #include "../srcs/utils/VectorUtils.tpp"

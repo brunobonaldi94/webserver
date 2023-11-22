@@ -1,28 +1,25 @@
 {
+  "version": "0.2.0",
   "configurations": [
-  {
-    "name": "(gdb) Launch",
-    "type": "cppdbg",
-    "request": "launch",
-    "program": "${workspaceFolder}/webserver",
-    "args": ["webserver.conf"],
-    "stopAtEntry": false,
-    "cwd": "${workspaceFolder}",
-    "environment": [],
-    "externalConsole": false,
-    "MIMode": "gdb",
-    "setupCommands": [
+    {
+      "name": "C++ Debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/webserver", // Path to your compiled C++ program
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb",
+      "setupCommands": [
         {
-            "description": "Enable pretty-printing for gdb",
-            "text": "-enable-pretty-printing",
-            "ignoreFailures": true
-        },
-        {
-            "description": "Set Disassembly Flavor to Intel",
-            "text": "-gdb-set disassembly-flavor intel",
-            "ignoreFailures": true
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
         }
-    ]
-  }
+      ],
+      "preLaunchTask": "build" // This references a task in tasks.json to build your program
+    }
   ]
 }

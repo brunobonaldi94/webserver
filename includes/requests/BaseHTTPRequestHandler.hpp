@@ -9,11 +9,13 @@
 #include <iterator> 
 #include <stdlib.h>
 #include <stdexcept>
+#include "VectorUtils.hpp"
 #include "StringUtils.hpp"
 #include "HTTPStatus.hpp"
 
 class BaseHTTPRequestHandler {
     public:
+		BaseHTTPRequestHandler();
 		const std::string headersBufferToString() const;
 		bool parseRequest(const char* request) ;
 		void clearHeadersBuffers();
@@ -27,7 +29,7 @@ class BaseHTTPRequestHandler {
 		void writeContent(const std::string content);
 		void setRequestLines(const std::vector<std::string> requestLines);
 		std::string getContent(const std::string path);
-
+		std::vector<std::string> getMethodsAllowed() const;
 
     private:
 		std::ostringstream headersBuffer;

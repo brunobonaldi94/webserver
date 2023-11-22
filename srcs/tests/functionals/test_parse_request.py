@@ -25,13 +25,15 @@ class TestParseRequest(unittest.TestCase):
         self.assertIn('OK', self._send("GET / HTTP/1.1 \r\n"))
     
     def test_prototol_version(self):
-        #send a protocol version invalid
         self.assertIn('HTTP Version Not Supported', self._send("GET / HTTP/1.0 \r\n"))
         self.assertIn('HTTP Version Not Supported', self._send("GET / HTTP/0.9 \r\n"))
         self.assertIn('HTTP Version Not Supported', self._send("GET / HTTP/2.0 \r\n"))
         self.assertIn('HTTP Version Not Supported', self._send("GET / HTTP/3.0 \r\n"))
 
         self.assertIn('OK', self._send("GET / HTTP/1.1 \r\n"))
+    
+    def test_send_only_method(self):
+        self.assertIn('Bad Request', self._send("GET \r\n"))
     
     def tearDown(self) -> None:
         self.connection.close()

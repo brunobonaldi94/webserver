@@ -7,3 +7,4 @@
 *tailwind.config.js
 *.log
 srcs/tests/functionals/__pycache__/
+webserver/.vscode/*
