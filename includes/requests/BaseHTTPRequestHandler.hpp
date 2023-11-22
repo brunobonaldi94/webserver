@@ -17,7 +17,7 @@ class BaseHTTPRequestHandler {
     public:
 		BaseHTTPRequestHandler();
 		const std::string headersBufferToString() const;
-		bool parseRequest(const char* request) ;
+		bool parseRequest(const char* request);
 		void clearHeadersBuffers();
 	
 	protected:
@@ -30,6 +30,8 @@ class BaseHTTPRequestHandler {
 		void setRequestLines(const std::vector<std::string> requestLines);
 		std::string getContent(const std::string path);
 		std::vector<std::string> getMethodsAllowed() const;
+		std::string getContent(const std::string path, bool& foundContent);
+	  	std::string GetPath() const;
 
     private:
 		std::ostringstream headersBuffer;

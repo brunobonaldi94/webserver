@@ -17,48 +17,62 @@
 #include <vector>
 #include "Logger.hpp"
 #include "requests/RequestHandler.hpp"
+#include "StringUtils.hpp"
+#include "ServerContext.hpp"
 
 class ATcpListener
 {
 
 public:
 
-	ATcpListener(std::string ipAddress, std::string port, RequestHandler r);
+	ATcpListener(RequestHandler requestHandler, std::vector<AContext *> serverContexts);
 
 	// Initialize the listener
-	int init();
+	bool Init();
 
 	// Run the listener
-	int run();
+	bool Run();
 
 protected:
 
 	// Handler for client connections
-	virtual void handleNewConnection(int clientSocket);
+	virtual void HandleNewConnection(int clientSocket);
+
+	// Handler for client connections
+	virtual void HandleOnGoingConnection(int clientSocket, int socketIndex);
 
 	// Handler for client disconnections
 
-	virtual void onClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
+	virtual void OnClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
 
 	// Handler for when a message is received from the client
-	virtual void onMessageReceived(int clientSocket, const char* msg) = 0;
+	virtual void OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) = 0;
 
 	// Send a message to a client
-	void sendToClient(int clientSocket, const char* msg, int length) const;
-	
+	void SendToClient(int clientSocket, const char* msg, int length) const;
+
 	RequestHandler requestHandler;
 
 private:
 
-	int getListenerSocket(void);
-	void addToPfds(int newfd);
-	void removeFromPfds(int i);
+	int GetListenerSocket(AContext * serverContext);
+	struct addrinfo* GetAddressInfo(std::string ipAddress, std::string port);
+	int BindSocket(struct addrinfo*  addrinfo);
+	bool IsListeningSocket(int fd);
+	void AddToPfds(int newfd);
+	void RemoveFromPfds(int i);
+	void AddToListenFds(int newfd, ServerContext * serverContext);
+	void RemoveFromListenFds(int i);
+	void AddToSocketFdToServerContext(int newfd, ServerContext * serverContext);
+	void RemoveFromSocketFdToServerContext(int i);
 
-	std::string										m_ipAddress;	// IP Address server will run on
-	std::string										m_port;			// Port # for the web service
+
 	//int														m_socket;		// Internal FD for the listening socket
+	std::vector<AContext *> 			m_serverContexts;
+	char 													m_buffer[4096];	// Buffer for incoming data
 	std::vector<struct pollfd>		pfds;			// Pointer to the pollfd array
 	static const int 							MAXFDS = 100;	// Maximum number of file descriptors
-	int														listenfd;											// File descriptor for the listening socket
+	std::map<int, ServerContext*> listenFds;
+	std::map<int, ServerContext*> m_socketFdToServerContext;
 	
 };

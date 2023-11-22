@@ -38,3 +38,25 @@ TEST_CASE("ParseConfigFile_NoSemiCollon_ReturnsFalse")
     //assert
     FAST_CHECK_UNARY_FALSE(result);
 }
+
+TEST_CASE("ParseConfigFile_ServerMissingCurlyBraces_ReturnsFalse")
+{
+    //arrange
+    std::string fileName = "server_missing_curly_braces.conf";
+    ConfigParser configParser(fileName);
+
+    //act
+    bool result = configParser.ParseConfigFile();
+  
+    //assert
+    FAST_CHECK_UNARY_FALSE(result);
+}
+
+TEST_CASE("ParseConfigFile_ConfFileWithWrongExtension_RaiseWrongFileException")
+{
+    //arrange
+    std::string fileName = "webserver.conf1";
+    
+    //assert
+    CHECK_THROWS_MESSAGE(ConfigParser configParser(fileName), "Wrong file extension");
+}

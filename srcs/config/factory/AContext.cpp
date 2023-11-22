@@ -1,6 +1,6 @@
 #include "AContext.hpp"
 
-AContext::AContext(AContext *parentContext) : _parentContext(parentContext)
+AContext::AContext(AContext *parentContext, std::string contextName) : _parentContext(parentContext), _contextName(contextName)
 {
     
 }
@@ -27,7 +27,7 @@ AContext& AContext::operator=(AContext const & other)
 
 void AContext::AddDirective(std::string name, ADirective *directive)
 {
-    this->_directives[name].push_back(directive);
+    this->_directives[name] = directive;
 }
 
 void AContext::AddSubContext(std::string name, AContext *subContext)
@@ -40,14 +40,23 @@ void AContext::SetParentContext(AContext *parentContext)
     this->_parentContext = parentContext;
 }
 
-std::map<std::string,std::vector<ADirective *> >  AContext::GetDirectives() const
+MapDirectives AContext::GetDirectives() const
 {
     return this->_directives;
 }
-
-std::map<std::string,std::vector<AContext *> > AContext::GetSubContexts() const
+MapContexts AContext::GetSubContexts() const
 {
     return this->_subContexts;
+}
+
+void AContext::SetContextName(std::string contextName)
+{
+    this->_contextName = contextName;
+}
+
+std::string AContext::GetContextName() const
+{
+    return (this->_contextName);
 }
 
 AContext *AContext::GetParentContext() const
@@ -93,6 +102,63 @@ void AContext::HandleDirectiveCreation(std::string::iterator &it, std::string &c
         directive->SetParentContext(this);
         this->AddDirective(directiveCreator->first, directive);
         directive->ParseDirective(line);
-        directive->PrintDirective();
     }
+}
+
+void AContext::PrintContext()
+{
+    std::cout << "Context: " << this->_contextName << std::endl;
+    if (this->GetParentContext())
+        std::cout << "Parent context: " << this->GetParentContext()->_contextName << std::endl;
+    else
+        std::cout << "Parent context: NULL" << std::endl;
+    StringUtils::PrintSeparator();
+    std::cout << "Directives: " << std::endl;
+    for (MapDirectives::iterator it = this->_directives.begin(); it != this->_directives.end(); ++it)
+    {
+        Logger::Debug("Directive name = ", INFO, it->first);
+        if (it->second->GetParentContext())
+            Logger::Debug("Parent context = ", INFO, it->second->GetParentContext()->_contextName);
+        else
+            Logger::Debug("Parent context = ", INFO, "NULL");
+        it->second->PrintDirective();
+
+    }
+    std::cout << "SubContexts: " << std::endl;
+    for (MapContexts::iterator it = this->_subContexts.begin(); it != this->_subContexts.end(); ++it)
+    {
+        Logger::Debug("SubContext name = ", INFO, it->first);
+        for (std::vector<AContext *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+            (*it2)->PrintContext();
+    }
+    StringUtils::PrintSeparator();
+}
+
+void AContext::FillDefaultValuesDirectives()
+{
+    MapDirectives directives = this->GetDirectives();
+    for (MapDirCreator::iterator it = this->_allowedDirectives.begin(); it != this->_allowedDirectives.end(); ++it)
+    {
+        std::string directiveName = it->first;
+        if (MapUtils<std::string, ADirective*>::SafeFindMap(directives, directiveName) == NULL && it->second != NULL)
+        {
+            ADirective *directive = it->second->CreateDirective();
+            directive->SetParentContext(this);
+            this->AddDirective(directiveName, directive);
+            directive->FillDefaultValues();
+        }
+    }
+}
+
+ADirective *AContext::GetDirective(std::string name)
+{
+    PairDirCreator *directivePairCreator = 
+        MapUtils<std::string, ADirectiveCreator *>::SafeFindMap(this->_allowedDirectives, name);
+    if (directivePairCreator == NULL || directivePairCreator->second == NULL)
+        throw NotAllowedException(name + " directive not allowed in " + this->_contextName + " context");
+    PairDirectives *directivePair = 
+        MapUtils<std::string, ADirective *>::SafeFindMap(this->_directives, name);
+    if (directivePair == NULL)
+        return (NULL);
+    return (directivePair->second);
 }

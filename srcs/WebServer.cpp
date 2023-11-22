@@ -8,21 +8,29 @@
 #include <iterator>
 #include "WebServer.hpp"
 
-// Handler for when a message is received from the client
-void WebServer::onMessageReceived(int clientSocket, const char* msg) 
+WebServer::WebServer(RequestHandler requestHandler, std::vector<AContext *> serverContexts) : ATcpListener(requestHandler, serverContexts)
 {
+}
+
+// Handler for when a message is received from the client
+void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg)
+{
+	ListenDirective *listenDirective = serverContext->GetListenDirective();
+	Logger::Log(INFO, "Received from client: " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
 	if (this->requestHandler.parseRequest(msg) == true)
 		this->requestHandler.doGET();
-	this->sendToClient(
+	
+	this->SendToClient(
 		clientSocket, 
 		this->requestHandler.headersBufferToString().c_str(), 
 		this->requestHandler.headersBufferToString().size());
+
 	this->requestHandler.clearHeadersBuffers();
 }
 
 // Handler for client disconnections
-void WebServer::onClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
+void WebServer::OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
 {
-	ATcpListener::onClientDisconnected(clientSocket, socketIndex, nbytes);
+	ATcpListener::OnClientDisconnected(clientSocket, socketIndex, nbytes);
 	std::cout << "Client disconnected: " << clientSocket << std::endl;
 }

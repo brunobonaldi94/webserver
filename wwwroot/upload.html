@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Web Server!</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -255,17 +254,37 @@
           >Upload</a
         >
       </nav>
-      <div class="h-full flex items-center justify-center">
-        <div
-          class="hover:skew-x-[24deg] hover:bg-gradient-to-r rounded-lg from-teal-700 hover:to-teal-900 transition-all shadow-md border-b"
+      <main
+        class="max-w-[1440px] m-auto p-8 h-full flex items-center justify-center"
+      >
+        <form
+          action="#"
+          method="post"
+          enctype="multipart/form-data"
+          class="border border-teal-300 shadow-md p-8 w-full rounded-md min-w-[25vw] flex flex-col space-y-2"
         >
-          <h1
-            class="w-full text-gray-800 border-teal-800/60 font-bold text-center text-5xl p-2 transition-all hover:skew-x-[-24deg] hover:text-white"
+          <h3
+            class="border-b border-gray-400/50 text-3xl text-gray-700 mb-2 pb-1"
           >
-            Welcome to the Webserver - bbonaldi, harndt, sjhony-x
-          </h1>
-        </div>
-      </div>
+            Upload Form
+          </h3>
+          <label class="block">
+            <span class="sr-only">Choose profile photo</span>
+            <input
+              id="file"
+              name="file"
+              type="file"
+              class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-800 file:text-white hover:file:bg-teal-900 cursor-pointer"
+            />
+          </label>
+          <button
+            type="submit"
+            class="bg-teal-900 text-white p-2 rounded-md ml-auto"
+          >
+            Submit
+          </button>
+        </form>
+      </main>
     </div>
   </body>
 </html>

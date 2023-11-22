@@ -1,6 +1,6 @@
 #include "LocationContext.hpp"
 
-LocationContext::LocationContext(): AContext()
+LocationContext::LocationContext(): AContext(NULL, "location")
 {
     std::string contexts[] = {"server", "location"};
     AContextCreator* contextsCreators[] = {NULL, NULL};
@@ -56,11 +56,31 @@ void LocationContext::ParseContext(std::string &content)
             break;
         }
         word = StringUtils::ExtractWord(it, content);
-        Logger::Debug("LocationContext::ParseContext word = ", INFO, word);
         AContext::HandleContextCreation(content, word, "location");
         AContext::HandleDirectiveCreation(it, content, word, "location");
     }
     if (!locationHasCloseCurlyBraces)
         throw SyntaxErrorException("Location context must have a close curly braces `}`");
     content.erase(content.begin(), it);
+}
+
+void LocationContext::PrintContext()
+{
+    std::string msg = "Uri: " + this->GetUri(); 
+    Logger::Debug("LocationContext::PrintContext", SUCCESS, msg);
+    MapDirectives directives = this->GetDirectives();
+    for (MapDirectives::iterator it = directives.begin(); it != directives.end(); ++it)
+    {
+        Logger::Debug("Directive name = ", INFO, it->first);
+        if (it->second->GetParentContext())
+            Logger::Debug("Parent context = ", INFO, it->second->GetParentContext()->GetContextName());
+        else
+            Logger::Debug("Parent context = ", INFO, "NULL");
+       it->second->PrintDirective();
+    }
+}
+
+void LocationContext::FillDefaultValues()
+{
+    AContext::FillDefaultValuesDirectives();
 }

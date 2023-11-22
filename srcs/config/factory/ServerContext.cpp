@@ -1,6 +1,6 @@
 #include "ServerContext.hpp"
 
-ServerContext::ServerContext(): AContext(NULL)
+ServerContext::ServerContext(): AContext(NULL, "server")
 {
     this->SetParentContext(NULL);
     
@@ -51,7 +51,6 @@ void ServerContext::ParseContext(std::string &content)
         }
         StringUtils::AdvaceOnWhiteSpace(it, content);
         word = StringUtils::ExtractWord(it, content);
-        Logger::Debug("ServerContext::ParseContext word = ", INFO, word);
         AContext::HandleContextCreation(content, word, "server");
         AContext::HandleDirectiveCreation(it, content, word, "server");
         word.clear();
@@ -59,4 +58,27 @@ void ServerContext::ParseContext(std::string &content)
     if (!locationHasCloseCurlyBraces)
         throw SyntaxErrorException("Server context must have a close curly braces `}`");
     content.erase(content.begin(), it);
+}
+
+void ServerContext::PrintContext()
+{
+    AContext::PrintContext();
+}
+
+void ServerContext::FillDefaultValues()
+{
+    AContext::FillDefaultValuesDirectives();
+    MapContexts subContexts = this->GetSubContexts();
+    for (MapContexts::iterator it = subContexts.begin(); it != subContexts.end(); ++it)
+    {
+        std::vector<AContext *> contexts = it->second;
+        for (std::vector<AContext *>::iterator it2 = contexts.begin(); it2 != contexts.end(); ++it2)
+            (*it2)->FillDefaultValues();
+    }
+}
+
+ListenDirective *ServerContext::GetListenDirective()
+{
+    ADirective *directive = this->GetDirective("listen");
+    return (dynamic_cast<ListenDirective *>(directive));
 }

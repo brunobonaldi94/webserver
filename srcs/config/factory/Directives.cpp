@@ -102,6 +102,12 @@ void ListenDirective::PrintDirective() const
     Logger::Debug("ListenDirective::PrintDirective", SUCCESS, msg);
 }
 
+void ListenDirective::FillDefaultValues()
+{
+    this->_port = "80";
+    this->_host = "0.0.0.0";
+}
+
 ServerNameDirective::ServerNameDirective()
 {
 }
@@ -151,6 +157,13 @@ void ServerNameDirective::PrintDirective() const
         names += this->_names[i] + " ";
     names += this->_names[this->_names.size() - 1];
     Logger::Debug("ServerNameDirective::PrintDirective", SUCCESS, names);
+}
+
+void ServerNameDirective::FillDefaultValues()
+{
+    if (this->SetDefaultFromParent())
+        return ;
+    this->_names.push_back("localhost");
 }
 
 ErrorPageDirective::ErrorPageDirective()
@@ -238,6 +251,31 @@ void ErrorPageDirective::PrintDirective() const
     Logger::Debug("ErrorPageDirective::PrintDirective", SUCCESS, msg);
 }
 
+void ErrorPageDirective::FillDefaultValues()
+{
+    if (this->SetDefaultFromParent())
+        return ;
+    this->_code = "404";
+    this->_path = "/404.html";
+}
+
+bool ErrorPageDirective::SetDefaultFromParent()
+{
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
+        return false;
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentErrorPage = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "error_page");
+    if (parentErrorPage == NULL)
+        return false;
+    ErrorPageDirective *errorPageDirective = dynamic_cast<ErrorPageDirective *>(parentErrorPage->second);
+    if (!errorPageDirective)
+        return false;
+    this->_code = errorPageDirective->GetCode();
+    this->_path = errorPageDirective->GetPath();
+    return true;
+}
+
 ClientMaxBodySizeDirective::ClientMaxBodySizeDirective()
 {
 }
@@ -302,6 +340,30 @@ void ClientMaxBodySizeDirective::PrintDirective() const
     Logger::Debug("ClientMaxBodySizeDirective::PrintDirective", SUCCESS, msg);
 }
 
+void ClientMaxBodySizeDirective::FillDefaultValues()
+{
+    if (this->SetDefaultFromParent())
+        return ;
+    this->_size = "1M";
+}
+
+bool ClientMaxBodySizeDirective::SetDefaultFromParent()
+{
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
+        return false;
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentClientMaxBodySize = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "client_max_body_size");
+    if (parentClientMaxBodySize == NULL)
+        return false;
+    ClientMaxBodySizeDirective *clientMaxBodySizeDirective = dynamic_cast<ClientMaxBodySizeDirective *>(parentClientMaxBodySize->second);
+    if (!clientMaxBodySizeDirective)
+        return false;
+    if (clientMaxBodySizeDirective)
+        this->_size = clientMaxBodySizeDirective->GetSize();
+    return true;
+}
+
 IndexDirective::IndexDirective()
 {
 }
@@ -351,6 +413,30 @@ void IndexDirective::PrintDirective() const
     Logger::Debug("IndexDirective::PrintDirective", SUCCESS, index);
 }
 
+void IndexDirective::FillDefaultValues()
+{
+    if (this->SetDefaultFromParent())
+        return ;
+    this->_index.push_back("index.html");
+}
+
+bool IndexDirective::SetDefaultFromParent()
+{
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
+        return false;
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentIndex = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "index");
+    if (parentIndex == NULL)
+        return false;
+    IndexDirective *indexDirective = dynamic_cast<IndexDirective *>(parentIndex->second);
+    if (!indexDirective)
+        return false;
+    if (indexDirective)
+        this->_index = indexDirective->GetIndex();
+    return true;
+}
+
 RootDirective::RootDirective()
 {
 }
@@ -394,6 +480,29 @@ void RootDirective::PrintDirective() const
 {
     std::string msg = "path: " + this->_path;
     Logger::Debug("RootDirective::PrintDirective", SUCCESS, msg);
+}
+
+void RootDirective::FillDefaultValues()
+{
+    if (this->SetDefaultFromParent())
+        return ;
+    this->_path = "html";
+}
+
+bool RootDirective::SetDefaultFromParent()
+{
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
+        return false;
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentRoot = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "root");
+    if (parentRoot == NULL)
+        return false;
+    RootDirective *rootDirective = dynamic_cast<RootDirective *>(parentRoot->second);
+    if (!rootDirective)
+        return false;
+    this->_path = rootDirective->GetPath();
+    return true;
 }
 
 AutoIndexDirective::AutoIndexDirective()
@@ -444,6 +553,29 @@ void AutoIndexDirective::PrintDirective() const
 {
     std::string msg = "autoindex: " + std::string(this->_autoIndex ? "on" : "off");
     Logger::Debug("AutoIndexDirective::PrintDirective", SUCCESS, msg);
+}
+
+void AutoIndexDirective::FillDefaultValues()
+{
+    if (this->SetDefaultFromParent())
+        return ;
+    this->_autoIndex = false;
+}
+
+bool AutoIndexDirective::SetDefaultFromParent()
+{
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
+        return false;
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentAutoIndex = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "autoindex");
+    if (parentAutoIndex == NULL)
+        return false;
+    AutoIndexDirective *autoIndexDirective = dynamic_cast<AutoIndexDirective *>(parentAutoIndex->second);
+    if (!autoIndexDirective)
+        return false;
+    this->_autoIndex = autoIndexDirective->GetAutoIndex();
+    return true;
 }
 
 LimitExceptDirective::LimitExceptDirective()
@@ -520,6 +652,11 @@ void LimitExceptDirective::PrintDirective() const
     Logger::Debug("LimitExceptDirective::PrintDirective", SUCCESS, methods);
 }
 
+void LimitExceptDirective::FillDefaultValues()
+{
+    this->_methods.push_back("GET");
+}
+
 CgiDirective::CgiDirective()
 {
 }
@@ -589,4 +726,29 @@ void CgiDirective::PrintDirective() const
 {
     std::string msg = "extension: " + this->_extension + " binary path: " + this->_binaryPath;
     Logger::Debug("CgiDirective::PrintDirective", SUCCESS, msg);
+}
+
+void CgiDirective::FillDefaultValues()
+{
+    if (this->SetDefaultFromParent())
+        return ;
+    this->_extension = ".php";
+    this->_binaryPath = "/usr/bin/php-cgi";
+}
+
+bool CgiDirective::SetDefaultFromParent()
+{
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
+        return false;
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentCgiDirective = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "cgi");
+    if (directives.size() == 0)
+        return false;
+    CgiDirective *cgiDirective = dynamic_cast<CgiDirective *>(parentCgiDirective->second);
+    if (!parentCgiDirective)
+        return false;
+    this->_extension = cgiDirective->GetExtension();
+    this->_binaryPath = cgiDirective->GetBinaryPath();
+    return true;
 }

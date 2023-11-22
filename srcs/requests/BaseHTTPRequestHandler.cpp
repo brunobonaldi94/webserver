@@ -16,6 +16,10 @@ void BaseHTTPRequestHandler::writeContent(const std::string content) {
 	this->headersBuffer << content;
 }
 
+std::string BaseHTTPRequestHandler::GetPath() const {
+	return this->path;
+}
+
 void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status) {
     this->sendResponse(status.code, status.description);
 	this->sendHeader("Cache-Control", "no-cache, private");
@@ -102,18 +106,19 @@ const std::string BaseHTTPRequestHandler::headersBufferToString() const {
 	return headersBufferStr;
 }
 
-std::string BaseHTTPRequestHandler::getContent(const std::string path) {
-    std::string content  = "";
+std::string BaseHTTPRequestHandler::getContent(const std::string path, bool& foundContent) {
+	std::string content  = "";
 	char const *file = path.c_str();
 	std::ifstream f(file);
-
+	foundContent = false;
 	if (f.good())
 	{
 		std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-		return str;
+		foundContent = true;
+		content = str;
 	}
-    f.close();
-    return content;
+  f.close();
+  return content;
 }
 
 std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {

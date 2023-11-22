@@ -2,6 +2,7 @@
 *.o
 *webserver
 *webserv
+*webserv_test
 *.a
 *.txt
 *tailwind.config.js

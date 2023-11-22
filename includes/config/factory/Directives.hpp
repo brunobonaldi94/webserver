@@ -27,6 +27,7 @@ public:
     bool ValidateHost(std::string host) const;
     void ParseDirective(std::string &line);
     void PrintDirective() const;
+    void FillDefaultValues();
 };
 
 class ServerNameDirective : public ADirective
@@ -43,6 +44,7 @@ public:
     std::vector<std::string> GetNames() const;
     void ParseDirective(std::string &line);
     void PrintDirective() const;
+    void FillDefaultValues();
 };
 
 class ErrorPageDirective : public ADirective
@@ -65,6 +67,8 @@ public:
     bool ValidateCode(std::string code) const;
     void ParseDirective(std::string &line);
     void PrintDirective() const;
+    void FillDefaultValues();
+    bool SetDefaultFromParent();
 };
 
 class ClientMaxBodySizeDirective : public ADirective
@@ -84,6 +88,8 @@ public:
     bool ValidateSize(std::string size) const;
     void ParseDirective(std::string &line);
     void PrintDirective() const;
+    void FillDefaultValues();
+    bool SetDefaultFromParent();
 };
 
 class LimitExceptDirective : public ADirective
@@ -103,6 +109,7 @@ public:
 
     void ParseDirective(std::string &line);
     void PrintDirective() const;
+    void FillDefaultValues();
 };
 
 class RootDirective : public ADirective
@@ -120,6 +127,8 @@ public:
     std::string GetPath() const;
     void ParseDirective(std::string &line);
     void PrintDirective() const;
+    void FillDefaultValues();
+    bool SetDefaultFromParent();
 };
 
 class AutoIndexDirective : public ADirective
@@ -137,6 +146,8 @@ public:
     bool GetAutoIndex() const;
     void ParseDirective(std::string &line);
     void PrintDirective() const;
+    void FillDefaultValues();
+    bool SetDefaultFromParent();
 };
 
 class IndexDirective : public ADirective
@@ -153,6 +164,8 @@ public:
     std::vector<std::string> GetIndex() const;
     void ParseDirective(std::string &line);
     void PrintDirective() const;
+    void FillDefaultValues();
+    bool SetDefaultFromParent();
 };
 
 class CgiDirective : public ADirective
@@ -175,4 +188,6 @@ public:
 
     void ParseDirective(std::string &line);
     void PrintDirective() const;
+    void FillDefaultValues();
+    bool SetDefaultFromParent();
 };
