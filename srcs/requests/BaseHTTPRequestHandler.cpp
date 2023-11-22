@@ -1,12 +1,14 @@
 #include "BaseHTTPRequestHandler.hpp"
 
 
+BaseHTTPRequestHandler::~BaseHTTPRequestHandler() {}
+
 void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message) {
-	this->headersBuffer << "HTTP/1.1 " << statusCode << " " << message << std::endl;
+	this->headersBuffer << "HTTP/1.1 " << statusCode << " " << message << CRLF;
 }
 
 void BaseHTTPRequestHandler::endHeaders() {
-	this->headersBuffer << std::endl;
+	this->headersBuffer << CRLF;
 }
 
 void BaseHTTPRequestHandler::writeContent(const std::string content) {
@@ -37,19 +39,40 @@ void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requ
 	this->requestVersion = requestLines[2];
 }
 
-bool BaseHTTPRequestHandler::parseRequest(const char* request) {
-	
+std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request) {
 	std::istringstream iss(request);
-	//log request message
 	std::cout << request << std::endl;
-	std::vector<std::string> requestLines((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
-	this->setRequestLines(requestLines);
+	std::vector<std::string> requestLines;
+	std::string line;
+	bool bodyStart = false;
 
-	if (requestLines.size() == 0)
-		return false;
+	while (std::getline(iss, line)) {
+			if (!line.empty() && line[line.size() - 1] == '\r') {
+				  if (line.size() == 1) {
+						bodyStart = true;
+					}
+					line.erase(line.size() - 1);
+			}
+			if (bodyStart == true)
+				this->body += line;
+			else 
+				requestLines.push_back(line);
+	}
+	return requestLines;
+}
+
+BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequest(const char* request) {
+	
+//log request message
+	std::vector<std::string> requestLines = this->SplitRequest(request);
+	std::vector<std::string> firstRequestLine = StringUtils::Split(requestLines[0], " ");
+	this->setRequestLines(firstRequestLine);
+
+	if (firstRequestLine.size() < 3)
+		return NULL;
 	std::vector<std::string> versionNumber;
-	if (requestLines.size() >= 3) {
-		try {
+
+	try {
 			std::string baseVersion = "HTTP/";
 			if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
 				throw std::invalid_argument("");
@@ -64,23 +87,21 @@ bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 		}
 		catch(const std::exception& e) {
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
-			return false;
+			return NULL;
 		}
-		if (std::atoi(versionNumber[0].c_str()) != 1 || 
-			std::atoi(versionNumber[1].c_str()) != 1) {
+
+		if (std::atoi(versionNumber[0].c_str()) != 1 || std::atoi(versionNumber[1].c_str()) != 1) {
 			this->sendError("<h1>HTTP Version Not Supported</h1>", HTTPStatus::HTTP_VERSION_NOT_SUPPORTED);
-			return false;
+			return NULL;
 		}
 		
-	}
 
 	// if (this->path != "/") {
 	// 	this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
 	// 	return false;
 	// }
-	if (requestLines.size() >= 3 && this->requestMethod == "GET")
-		return true;
-	return false;
+	BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
+	return method;
 }
 
 const std::string BaseHTTPRequestHandler::headersBufferToString() const {
@@ -103,3 +124,12 @@ std::string BaseHTTPRequestHandler::getContent(const std::string path, bool& fou
   return content;
 }
 
+BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::getMethod(const std::string& method) {
+	if (method == "GET")
+		return &BaseHTTPRequestHandler::doGET;
+	else if (method == "POST")
+		return &BaseHTTPRequestHandler::doPOST;
+	else if (method == "DELETE")
+		return &BaseHTTPRequestHandler::doDELETE;
+	return NULL;
+}

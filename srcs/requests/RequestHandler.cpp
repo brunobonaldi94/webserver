@@ -32,7 +32,7 @@ void RequestHandler::doGET() {
 }
 
 void RequestHandler::doPOST() {
-
+    this->doGET();
 }
 
 void RequestHandler::doDELETE() {

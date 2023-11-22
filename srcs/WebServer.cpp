@@ -17,8 +17,9 @@ void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket
 {
 	ListenDirective *listenDirective = serverContext->GetListenDirective();
 	Logger::Log(INFO, "Received from client: " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
-	if (this->requestHandler.parseRequest(msg) == true)
-		this->requestHandler.doGET();
+	BaseHTTPRequestHandler::RequestMethodFunction method = this->requestHandler.parseRequest(msg);
+	if (method != NULL)
+		(this->requestHandler.*method)();
 	
 	this->SendToClient(
 		clientSocket, 

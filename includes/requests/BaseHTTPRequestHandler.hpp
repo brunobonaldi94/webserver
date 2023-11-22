@@ -12,11 +12,21 @@
 #include "StringUtils.hpp"
 #include "HTTPStatus.hpp"
 
+
 class BaseHTTPRequestHandler {
     public:
+		virtual ~BaseHTTPRequestHandler();
+
+		typedef void (BaseHTTPRequestHandler::*RequestMethodFunction)(void);
+		
 		const std::string headersBufferToString() const;
-		bool parseRequest(const char* request);
+		RequestMethodFunction getMethod(const std::string& method);
+		RequestMethodFunction parseRequest(const char* request);
 		void clearHeadersBuffers();
+
+		virtual void doGET() = 0;
+		virtual void doPOST() = 0;
+		virtual void doDELETE() = 0;
 	
 	protected:
 		void sendResponse(int statusCode, std::string message);
@@ -29,9 +39,11 @@ class BaseHTTPRequestHandler {
 		std::string getContent(const std::string path, bool& foundContent);
 	  std::string GetPath() const;
 
+		std::vector<std::string> SplitRequest(const char* request);
+
     private:
 		std::ostringstream headersBuffer;
-
+		std::string body;
 		std::string requestMethod;
 		std::string path;
 		std::string requestVersion;
@@ -39,6 +51,6 @@ class BaseHTTPRequestHandler {
 
 template <typename T>
 void BaseHTTPRequestHandler::sendHeader(std::string key, T value) {
-	this->headersBuffer <<  key << ": " << value << std::endl;
+	this->headersBuffer <<  key << ": " << value << CRLF;
 }
 #endif
