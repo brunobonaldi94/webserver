@@ -17,7 +17,7 @@ RequestHandler& RequestHandler::operator=(const RequestHandler& other) {
 
 void RequestHandler::doGET() {
     std::string path = this->GetPath();
-    if (path == "/")
+    if (path[0] == '/')
         path = "/index.html";
     bool foundContent = false;
     std::string content = this->getContent("wwwroot/" + path, foundContent);

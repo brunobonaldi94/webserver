@@ -92,11 +92,9 @@ bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 			return false;
 		}
 	}
-	if (this->path != "/") {
-		this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
-		return false;
-	}
-	if (requestLines.size() >= 3 && this->requestMethod == "GET")
+	std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
+	if (requestLines.size() >= 2 && 
+		VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
 		return true;
 	return false;
 }
