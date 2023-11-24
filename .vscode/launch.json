@@ -1,20 +1,6 @@
 {
   "version": "0.2.0",
   "configurations": [
-<<<<<<< HEAD
-    {
-      "name": "C++ Debug",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/webserver", // Path to your compiled C++ program
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "lldb",
-      "setupCommands": [
-=======
   {
     "name": "(gdb) Launch",
     "type": "cppdbg",
@@ -27,7 +13,6 @@
     "externalConsole": false,
     "MIMode": "gdb",
     "setupCommands": [
->>>>>>> 90f56ccb75be2569cb9f890f986360ce793d0fd3
         {
           "description": "Enable pretty-printing for gdb",
           "text": "-enable-pretty-printing",
