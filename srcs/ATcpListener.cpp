@@ -151,7 +151,7 @@ void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 	ssize_t nbytes = recv(clientSocket, this->m_buffer, sizeof this->m_buffer, 0);
 	if (nbytes > 0)
 	{
-		this->OnMessageReceived(this->m_socketFdToServerContext[clientSocket], clientSocket, this->m_buffer);
+		this->OnMessageReceived(this->m_socketFdToServerContext[clientSocket], clientSocket, socketIndex, nbytes, this->m_buffer);
 		return ;
 	}
 	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);

@@ -51,6 +51,7 @@ bool BaseHTTPRequestHandler::parseRequest(const char* request) {
     if (it2 != requestLines.end()) {
         requestLines.erase(it2);
     }
+
 	if (requestLines.size() == 0)
 		return false;
 	std::vector<std::string> versionNumber;
@@ -79,12 +80,12 @@ bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 			return false;
 		}
 	}
+	this->requestMethod = requestLines[0];
+	this->path = requestLines[1];
 	if (!(2 <= requestLines.size() && requestLines.size() <= 3)) {
 		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 			return false;
 	}
-	this->requestMethod = requestLines[0];
-	this->path = requestLines[1];
 	if (requestLines.size() == 2) {
 		//missing close connection
 		if (this->requestMethod != "GET") {
@@ -92,10 +93,12 @@ bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 			return false;
 		}
 	}
+	//std::cout << "Cheguei aqui! " << std::endl;
 	std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
 	if (requestLines.size() >= 2 && 
-		VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
-		return true;
+		VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod)) {
+			return true;
+		}
 	return false;
 }
 

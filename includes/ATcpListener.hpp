@@ -43,10 +43,10 @@ protected:
 
 	// Handler for client disconnections
 
-	virtual void OnClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
+	virtual void OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes);
 
 	// Handler for when a message is received from the client
-	virtual void OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) = 0;
+	virtual void OnMessageReceived(ServerContext *serverContext, int clientSocket, int socketIndex, size_t nbytes, const char* msg) = 0;
 
 	// Send a message to a client
 	void SendToClient(int clientSocket, const char* msg, int length) const;
