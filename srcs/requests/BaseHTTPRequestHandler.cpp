@@ -47,7 +47,7 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* reques
 	bool bodyStart = false;
 
 	while (std::getline(iss, line)) {
-			if (!line.empty() && line[line.size() - 1] == '\r') {
+			if (!line.empty() && line[line.size() - 1] == CR) {
 				  if (line.size() == 1) {
 						bodyStart = true;
 					}

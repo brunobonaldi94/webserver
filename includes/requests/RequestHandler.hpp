@@ -13,6 +13,8 @@ class RequestHandler : public BaseHTTPRequestHandler {
 		void doPOST();
 		void doDELETE();
 
+		void sendJsonResponse(std::string json);
+
     private:
 		//
 };
