@@ -13,12 +13,18 @@ WebServer::WebServer(RequestHandler requestHandler, std::vector<AContext *> serv
 }
 
 // Handler for when a message is received from the client
-void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg)
+void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket, int socketIndex, size_t nbytes, const char* msg)
 {
+	(void) nbytes;
+	(void) socketIndex;
 	ListenDirective *listenDirective = serverContext->GetListenDirective();
 	Logger::Log(INFO, "Received from client: " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
 	if (this->requestHandler.parseRequest(msg) == true)
 		this->requestHandler.doGET();
+	/* else {
+		OnClientDisconnected(clientSocket, socketIndex, nbytes);
+		return ;
+	} */
 	
 	this->SendToClient(
 		clientSocket, 
