@@ -1,5 +1,6 @@
 {
   "files.associations": {
+    "*.java": "java",
     "array": "cpp",
     "atomic": "cpp",
     "bit": "cpp",
@@ -74,6 +75,7 @@
     "bitset": "cpp",
     "complex": "cpp",
     "cfenv": "cpp",
-    "typeindex": "cpp"
+    "typeindex": "cpp",
+    "ranges": "cpp"
   }
 }

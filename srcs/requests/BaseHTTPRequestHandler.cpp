@@ -65,8 +65,9 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 {
 	// log request message
 	std::vector<std::string> requestLines = this->SplitRequest(request);
-	std::vector<std::string> firstRequestLine = StringUtils::Split(requestLines[0], " ");
-
+	std::vector<std::string> firstRequestLine;
+	if (requestLines.size() > 0)
+		firstRequestLine = StringUtils::Split(requestLines[0], " ");
 	if (firstRequestLine.size() == 0)
 		return NULL;
 	std::vector<std::string> versionNumber;
