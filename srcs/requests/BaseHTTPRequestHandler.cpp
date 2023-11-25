@@ -20,7 +20,7 @@ std::string BaseHTTPRequestHandler::GetPath() const {
 }
 
 void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status) {
-    this->sendResponse(status.code, status.description);
+	this->sendResponse(status.code, status.description);
 	this->sendHeader("Cache-Control", "no-cache, private");
 	this->sendHeader("Content-Type", "text/html");
 	this->sendHeader("Content-Length", content.size());
