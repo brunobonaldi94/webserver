@@ -117,7 +117,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		}
 	}
 	std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
-	if (requestLines.size() >= 2 &&
+	if (firstRequestLine.size() >= 2 &&
 		VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
 	{
 		BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
