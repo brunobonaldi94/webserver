@@ -25,3 +25,12 @@ void VectorUtils<T>::SafeRemoveVector(std::vector<T> &vector, T key)
         return ;
     vector.erase(it);
 }
+
+template <typename T>
+bool VectorUtils<T>::hasElement(std::vector<T> &container, T &element)
+{
+    typename std::vector<T>::iterator it = std::find(container.begin(), container.end(), element);
+    if (it == container.end())
+        return false;
+    return true;
+}

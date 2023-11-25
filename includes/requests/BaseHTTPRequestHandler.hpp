@@ -36,6 +36,7 @@ class BaseHTTPRequestHandler {
 		void sendError(const std::string& content, const StatusCode& status);
 		void writeContent(const std::string content);
 		void setRequestLines(const std::vector<std::string> requestLines);
+		std::vector<std::string> getMethodsAllowed() const;
 		std::string getContent(const std::string path, bool& foundContent);
 	  std::string GetPath() const;
 

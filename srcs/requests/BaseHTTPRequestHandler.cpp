@@ -61,18 +61,20 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* reques
 	return requestLines;
 }
 
-BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequest(const char* request) {
-	
-//log request message
+BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequest(const char *request)
+{
+	// log request message
 	std::vector<std::string> requestLines = this->SplitRequest(request);
 	std::vector<std::string> firstRequestLine = StringUtils::Split(requestLines[0], " ");
-	this->setRequestLines(firstRequestLine);
 
-	if (firstRequestLine.size() < 3)
+	if (firstRequestLine.size() == 0)
 		return NULL;
 	std::vector<std::string> versionNumber;
-
-	try {
+	if (firstRequestLine.size() >= 3)
+	{
+		this->setRequestLines(firstRequestLine);
+		try
+		{
 			std::string baseVersion = "HTTP/";
 			if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
 				throw std::invalid_argument("");
@@ -81,27 +83,48 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 				throw std::runtime_error("");
 			std::string baseVersionNumber = baseVersionNumberVector[1];
 			versionNumber = StringUtils::Split(baseVersionNumber, ".");
-			if (versionNumber.size() != 2  || 
+			if (versionNumber.size() != 2 ||
 				(versionNumber.size() == 2 && versionNumber[0] == ""))
 				throw std::runtime_error("");
 		}
-		catch(const std::exception& e) {
+		catch (const std::exception &e)
+		{
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 			return NULL;
 		}
-
-		if (std::atoi(versionNumber[0].c_str()) != 1 || std::atoi(versionNumber[1].c_str()) != 1) {
+		if (std::atoi(versionNumber[0].c_str()) != 1 ||
+			std::atoi(versionNumber[1].c_str()) != 1)
+		{
 			this->sendError("<h1>HTTP Version Not Supported</h1>", HTTPStatus::HTTP_VERSION_NOT_SUPPORTED);
 			return NULL;
 		}
-		
+	}
+	if (!(2 <= firstRequestLine.size() && firstRequestLine.size() <= 3))
+	{
+		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		return NULL;
+	}
 
-	// if (this->path != "/") {
-	// 	this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
-	// 	return false;
-	// }
-	BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
-	return method;
+	this->requestMethod = firstRequestLine[0];
+	this->path = firstRequestLine[1];
+	if (firstRequestLine.size() == 2)
+	{
+		// missing close connection
+		if (this->requestMethod != "GET")
+		{
+			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+			return NULL;
+		}
+	}
+	std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
+	if (requestLines.size() >= 2 &&
+		VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
+	{
+		BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
+		return method;
+	}
+	return NULL;
+
 }
 
 const std::string BaseHTTPRequestHandler::headersBufferToString() const {
@@ -132,4 +155,9 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::getMethod(
 	else if (method == "DELETE")
 		return &BaseHTTPRequestHandler::doDELETE;
 	return NULL;
+}
+
+std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
+	std::vector<std::string> methodsAllowed;
+	return StringUtils::Split("GET PUT POST DELETE PATCH HEAD OPTIONS TRACE CONNECT", " ");
 }
