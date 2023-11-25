@@ -42,15 +42,10 @@ void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requ
 
 bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 	
-	//std::istringstream iss(request);
 	//log request message
 	std::cout << request << std::endl;
-	//std::vector<std::string> requestLines((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
-	std::vector<std::string> requestLines = StringUtils::Split(request, " ");
-	std::vector<std::string>::iterator it2 = std::find(requestLines.begin(), requestLines.end(), "\r\n");
-    if (it2 != requestLines.end()) {
-        requestLines.erase(it2);
-    }
+	std::vector<std::string> rawRequestLines = StringUtils::Split(request, "\r\n");
+	std::vector<std::string> requestLines = StringUtils::Split(rawRequestLines[0], " ");
 
 	if (requestLines.size() == 0)
 		return false;
@@ -80,12 +75,13 @@ bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 			return false;
 		}
 	}
-	this->requestMethod = requestLines[0];
-	this->path = requestLines[1];
 	if (!(2 <= requestLines.size() && requestLines.size() <= 3)) {
 		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 			return false;
 	}
+
+	this->requestMethod = requestLines[0];
+	this->path = requestLines[1];
 	if (requestLines.size() == 2) {
 		//missing close connection
 		if (this->requestMethod != "GET") {
@@ -93,7 +89,6 @@ bool BaseHTTPRequestHandler::parseRequest(const char* request) {
 			return false;
 		}
 	}
-	//std::cout << "Cheguei aqui! " << std::endl;
 	std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
 	if (requestLines.size() >= 2 && 
 		VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod)) {

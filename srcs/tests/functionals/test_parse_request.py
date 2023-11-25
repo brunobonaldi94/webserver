@@ -22,7 +22,7 @@ class TestParseRequest(unittest.TestCase):
         self.assertIn('Bad Request', self._send("GET / HTTP \r\n"))
         self.assertIn('Bad Request', self._send("GET / HTTP/.1 \r\n"))
 
-        #self.assertIn('OK', self._send("GET / HTTP/1.1 \r\n"))
+        self.assertIn('OK', self._send("GET / HTTP/1.1 \r\n"))
     
     def test_prototol_version(self):
         self.assertIn('HTTP Version Not Supported', self._send("GET / HTTP/1.0 \r\n"))
@@ -30,7 +30,7 @@ class TestParseRequest(unittest.TestCase):
         self.assertIn('HTTP Version Not Supported', self._send("GET / HTTP/2.0 \r\n"))
         self.assertIn('HTTP Version Not Supported', self._send("GET / HTTP/3.0 \r\n"))
 
-        #self.assertIn('OK', self._send("GET / HTTP/1.1 \r\n"))
+        self.assertIn('OK', self._send("GET / HTTP/1.1 \r\n"))
     
     def test_send_only_method(self):
         self.assertIn('Bad Request', self._send("GET \r\n"))

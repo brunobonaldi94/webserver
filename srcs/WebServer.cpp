@@ -21,15 +21,14 @@ void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket
 	Logger::Log(INFO, "Received from client: " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
 	if (this->requestHandler.parseRequest(msg) == true)
 		this->requestHandler.doGET();
-	/* else {
-		OnClientDisconnected(clientSocket, socketIndex, nbytes);
-		return ;
-	} */
 	
 	this->SendToClient(
 		clientSocket, 
 		this->requestHandler.headersBufferToString().c_str(), 
 		this->requestHandler.headersBufferToString().size());
+	
+	/* if (this->requestHandler.parseRequest(msg) == false)
+		OnClientDisconnected(clientSocket, socketIndex, nbytes); */
 
 	this->requestHandler.clearHeadersBuffers();
 }
