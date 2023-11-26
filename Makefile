@@ -25,6 +25,7 @@ BASE_SRCS :=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/config/ConfigParser.cpp \
 							$(SRCS_DIR)/log/Logger.cpp \
 							$(SRCS_DIR)/utils/StringUtils.cpp \
+							$(SRCS_DIR)/utils/JsonSerializer.cpp \
 							$(SRCS_DIR)/errors/NotAllowedException.cpp \
 							$(SRCS_DIR)/errors/NotFoundException.cpp \
 							$(SRCS_DIR)/errors/SyntaxErrorException.cpp \

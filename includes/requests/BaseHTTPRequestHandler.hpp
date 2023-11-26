@@ -38,13 +38,13 @@ class BaseHTTPRequestHandler {
 		void setRequestLines(const std::vector<std::string> requestLines);
 		std::vector<std::string> getMethodsAllowed() const;
 		std::string getContent(const std::string path, bool& foundContent);
-	  std::string GetPath() const;
-
+	  	std::string GetPath() const;
 		std::vector<std::string> SplitRequest(const char* request);
+		
+		std::string body;
 
     private:
 		std::ostringstream headersBuffer;
-		std::string body;
 		std::string requestMethod;
 		std::string path;
 		std::string requestVersion;

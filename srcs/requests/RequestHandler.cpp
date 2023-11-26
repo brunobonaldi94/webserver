@@ -1,4 +1,5 @@
 #include "RequestHandler.hpp"
+#include "JsonSerializer.hpp"
 
 RequestHandler::RequestHandler(){
 
@@ -44,6 +45,16 @@ void RequestHandler::doGET() {
 }
 
 void RequestHandler::doPOST() {
+    if (this->body.empty())
+        return ;
+    //std::cout << "body: " << this->body << std::endl;
+    std::vector<std::string> body = StringUtils::Split(this->body, "&");
+    std::map<std::string, std::string> data;
+    data["first_name"] = StringUtils::Split(body[0], "=")[1];
+    data["last_name"] = StringUtils::Split(body[1], "=")[1];
+    JsonSerializer::save(JsonSerializer::serialize(data));
+    this->body.clear();
+    this->body = "";
     this->doGET();
 }
 
