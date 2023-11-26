@@ -27,11 +27,15 @@ void RequestHandler::sendJsonResponse(std::string json) {
 
 
 void RequestHandler::doGET() {
+    std::string content;
     std::string path = this->GetPath();
+
     if (path == "/")
         path = "/index.html";
     bool foundContent = false;
-    std::string content = this->getContent("wwwroot/" + path, foundContent);
+    content = this->getContent("wwwroot/" + path, foundContent);
+    if (path == "/get")
+        return this->sendJsonResponse(JsonSerializer::open("data.json"));
     if (path == "/api/files")
         return this->sendJsonResponse("{\"files\": [\"file1\", \"file2\"]}");
     if (foundContent == false)

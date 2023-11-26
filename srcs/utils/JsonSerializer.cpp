@@ -37,3 +37,26 @@ void JsonSerializer::save(std::string data)
     output.close();
 }
 
+std::string JsonSerializer::open(std::string filename)
+{
+    std::ifstream input;
+    std::string inputStr;
+    std::string text("");
+
+    input.open(filename.c_str());
+    if (input.fail() || !input.is_open())
+    {
+        std::cout << "Unable to open file" << std::endl;
+        return std::string();
+    }
+    if (input.peek() == std::ifstream::traits_type::eof())
+    {
+        std::cout << "Empty file!" << std::endl;
+        return std::string();
+    }
+    while (std::getline(input, inputStr))
+        text += inputStr + "\n";
+    text.erase(text.length() - 1);
+    input.close();
+    return (text);
+}
