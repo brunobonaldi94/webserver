@@ -63,69 +63,52 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* reques
 
 BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequest(const char *request)
 {
-	// log request message
-	std::vector<std::string> requestLines = this->SplitRequest(request);
-	std::vector<std::string> firstRequestLine;
-	if (requestLines.size() > 0)
-		firstRequestLine = StringUtils::Split(requestLines[0], " ");
-	if (firstRequestLine.size() == 0)
-		return NULL;
-	std::vector<std::string> versionNumber;
-	if (firstRequestLine.size() >= 3)
+	try
 	{
-		this->setRequestLines(firstRequestLine);
-		try
-		{
-			std::string baseVersion = "HTTP/";
-			if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
-				throw std::invalid_argument("");
-			std::vector<std::string> baseVersionNumberVector = StringUtils::Split(this->requestVersion, "/");
-			if (baseVersionNumberVector.size() != 2)
-				throw std::runtime_error("");
-			std::string baseVersionNumber = baseVersionNumberVector[1];
-			versionNumber = StringUtils::Split(baseVersionNumber, ".");
-			if (versionNumber.size() != 2 ||
-				(versionNumber.size() == 2 && versionNumber[0] == ""))
-				throw std::runtime_error("");
-		}
-		catch (const std::exception &e)
+		std::vector<std::string> requestLines = this->SplitRequest(request);
+		std::vector<std::string> firstRequestLine;
+		std::vector<std::string> versionNumber;
+
+		firstRequestLine = StringUtils::Split(requestLines[0], " ");
+		if (firstRequestLine.size() < 2 || (firstRequestLine.size() == 2 && firstRequestLine[0] != "GET"))
 		{
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 			return NULL;
 		}
+
+		this->setRequestLines(firstRequestLine);	
+		std::string baseVersion = "HTTP/";
+		if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
+			throw std::invalid_argument("");
+		std::vector<std::string> baseVersionNumberVector = StringUtils::Split(this->requestVersion, "/");
+		if (baseVersionNumberVector.size() != 2)
+			throw std::runtime_error("");
+		std::string baseVersionNumber = baseVersionNumberVector[1];
+		versionNumber = StringUtils::Split(baseVersionNumber, ".");
+		if (versionNumber.size() != 2 ||
+			(versionNumber.size() == 2 && versionNumber[0] == ""))
+			throw std::runtime_error("");
 		if (std::atoi(versionNumber[0].c_str()) != 1 ||
 			std::atoi(versionNumber[1].c_str()) != 1)
 		{
 			this->sendError("<h1>HTTP Version Not Supported</h1>", HTTPStatus::HTTP_VERSION_NOT_SUPPORTED);
 			return NULL;
 		}
+		this->requestMethod = firstRequestLine[0];
+		this->path = firstRequestLine[1];
+		std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
+		if (VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
+		{
+			BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
+			return method;
+		}
+		return NULL;
 	}
-	if (!(2 <= firstRequestLine.size() && firstRequestLine.size() <= 3))
+	catch (const std::exception &e)
 	{
 		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 		return NULL;
 	}
-
-	this->requestMethod = firstRequestLine[0];
-	this->path = firstRequestLine[1];
-	if (firstRequestLine.size() == 2)
-	{
-		// missing close connection
-		if (this->requestMethod != "GET")
-		{
-			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
-			return NULL;
-		}
-	}
-	std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
-	if (firstRequestLine.size() >= 2 &&
-		VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
-	{
-		BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
-		return method;
-	}
-	return NULL;
-
 }
 
 const std::string BaseHTTPRequestHandler::headersBufferToString() const {
