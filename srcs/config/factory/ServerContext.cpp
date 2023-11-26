@@ -76,9 +76,3 @@ void ServerContext::FillDefaultValues()
             (*it2)->FillDefaultValues();
     }
 }
-
-ListenDirective *ServerContext::GetListenDirective()
-{
-    ADirective *directive = this->GetDirective("listen");
-    return (dynamic_cast<ListenDirective *>(directive));
-}

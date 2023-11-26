@@ -149,7 +149,6 @@ void AContext::FillDefaultValuesDirectives()
         }
     }
 }
-
 ADirective *AContext::GetDirective(std::string name)
 {
     PairDirCreator *directivePairCreator = 
@@ -161,4 +160,13 @@ ADirective *AContext::GetDirective(std::string name)
     if (directivePair == NULL)
         return (NULL);
     return (directivePair->second);
+}
+
+std::vector<AContext *> *AContext::GetSubContextsByName(std::string name)
+{
+    
+    std::pair<const std::string, std::vector<AContext *> > *subContext = MapUtils<std::string, std::vector<AContext *> >::SafeFindMap(this->_subContexts, name);
+    if (subContext == NULL)
+        return NULL;
+    return &subContext->second;
 }

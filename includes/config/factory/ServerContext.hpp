@@ -16,8 +16,6 @@ public:
 
     ServerContext& operator=(ServerContext const & other);
     
-    ListenDirective *GetListenDirective();
-    
     void ParseContext(std::string &content);
     void PrintContext();
     void FillDefaultValues();

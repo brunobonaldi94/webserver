@@ -4,8 +4,8 @@
 #include <sstream>
 #include <stdio.h>
 
-ATcpListener::ATcpListener(RequestHandler requestHandler, std::vector<AContext *> serverContexts) :
-	requestHandler(requestHandler), m_serverContexts(serverContexts) 
+ATcpListener::ATcpListener(RequestHandler requestHandler, std::vector<ServerConfig *> serverConfigs) :
+	requestHandler(requestHandler), m_serverConfigs(serverConfigs) 
 {
 }
 
@@ -52,30 +52,23 @@ int ATcpListener::BindSocket(struct addrinfo *addrinfo)
 		return listener;
 }
 
-int ATcpListener::GetListenerSocket(AContext * serverContext)
+int ATcpListener::GetListenerSocket(ServerConfig * serverConfig)
 {
     int listener;
     struct addrinfo *ai;
-		ServerContext *serverContextCast = dynamic_cast<ServerContext *>(serverContext);
-		if (serverContextCast == NULL)
-		{
-				Logger::Log(ERROR, "Failed to cast server context");
-				return -1;
-		}
-		ListenDirective *listenDirective = dynamic_cast<ListenDirective *>(serverContextCast->GetDirectives()["listen"]);
-    ai = this->GetAddressInfo(listenDirective->GetHost(), listenDirective->GetPort());
+    ai = this->GetAddressInfo(serverConfig->GetHost(), serverConfig->GetPort());
     listener = this->BindSocket(ai);
 		if (listener == -1)
 				return -1;
     if (listen(listener, SOMAXCONN) == -1)
         return -1;
-		Logger::Log(INFO, "Listening on host - " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
+		Logger::Log(INFO, "Listening on host - " + serverConfig->GetHost() + ":" + serverConfig->GetPort());
     return listener;
 }
 
 bool ATcpListener::IsListeningSocket(int fd)
 {
-	std::pair<const int, ServerContext*> *found = MapUtils<int, ServerContext*>::SafeFindMap(this->listenFds, fd);
+	std::pair<const int, ServerConfig*> *found = MapUtils<int, ServerConfig*>::SafeFindMap(this->listenFds, fd);
 	if (found == NULL)
 		return false;
 	return true;
@@ -89,24 +82,24 @@ void ATcpListener::AddToPfds(int newfd)
 		this->pfds.push_back(pfd);
 }
 
-void ATcpListener::AddToListenFds(int newfd, ServerContext *serverContext)
+void ATcpListener::AddToListenFds(int newfd, ServerConfig *serverConfig)
 {
-		this->listenFds[newfd] = serverContext;
+		this->listenFds[newfd] = serverConfig;
 }
 
 void ATcpListener::RemoveFromListenFds(int i)
 {
-		MapUtils<int, ServerContext *>::SafeRemoveMap(this->listenFds, i);
+		MapUtils<int, ServerConfig *>::SafeRemoveMap(this->listenFds, i);
 }
 
-void ATcpListener::AddToSocketFdToServerContext(int newfd, ServerContext *serverContext)
+void ATcpListener::AddToSocketFdToServerConfig(int newfd, ServerConfig *serverConfig)
 {
-		this->m_socketFdToServerContext[newfd] = serverContext;
+		this->m_socketFdToServerConfigs[newfd] = serverConfig;
 }
 
-void ATcpListener::RemoveFromSocketFdToServerContext(int i)
+void ATcpListener::RemoveFromSocketFdToServerConfig(int i)
 {
-		MapUtils<int, ServerContext *>::SafeRemoveMap(this->m_socketFdToServerContext, i);
+		MapUtils<int, ServerConfig *>::SafeRemoveMap(this->m_socketFdToServerConfigs, i);
 }
 
 void ATcpListener::HandleNewConnection(int clientSocket)
@@ -120,7 +113,7 @@ void ATcpListener::HandleNewConnection(int clientSocket)
 	else
 	{
 		this->AddToPfds(newfd);
-		this->AddToSocketFdToServerContext(newfd, this->listenFds[clientSocket]);
+		this->AddToSocketFdToServerConfig(newfd, this->listenFds[clientSocket]);
 	}
 }
 
@@ -131,7 +124,7 @@ void ATcpListener::RemoveFromPfds(int i)
 
 bool ATcpListener::Init()
 {
-	for (std::vector<AContext *>::iterator it = this->m_serverContexts.begin(); it != this->m_serverContexts.end(); it++)
+	for (std::vector<ServerConfig *>::iterator it = this->m_serverConfigs.begin(); it != this->m_serverConfigs.end(); it++)
 	{
 		int listenFd = this->GetListenerSocket(*it);
 		if (listenFd == -1)
@@ -139,9 +132,9 @@ bool ATcpListener::Init()
 			Logger::Log(ERROR, "Failed to create listener socket");
 			return false;
 		}
-		this->AddToListenFds(listenFd, dynamic_cast<ServerContext *>(*it));
+		this->AddToListenFds(listenFd, *it);
 	}
-	for (std::map<int, ServerContext *>::iterator it = this->listenFds.begin(); it != this->listenFds.end(); it++)
+	for (std::map<int, ServerConfig *>::iterator it = this->listenFds.begin(); it != this->listenFds.end(); it++)
 		this->AddToPfds(it->first);
 	return true;
 }
@@ -151,7 +144,7 @@ void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 	ssize_t nbytes = recv(clientSocket, this->m_buffer, sizeof this->m_buffer, 0);
 	if (nbytes > 0)
 	{
-		this->OnMessageReceived(this->m_socketFdToServerContext[clientSocket], clientSocket, this->m_buffer);
+		this->OnMessageReceived(this->m_socketFdToServerConfigs[clientSocket], clientSocket, this->m_buffer);
 		return ;
 	}
 	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);
@@ -174,7 +167,7 @@ void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex, ssize
 			Logger::Log(ERROR, "recv");
 		close(this->pfds[socketIndex].fd);
 		this->RemoveFromPfds(socketIndex);
-		this->RemoveFromSocketFdToServerContext(clientSocket);
+		this->RemoveFromSocketFdToServerConfig(clientSocket);
 }
 
 bool ATcpListener::Run()
@@ -201,4 +194,9 @@ bool ATcpListener::Run()
 		}	
 	}
 	return true;
+}
+
+ATcpListener::~ATcpListener()
+{
+	VectorUtils<ServerConfig *>::clearVector(this->m_serverConfigs);
 }

@@ -8,15 +8,14 @@
 #include <iterator>
 #include "WebServer.hpp"
 
-WebServer::WebServer(RequestHandler requestHandler, std::vector<AContext *> serverContexts) : ATcpListener(requestHandler, serverContexts)
+WebServer::WebServer(RequestHandler requestHandler, std::vector<ServerConfig *> serverConfigs) : ATcpListener(requestHandler, serverConfigs)
 {
 }
 
 // Handler for when a message is received from the client
-void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg)
+void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, const char* msg)
 {
-	ListenDirective *listenDirective = serverContext->GetListenDirective();
-	Logger::Log(INFO, "Received from client: " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
+	serverConfig->GetHost();
 	BaseHTTPRequestHandler::RequestMethodFunction method = this->requestHandler.parseRequest(msg);
 	if (method != NULL)
 		(this->requestHandler.*method)();

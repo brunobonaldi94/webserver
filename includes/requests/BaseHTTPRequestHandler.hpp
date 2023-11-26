@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include "StringUtils.hpp"
 #include "HTTPStatus.hpp"
-
+#include "ServerContext.hpp"
 
 class BaseHTTPRequestHandler {
     public:

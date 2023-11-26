@@ -18,14 +18,15 @@
 #include "Logger.hpp"
 #include "requests/RequestHandler.hpp"
 #include "StringUtils.hpp"
-#include "ServerContext.hpp"
+#include "ServerConfig.hpp"
 
 class ATcpListener
 {
 
 public:
 
-	ATcpListener(RequestHandler requestHandler, std::vector<AContext *> serverContexts);
+	ATcpListener(RequestHandler requestHandler, std::vector<ServerConfig *> serverConfigs);
+	virtual ~ATcpListener();
 
 	// Initialize the listener
 	bool Init();
@@ -46,7 +47,7 @@ protected:
 	virtual void OnClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
 
 	// Handler for when a message is received from the client
-	virtual void OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg) = 0;
+	virtual void OnMessageReceived(ServerConfig *serverConfig, int clientSocket, const char* msg) = 0;
 
 	// Send a message to a client
 	void SendToClient(int clientSocket, const char* msg, int length) const;
@@ -55,24 +56,24 @@ protected:
 
 private:
 
-	int GetListenerSocket(AContext * serverContext);
+	int GetListenerSocket(ServerConfig * ServerConfig);
 	struct addrinfo* GetAddressInfo(std::string ipAddress, std::string port);
 	int BindSocket(struct addrinfo*  addrinfo);
 	bool IsListeningSocket(int fd);
 	void AddToPfds(int newfd);
 	void RemoveFromPfds(int i);
-	void AddToListenFds(int newfd, ServerContext * serverContext);
+	void AddToListenFds(int newfd, ServerConfig * serverConfig);
 	void RemoveFromListenFds(int i);
-	void AddToSocketFdToServerContext(int newfd, ServerContext * serverContext);
-	void RemoveFromSocketFdToServerContext(int i);
+	void AddToSocketFdToServerConfig(int newfd, ServerConfig * ServerConfig);
+	void RemoveFromSocketFdToServerConfig(int i);
 
 
 	//int														m_socket;		// Internal FD for the listening socket
-	std::vector<AContext *> 			m_serverContexts;
+	std::vector<ServerConfig *> 	m_serverConfigs;
 	char 													m_buffer[4096];	// Buffer for incoming data
 	std::vector<struct pollfd>		pfds;			// Pointer to the pollfd array
 	static const int 							MAXFDS = 100;	// Maximum number of file descriptors
-	std::map<int, ServerContext*> listenFds;
-	std::map<int, ServerContext*> m_socketFdToServerContext;
+	std::map<int, ServerConfig*> listenFds;
+	std::map<int, ServerConfig*> m_socketFdToServerConfigs;
 	
 };

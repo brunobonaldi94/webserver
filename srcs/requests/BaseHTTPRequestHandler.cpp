@@ -1,6 +1,5 @@
 #include "BaseHTTPRequestHandler.hpp"
 
-
 BaseHTTPRequestHandler::~BaseHTTPRequestHandler() {}
 
 void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message) {
@@ -20,7 +19,7 @@ std::string BaseHTTPRequestHandler::GetPath() const {
 }
 
 void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status) {
-    this->sendResponse(status.code, status.description);
+  this->sendResponse(status.code, status.description);
 	this->sendHeader("Cache-Control", "no-cache, private");
 	this->sendHeader("Content-Type", "text/html");
 	this->sendHeader("Content-Length", content.size());
@@ -46,7 +45,8 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* reques
 	std::string line;
 	bool bodyStart = false;
 
-	while (std::getline(iss, line)) {
+	while (std::getline(iss, line))
+	{
 			if (!line.empty() && line[line.size() - 1] == CR) {
 				  if (line.size() == 1) {
 						bodyStart = true;

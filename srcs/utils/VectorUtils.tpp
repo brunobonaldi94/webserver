@@ -34,3 +34,14 @@ bool VectorUtils<T>::hasElement(std::vector<T> &container, T &element)
         return false;
     return true;
 }
+
+template <typename T>
+void VectorUtils<T>::clearVector(std::vector<T> &vector)
+{
+    if (vector.size() == 0)
+        return;
+    for (typename std::vector<T>::iterator it = vector.begin(); it != vector.end(); it++)
+        if (*it != NULL)
+            delete *it;
+    vector.clear();
+}
