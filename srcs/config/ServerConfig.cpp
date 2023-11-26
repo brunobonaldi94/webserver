@@ -10,7 +10,10 @@ ServerConfig::ServerConfig(ServerConfig const & other)
     *this = other;
 }
 
-ServerConfig::~ServerConfig(){}
+ServerConfig::~ServerConfig()
+{
+    VectorUtils<LocationConfig *>::clearVector(this->_locations);
+}
 
 ServerConfig& ServerConfig::operator=(ServerConfig const & other)
 {
@@ -134,13 +137,11 @@ void ServerConfig::SetCgiExtension(std::string cgiExtension)
 
 void ServerConfig::SetValuesFromServerContext()
 {
-
-  
   std::vector<AContext *> *locationContexts = this->_serverContext->GetSubContextsByName("location");
   for (std::vector<AContext *>::iterator it = locationContexts->begin(); it != locationContexts->end(); it++)
   {
     LocationContext *locationContext = static_cast<LocationContext *>(*it);
-    LocationConfig locationConfig(locationContext);
+    LocationConfig *locationConfig = new LocationConfig(locationContext);
     this->_locations.push_back(locationConfig);
   }
   ListenDirective *listenDirective = static_cast<ListenDirective *>(this->_serverContext->GetDirective("listen"));
@@ -169,4 +170,14 @@ void ServerConfig::SetValuesFromServerContext()
   CgiDirective *cgiPathDirective = static_cast<CgiDirective *>(this->_serverContext->GetDirective("cgi"));
   this->_cgiBinaryPath = cgiPathDirective->GetBinaryPath();
   this->_cgiExtension = cgiPathDirective->GetExtension();
+}
+
+LocationConfig *ServerConfig::GetLocationConfig(std::string path)
+{
+  for (std::vector<LocationConfig *>::iterator it = this->_locations.begin(); it != this->_locations.end(); it++)
+  {
+    if ((*it)->GetPath() == path)
+      return (*it);
+  }
+  return NULL;
 }

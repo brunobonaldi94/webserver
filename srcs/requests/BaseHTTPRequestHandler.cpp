@@ -1,5 +1,6 @@
 #include "BaseHTTPRequestHandler.hpp"
 
+
 BaseHTTPRequestHandler::~BaseHTTPRequestHandler() {}
 
 void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message) {
@@ -16,6 +17,14 @@ void BaseHTTPRequestHandler::writeContent(const std::string content) {
 
 std::string BaseHTTPRequestHandler::GetPath() const {
 	return this->path;
+}
+
+ServerConfig *BaseHTTPRequestHandler::getServerConfig() const {
+	return this->serverConfig;
+}
+
+void BaseHTTPRequestHandler::setServerConfig(ServerConfig *serverConfig) {
+	this->serverConfig = serverConfig;
 }
 
 void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status) {
@@ -75,7 +84,6 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 			return NULL;
 		}
-
 		this->setRequestLines(firstRequestLine);	
 		std::string baseVersion = "HTTP/";
 		if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
@@ -143,5 +151,8 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::getMethod(
 
 std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
 	std::vector<std::string> methodsAllowed;
-	return StringUtils::Split("GET PUT POST DELETE PATCH HEAD OPTIONS TRACE CONNECT", " ");
+	LocationConfig *location = this->serverConfig->GetLocationConfig(this->path);
+	if (location == NULL)
+		return methodsAllowed;
+	return location->GetAllowedMethods();
 }

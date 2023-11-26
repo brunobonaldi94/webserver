@@ -10,7 +10,7 @@ class ServerConfig
 private:
 
     ServerContext *_serverContext;
-    std::vector<LocationConfig> _locations;
+    std::vector<LocationConfig *> _locations;
     std::string _port;
     std::string _host;
     std::vector<std::string> _serverNames;
@@ -56,5 +56,6 @@ public:
     void SetCgiBinaryPath(std::string cgiBinaryPath);
     void SetCgiExtension(std::string cgiExtension);
 
+    LocationConfig * GetLocationConfig(std::string path);
 
 };

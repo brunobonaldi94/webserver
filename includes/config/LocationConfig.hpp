@@ -8,6 +8,7 @@ class LocationConfig
 {
 private:
     LocationContext *_locationContext;
+    std::string path;
     std::string _errorPage;
     int errorPageCode;
     int _maxBodySize;
@@ -31,6 +32,7 @@ public:
     std::string GetIndexFile() const;
     bool GetAutoIndex() const;
     std::vector<std::string> GetAllowedMethods() const;
+    std::string GetPath() const;
 
     void SetErrorPage(std::string errorPage);
     void SetErrorPageCode(int errorPageCode);
@@ -39,4 +41,5 @@ public:
     void SetIndexFile(std::string indexFile);
     void SetAutoIndex(bool autoIndex);
     void SetAllowedMethods(std::vector<std::string> allowedMethods);
+    void SetPath(std::string path);
 };

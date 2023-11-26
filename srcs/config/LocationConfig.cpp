@@ -91,11 +91,23 @@ void LocationConfig::SetAllowedMethods(std::vector<std::string> allowedMethods)
     this->allowedMethods = allowedMethods;
 }
 
+std::string LocationConfig::GetPath() const
+{
+    return this->path;
+}
+
+void LocationConfig::SetPath(std::string path)
+{
+    this->path = path;
+}
+
 void LocationConfig::SetValuesFromLocationContext()
 {
+    this->path = this->_locationContext->GetUri();
+
     ErrorPageDirective *errorPageDirective = static_cast<ErrorPageDirective *>(this->_locationContext->GetDirective("error_page"));
-  this->_errorPage = errorPageDirective->GetPath();
-  this->errorPageCode = std::atoi(errorPageDirective->GetCode().c_str());
+    this->_errorPage = errorPageDirective->GetPath();
+    this->errorPageCode = std::atoi(errorPageDirective->GetCode().c_str());
 
     ClientMaxBodySizeDirective *maxBodySizeDirective = static_cast<ClientMaxBodySizeDirective *>(this->_locationContext->GetDirective("client_max_body_size"));
     this->_maxBodySize = BytesConversor(maxBodySizeDirective->GetSize());

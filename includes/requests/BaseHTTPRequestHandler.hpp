@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include "StringUtils.hpp"
 #include "HTTPStatus.hpp"
-#include "ServerContext.hpp"
+#include "ServerConfig.hpp"
 
 class BaseHTTPRequestHandler {
     public:
@@ -23,11 +23,13 @@ class BaseHTTPRequestHandler {
 		RequestMethodFunction getMethod(const std::string& method);
 		RequestMethodFunction parseRequest(const char* request);
 		void clearHeadersBuffers();
-
+		ServerConfig *getServerConfig() const;
+		void setServerConfig(ServerConfig *serverConfig);
+	
 		virtual void doGET() = 0;
 		virtual void doPOST() = 0;
 		virtual void doDELETE() = 0;
-	
+
 	protected:
 		void sendResponse(int statusCode, std::string message);
 		template <typename T>
@@ -48,6 +50,7 @@ class BaseHTTPRequestHandler {
 		std::string requestMethod;
 		std::string path;
 		std::string requestVersion;
+		ServerConfig *serverConfig;
 };
 
 template <typename T>
