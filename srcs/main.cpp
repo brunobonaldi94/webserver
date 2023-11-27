@@ -14,13 +14,7 @@ int main(int argc, char *argv[])
 			ConfigParser configParser(fileName);
 			if (!configParser.ParseConfigFile())
 				return ERROR_CODE;
-			std::vector<AContext *> serverContexts = configParser.GetServerContexts();
-			std::vector<ServerConfig *> serverConfigs;
-			for (std::vector<AContext *>::iterator it = serverContexts.begin(); it != serverContexts.end(); it++)
-			{
-				ServerConfig *serverConfig = new ServerConfig(dynamic_cast<ServerContext *>(*it));
-				serverConfigs.push_back(serverConfig);
-			}
+			std::vector<ServerConfig *> serverConfigs = configParser.CreateServerConfigs();
 			RequestHandler requestHandler;
 			WebServer webServ(requestHandler, serverConfigs);
 			if (!webServ.Init())

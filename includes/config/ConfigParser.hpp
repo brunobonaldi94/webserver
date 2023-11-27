@@ -21,6 +21,7 @@
 #include "types.hpp"
 #include "NotAllowedException.hpp"
 #include "NotFoundException.hpp"
+#include "ServerConfig.hpp"
 
 class ConfigParser
 {
@@ -47,4 +48,5 @@ public:
     bool ParseContent(std::string& content, std::string& word);
     void PrintContexts() const;
     void FillDefaultValues();
+    std::vector<ServerConfig *> CreateServerConfigs();
 };
