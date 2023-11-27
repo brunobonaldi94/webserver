@@ -57,8 +57,7 @@ void RequestHandler::doPOST() {
     data["first_name"] = StringUtils::Split(body[0], "=")[1];
     data["last_name"] = StringUtils::Split(body[1], "=")[1];
     JsonSerializer::save(JsonSerializer::serialize(data));
-    this->body.clear();
-    this->body = "";
+    this->body = std::string("");
     this->doGET();
 }
 

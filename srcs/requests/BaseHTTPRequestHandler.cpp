@@ -40,6 +40,7 @@ void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requ
 }
 
 std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request) {
+	this->body = "";
 	std::istringstream iss(request);
 	std::cout << request << std::endl;
 	std::vector<std::string> requestLines;
