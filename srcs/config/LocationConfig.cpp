@@ -124,3 +124,8 @@ void LocationConfig::SetValuesFromLocationContext()
     LimitExceptDirective *allowMethodsDirective = static_cast<LimitExceptDirective *>(this->_locationContext->GetDirective("limit_except"));
     this->allowedMethods = allowMethodsDirective->GetMethods();
 }
+
+std::string LocationConfig::GetFileFullPath() const
+{
+    return this->_rootPath + "/" +this->_indexFile;
+}

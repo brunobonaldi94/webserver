@@ -15,17 +15,15 @@ WebServer::WebServer(RequestHandler requestHandler, std::vector<ServerConfig *> 
 // Handler for when a message is received from the client
 void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, const char* msg)
 {
-	std::cout << "Message received: " << serverConfig->GetHost() << std::endl;
 	this->requestHandler.setServerConfig(serverConfig);
 	BaseHTTPRequestHandler::RequestMethodFunction method = this->requestHandler.parseRequest(msg);
 	if (method != NULL)
 		(this->requestHandler.*method)();
-	
 	this->SendToClient(
 		clientSocket, 
 		this->requestHandler.headersBufferToString().c_str(), 
-		this->requestHandler.headersBufferToString().size());
-
+		this->requestHandler.headersBufferToString().size()
+	);
 	this->requestHandler.clearHeadersBuffers();
 }
 

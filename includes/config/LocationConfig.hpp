@@ -33,6 +33,7 @@ public:
     bool GetAutoIndex() const;
     std::vector<std::string> GetAllowedMethods() const;
     std::string GetPath() const;
+    std::string GetFileFullPath() const;
 
     void SetErrorPage(std::string errorPage);
     void SetErrorPageCode(int errorPageCode);
@@ -42,4 +43,5 @@ public:
     void SetAutoIndex(bool autoIndex);
     void SetAllowedMethods(std::vector<std::string> allowedMethods);
     void SetPath(std::string path);
+
 };

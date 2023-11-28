@@ -27,12 +27,10 @@ void RequestHandler::sendJsonResponse(std::string json) {
 
 void RequestHandler::doGET() {
     std::string path = this->GetPath();
-    if (path == "/")
-        path = "/index.html";
     bool foundContent = false;
-    std::string content = this->getContent("wwwroot/" + path, foundContent);
     if (path == "/api/files")
         return this->sendJsonResponse("{\"files\": [\"file1\", \"file2\"]}");
+    std::string content = this->getContent(path, foundContent);
     if (foundContent == false)
         return this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
     this->sendResponse(HTTPStatus::OK.code, HTTPStatus::OK.description);

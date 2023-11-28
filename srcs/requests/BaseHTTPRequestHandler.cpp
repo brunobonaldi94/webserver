@@ -110,6 +110,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 			BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
 			return method;
 		}
+		this->sendError("<h1>Method Not Allowed</h1>", HTTPStatus::METHOD_NOT_ALLOWED);
 		return NULL;
 	}
 	catch (const std::exception &e)
@@ -123,12 +124,16 @@ const std::string BaseHTTPRequestHandler::headersBufferToString() const {
 	const std::string headersBufferStr = this->headersBuffer.str();
 	return headersBufferStr;
 }
-
-std::string BaseHTTPRequestHandler::getContent(const std::string path, bool& foundContent) {
+std::string BaseHTTPRequestHandler::getContent(const std::string path, bool &foundContent)
+{
 	std::string content  = "";
-	char const *file = path.c_str();
-	std::ifstream f(file);
 	foundContent = false;
+
+	LocationConfig *location = this->serverConfig->GetLocationConfig(path);
+	if (location == NULL)
+		return content;
+	char const *file = location->GetFileFullPath().c_str();
+	std::ifstream f(file);
 	if (f.good())
 	{
 		std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
