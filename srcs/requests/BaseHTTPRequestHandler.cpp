@@ -105,13 +105,18 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		this->requestMethod = firstRequestLine[0];
 		this->path = firstRequestLine[1];
 		std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
-		if (VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
+		if (methodsAllowed.size() == 0)
 		{
-			BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
-			return method;
+			this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+			return NULL;
 		}
-		this->sendError("<h1>Method Not Allowed</h1>", HTTPStatus::METHOD_NOT_ALLOWED);
-		return NULL;
+		if (!VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
+		{
+			this->sendError("<h1>Method Not Allowed</h1>", HTTPStatus::METHOD_NOT_ALLOWED);
+			return NULL;
+		}
+		BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
+		return method;
 	}
 	catch (const std::exception &e)
 	{
@@ -126,14 +131,12 @@ const std::string BaseHTTPRequestHandler::headersBufferToString() const {
 }
 std::string BaseHTTPRequestHandler::getContent(const std::string path, bool &foundContent)
 {
-	std::string content  = "";
+	std::string content("");
 	foundContent = false;
-
 	LocationConfig *location = this->serverConfig->GetLocationConfig(path);
 	if (location == NULL)
 		return content;
-	char const *file = location->GetFileFullPath().c_str();
-	std::ifstream f(file);
+	std::ifstream f(location->GetFileFullPath().c_str());
 	if (f.good())
 	{
 		std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
@@ -154,8 +157,30 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::getMethod(
 	return NULL;
 }
 
-std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
+std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowedForApi() const {
 	std::vector<std::string> methodsAllowed;
+
+	std::vector<std::string> api = StringUtils::Split(path, "/");
+	if (api.size() < 3 && (api[1] != "api" && api[2] != "files"))
+		return methodsAllowed;
+	
+	if (api.size() == 3)
+	{
+		methodsAllowed.push_back("GET");
+		return methodsAllowed;
+	}
+	else
+	{
+		methodsAllowed.push_back("DELETE");
+		return methodsAllowed;
+	}
+	return methodsAllowed;
+}
+
+std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
+	std::vector<std::string> methodsAllowed = this->getMethodsAllowedForApi();
+	if (methodsAllowed.size() > 0)
+		return methodsAllowed;
 	LocationConfig *location = this->serverConfig->GetLocationConfig(this->path);
 	if (location == NULL)
 		return methodsAllowed;

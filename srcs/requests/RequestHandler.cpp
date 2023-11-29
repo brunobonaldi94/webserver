@@ -28,6 +28,7 @@ void RequestHandler::sendJsonResponse(std::string json) {
 void RequestHandler::doGET() {
     std::string path = this->GetPath();
     bool foundContent = false;
+    Logger::PrintMessage(INFO,"Path: " + path);
     if (path == "/api/files")
         return this->sendJsonResponse("{\"files\": [\"file1\", \"file2\"]}");
     std::string content = this->getContent(path, foundContent);

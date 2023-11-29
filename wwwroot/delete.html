@@ -240,7 +240,7 @@
       const renderFiles = async () => {
         const data = await getFiles();
         const mainElement = document.querySelector("#delete-file");
-        data.files.forEach((file) => {
+        data?.files?.forEach((file) => {
           const fileElement = document.createElement("option");
           fileElement.setAttribute("value", file);
           fileElement.textContent = file;
