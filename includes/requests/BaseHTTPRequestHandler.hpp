@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string.h>
 #include <vector>
+#include<map>
 #include <iterator> 
 #include <stdlib.h>
 #include <stdexcept>
