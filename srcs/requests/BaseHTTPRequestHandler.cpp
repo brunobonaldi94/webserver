@@ -36,6 +36,20 @@ void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusC
 	this->writeContent(content);
 }
 
+void BaseHTTPRequestHandler::sendNotFoundError()
+{
+	std::string page = this->serverConfig->GetErrorPage();
+	int code = this->serverConfig->GetErrorPageCode();
+	std::string content = this->readContent(page);
+	if (content.empty())
+		this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+	else
+	{
+		StatusCode status(code, HTTPStatus::NOT_FOUND.description, HTTPStatus::NOT_FOUND.details);
+		this->sendError(content, HTTPStatus::NOT_FOUND);
+	}
+}
+
 void BaseHTTPRequestHandler::clearHeadersBuffers() {
 	this->headersBuffer.str("");
 	this->headersBuffer.clear();
@@ -107,7 +121,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
 		if (methodsAllowed.size() == 0)
 		{
-			this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+			this->sendNotFoundError();
 			return NULL;
 		}
 		if (!VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
@@ -129,22 +143,27 @@ const std::string BaseHTTPRequestHandler::headersBufferToString() const {
 	const std::string headersBufferStr = this->headersBuffer.str();
 	return headersBufferStr;
 }
-std::string BaseHTTPRequestHandler::getContent(const std::string path, bool &foundContent)
+
+std::string BaseHTTPRequestHandler::readContent(const std::string path) 
 {
 	std::string content("");
-	foundContent = false;
-	LocationConfig *location = this->serverConfig->GetLocationConfig(path);
-	if (location == NULL)
-		return content;
-	std::ifstream f(location->GetFileFullPath().c_str());
+	std::ifstream f(path.c_str());
 	if (f.good())
 	{
 		std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-		foundContent = true;
 		content = str;
 	}
   f.close();
   return content;
+}
+
+std::string BaseHTTPRequestHandler::getContent(const std::string path)
+{
+	std::string content("");
+	LocationConfig *location = this->serverConfig->GetLocationConfig(path);
+	if (location == NULL || location->GetFileFullPath().empty())
+		return content;
+	return this->readContent(location->GetFileFullPath());
 }
 
 BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::getMethod(const std::string& method) {
