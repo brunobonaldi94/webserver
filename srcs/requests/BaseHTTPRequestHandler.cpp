@@ -180,7 +180,7 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowedForApi() const
 	std::vector<std::string> methodsAllowed;
 
 	std::vector<std::string> api = StringUtils::Split(path, "/");
-	if (api.size() < 3 && (api[1] != "api" && api[2] != "files"))
+	if (api.size() < 3 || (api[1] != "api" && api[2] != "files"))
 		return methodsAllowed;
 	
 	if (api.size() == 3)
