@@ -39,8 +39,19 @@ void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requ
 	this->requestVersion = requestLines[2];
 }
 
+void BaseHTTPRequestHandler::setBody(const std::string line) {
+	if (!line.empty()) {
+		std::vector<std::string> lineSplited = StringUtils::Split(line, ":");
+		if (lineSplited[0] == "Content-Length")
+			this->contentLength = std::atoi(lineSplited[1].c_str());
+		this->body = this->body.substr(0, this->contentLength);
+	}
+}
+
 std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request) {
 	this->body = "";
+	this->contentLength = 0;
+
 	std::istringstream iss(request);
 	std::cout << request << std::endl;
 	std::vector<std::string> requestLines;
@@ -58,7 +69,8 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* reques
 				this->body += line;
 			else 
 				requestLines.push_back(line);
-	}
+			this->setBody(line);
+	}		
 	return requestLines;
 }
 

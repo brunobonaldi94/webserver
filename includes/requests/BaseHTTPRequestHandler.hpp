@@ -40,8 +40,10 @@ class BaseHTTPRequestHandler {
 		std::string getContent(const std::string path, bool& foundContent);
 	  	std::string GetPath() const;
 		std::vector<std::string> SplitRequest(const char* request);
+		void setBody(const std::string line);
 		
 		std::string body;
+		int contentLength;
 
     private:
 		std::ostringstream headersBuffer;
