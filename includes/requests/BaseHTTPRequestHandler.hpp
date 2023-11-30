@@ -9,6 +9,8 @@
 #include <iterator> 
 #include <stdlib.h>
 #include <stdexcept>
+#include <cstdlib>
+#include <ctime>
 #include "StringUtils.hpp"
 #include "HTTPStatus.hpp"
 
@@ -41,7 +43,7 @@ class BaseHTTPRequestHandler {
 	  	std::string GetPath() const;
 		std::vector<std::string> SplitRequest(const char* request);
 		void setBody(const std::string line);
-		
+		std::string generateRandomString(int length);
 		std::string body;
 		int contentLength;
 

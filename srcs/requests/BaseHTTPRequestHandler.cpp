@@ -175,3 +175,16 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
 	std::vector<std::string> methodsAllowed;
 	return StringUtils::Split("GET PUT POST DELETE PATCH HEAD OPTIONS TRACE CONNECT", " ");
 }
+
+std::string BaseHTTPRequestHandler::generateRandomString(int length) {
+    const std::string charset =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()-=+";
+    std::srand(static_cast<unsigned int>(std::time(NULL)));
+
+    std::string randomString;
+    for (int i = 0; i < length; ++i) {
+        int randomIndex = std::rand() % charset.length();
+        randomString += charset[randomIndex];
+    }
+    return randomString;
+}

@@ -51,12 +51,12 @@ void RequestHandler::doGET() {
 void RequestHandler::doPOST() {
     if (this->body.empty())
         return ;
-    //std::cout << "body: " << this->body << std::endl;
     std::vector<std::string> body = StringUtils::Split(this->body, "&");
     std::map<std::string, std::string> data;
     data["first_name"] = StringUtils::Split(body[0], "=")[1];
     data["last_name"] = StringUtils::Split(body[1], "=")[1];
-    JsonSerializer::save(JsonSerializer::serialize(data));
+    std::string filename = "data/" + data["first_name"] + "_" + data["last_name"] + "_" + this->generateRandomString(30) + ".json";
+    JsonSerializer::save(JsonSerializer::serialize(data), filename);
     this->body = std::string("");
     this->doGET();
 }

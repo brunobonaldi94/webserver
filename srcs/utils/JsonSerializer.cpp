@@ -30,9 +30,9 @@ std::map<std::string, std::string> JsonSerializer::deserialize(const std::string
     return result;
 }
 
-void JsonSerializer::save(std::string data)
+void JsonSerializer::save(const std::string& data, const std::string& path)
 {
-    std::ofstream output("data.json");
+    std::ofstream output(path.c_str());
     output << data;
     output.close();
 }
