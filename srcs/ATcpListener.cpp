@@ -141,6 +141,7 @@ bool ATcpListener::Init()
 
 void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 {
+	memset(this->m_buffer, 0, sizeof this->m_buffer);
 	ssize_t nbytes = recv(clientSocket, this->m_buffer, sizeof this->m_buffer, 0);
 	if (nbytes > 0)
 	{
