@@ -13,6 +13,7 @@
 #include "StringUtils.hpp"
 #include "HTTPStatus.hpp"
 #include "ServerConfig.hpp"
+#include "Headers.hpp"
 
 class BaseHTTPRequestHandler {
     public:
@@ -45,9 +46,9 @@ class BaseHTTPRequestHandler {
 		std::string getContent(const std::string path);
 	  std::string GetPath() const;
 		std::vector<std::string> getMethodsAllowedForApi() const;
-
-
+		void parseHeaders(std::vector<std::string> headers);
 		std::vector<std::string> SplitRequest(const char* request);
+		bool checkBodyLimit();
 
     private:
 		std::ostringstream headersBuffer;
@@ -56,6 +57,7 @@ class BaseHTTPRequestHandler {
 		std::string path;
 		std::string requestVersion;
 		ServerConfig *serverConfig;
+		Headers headers;
 };
 
 template <typename T>

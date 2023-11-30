@@ -29,6 +29,17 @@ void StringUtils::AdvaceOnWhiteSpace(std::string::iterator &it, std::string &fil
     }
 }
 
+std::string::iterator StringUtils::AdvaceOnWhiteSpace(std::string str)
+{
+  std::string::iterator it;
+  for (it = str.begin(); it != str.end(); it++)
+  {
+    if (std::isspace(*it))
+      continue;
+  }
+  return it;
+}
+
 void StringUtils::AdvaceOnDelimiters(std::string::iterator &it, std::string &fileContent, std::string delimeters)
 {
   for (size_t i = 0; i < delimeters.size(); i++)
@@ -95,13 +106,24 @@ std::vector<std::string> StringUtils::Split(std::string str, std::string delimit
 
 std::string StringUtils::UpperCase(std::string str)
 {
-  std::string upperCaseStr;
+  return StringUtils::ForEach(str, std::toupper);
+}
+
+std::string StringUtils::LowerCase(std::string str)
+{
+  return StringUtils::ForEach(str, std::tolower);
+}
+
+std::string StringUtils::ForEach(std::string str, int (* fun)(int))
+{
+  std::string transformedStr;
   for (size_t i = 0; i < str.size(); i++)
   {
-    upperCaseStr += std::toupper(str[i]);
+    transformedStr += fun(static_cast<int>(str[i]));
   }
-  return upperCaseStr;
+  return transformedStr;
 }
+
 
 std::string StringUtils::ExtractLine(std::string::iterator &it, std::string &fileContent)
 {
@@ -132,7 +154,25 @@ bool StringUtils::CheckNextCharAfterWhiteSpace(std::string::iterator &it, std::s
   return false;
 }
 
+std::vector<std::string> StringUtils::SplitAtFirstDelimiter(std::string str, std::string delimiters)
+{
+  std::vector<std::string> vec;
+  size_t pos = str.find_first_of(delimiters);
+  if (pos == std::string::npos)
+    return std::vector<std::string>();
+  vec.push_back(str.substr(0, pos));
+  vec.push_back(str.substr(pos + 1, str.size()));
+  return  vec;
+}
 
+
+std::string StringUtils::Trim(std::string str)
+{
+    const char* whiteSpace = " \t\n\r\f\v";
+    str.erase(str.find_last_not_of(whiteSpace) + 1);
+    str.erase(0, str.find_first_not_of(whiteSpace));
+    return str;
+}
 
 template <typename T>
 std::string StringUtils::ConvertNumberToString(T number)

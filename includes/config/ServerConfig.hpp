@@ -16,7 +16,7 @@ private:
     std::vector<std::string> _serverNames;
     std::string _errorPage;
     int errorPageCode;
-    int _maxBodySize;
+    ssize_t _maxBodySize;
     std::string _rootPath;
     std::vector<std::string> _indexFiles;
     bool _autoIndex;
@@ -37,7 +37,7 @@ public:
     std::vector<std::string> GetServerNames() const;
     std::string GetErrorPage() const;
     int GetErrorPageCode() const;
-    int GetMaxBodySize() const;
+    ssize_t GetMaxBodySize() const;
     std::string GetRootPath() const;
     std::vector<std::string> GetIndexFiles() const;
     bool GetAutoIndex() const;
@@ -49,7 +49,7 @@ public:
     void SetServerNames(std::vector<std::string> serverNames);
     void SetErrorPage(std::string errorPage);
     void SetErrorPageCode(int errorPageCode);
-    void SetMaxBodySize(int maxBodySize);
+    void SetMaxBodySize(ssize_t maxBodySize);
     void SetRootPath(std::string rootPath);
     void SetIndexFiles(std::vector<std::string> indexFiles);
     void SetAutoIndex(bool autoIndex);

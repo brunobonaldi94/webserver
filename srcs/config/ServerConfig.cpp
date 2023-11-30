@@ -49,7 +49,7 @@ int ServerConfig::GetErrorPageCode() const
     return this->errorPageCode;
 }
 
-int ServerConfig::GetMaxBodySize() const
+ssize_t ServerConfig::GetMaxBodySize() const
 {
     return this->_maxBodySize;
 }
@@ -104,7 +104,7 @@ void ServerConfig::SetErrorPageCode(int errorPageCode)
     this->errorPageCode = errorPageCode;
 }
 
-void ServerConfig::SetMaxBodySize(int maxBodySize)
+void ServerConfig::SetMaxBodySize(ssize_t maxBodySize)
 {
     this->_maxBodySize = maxBodySize;
 }

@@ -61,6 +61,19 @@ void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requ
 	this->requestVersion = requestLines[2];
 }
 
+void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> headers)
+{
+	for (std::vector<std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+	{
+		std::vector<std::string> keyValue = StringUtils::SplitAtFirstDelimiter(*it, ":");
+		if (keyValue.size() < 2)
+			continue;
+		std::string key = keyValue[0];
+		std::string value = keyValue[1];
+		this->headers.setHeader(key, value);
+	}
+}
+
 std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request) {
 	std::istringstream iss(request);
 	std::cout << request << std::endl;
@@ -70,28 +83,47 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* reques
 
 	while (std::getline(iss, line))
 	{
-			if (!line.empty() && line[line.size() - 1] == CR) {
-				  if (line.size() == 1) {
-						bodyStart = true;
-					}
-					line.erase(line.size() - 1);
-			}
-			if (bodyStart == true)
-				this->body += line;
-			else 
-				requestLines.push_back(line);
+		if (!line.empty() && line[line.size() - 1] == CR) {
+			  if (line.size() == 1) {
+					bodyStart = true;
+				}
+				line.erase(line.size() - 1);
+		}
+		if (bodyStart == true)
+			this->body += line;
+		else 
+			requestLines.push_back(line);
 	}
+	this->parseHeaders(requestLines);
 	return requestLines;
+}
+
+bool BaseHTTPRequestHandler::checkBodyLimit()
+{
+	std::string contentLength = this->headers.getHeader("Content-Length");
+	if (contentLength.empty())
+		return true;
+	ssize_t contentLengthNbr = std::atoll(contentLength.c_str());
+	ssize_t maxContentLength = this->serverConfig->GetMaxBodySize();
+	if (contentLengthNbr < 0 || contentLengthNbr > maxContentLength)
+		return false;
+	// if (this->body.size() > static_cast<size_t>(contentLengthNbr))
+	// 	return false;
+	return true;
 }
 
 BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequest(const char *request)
 {
 	try
 	{
-		std::vector<std::string> requestLines = this->SplitRequest(request);
 		std::vector<std::string> firstRequestLine;
 		std::vector<std::string> versionNumber;
-
+		std::vector<std::string> requestLines = this->SplitRequest(request);
+		if (!this->checkBodyLimit())
+		{
+			this->sendError("<h1>Request Entity Too Large</h1>", HTTPStatus::CONTENT_TOO_LARGE);
+			return NULL;
+		}
 		firstRequestLine = StringUtils::Split(requestLines[0], " ");
 		if (firstRequestLine.size() < 2 || (firstRequestLine.size() == 2 && firstRequestLine[0] != "GET"))
 		{
