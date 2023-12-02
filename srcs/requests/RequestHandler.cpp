@@ -25,6 +25,22 @@ void RequestHandler::sendJsonResponse(std::string json) {
 	this->writeContent(json);
 }
 
+std::vector<std::string> RequestHandler::getFiles(const std::string& path) {
+    std::vector<std::string> files;
+    DIR *dir;
+    struct dirent *ent;
+
+    if ((dir = opendir (path.c_str())) != NULL) {
+        while ((ent = readdir (dir)) != NULL)
+            files.push_back(ent->d_name);
+        closedir (dir);
+    } 
+    else {
+        perror ("");
+        throw std::runtime_error("Error while reading directory");
+    }
+    return files;
+}
 
 void RequestHandler::doGET() {
     std::string content;
@@ -34,8 +50,20 @@ void RequestHandler::doGET() {
         path = "/index.html";
     bool foundContent = false;
     content = this->getContent("wwwroot/" + path, foundContent);
-    if (path == "/get")
-        return this->sendJsonResponse(JsonSerializer::open("data.json"));
+    if (path == "/get") {
+        std::vector<std::string>::iterator it;
+        try {
+            std::vector<std::string> files = this->getFiles("../webserver/data");
+            for (it = files.begin(); it != files.end(); it++) {
+                if (*it != "." && *it != "..")
+                    content += "<h4><a href=/../webserver/data/"+ *it +">"+ *it +"</a></h4>";
+            }
+            foundContent = true;
+        }
+        catch (std::exception& e) {
+            return this->sendJsonResponse("{\"message\": \"" + std::string(e.what()) + "\"}");
+        }
+    }
     if (path == "/api/files")
         return this->sendJsonResponse("{\"files\": [\"file1\", \"file2\"]}");
     if (foundContent == false)
