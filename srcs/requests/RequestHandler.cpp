@@ -68,8 +68,13 @@ void RequestHandler::doGET() {
             std::vector<std::string> files = this->getFiles("../webserver/data");
             std::string value;
             for (it = files.begin(); it != files.end(); it++) {
-                if (*it != "." && *it != "..")
-                    value += renderTemplate("<h4><a href=\"{data}\"</a>{data}</h4>", *it);
+                if (*it != "." && *it != "..") {
+                    std::string label = (*it).substr(0, it->find_last_of("_"));
+                    label = renderTemplate("<h4><a href=\"{data}\"></a>{data}", label);
+                    std::string btnDelete = renderTemplate(
+                        "<a href=\"delete/{data}\" class=\"ml-5 text-red-600\">Delete</a></h4>", *it);
+                    value += (label + btnDelete);
+                }
             }
             path = "/get.html";
             content = this->getContent("wwwroot/" + path, foundContent);
