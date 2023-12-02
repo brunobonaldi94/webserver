@@ -42,6 +42,18 @@ std::vector<std::string> RequestHandler::getFiles(const std::string& path) {
     return files;
 }
 
+std::string RequestHandler::renderTemplate(const std::string& templateStr, const std::string& value) {
+    std::string placeholder = "{data}";
+    std::string result = templateStr;
+    size_t pos = result.find(placeholder);
+
+    while (pos != std::string::npos) {
+        result.replace(pos, placeholder.length(), value);
+        pos = result.find(placeholder, pos + value.length());
+    }
+    return result;
+}
+
 void RequestHandler::doGET() {
     std::string content;
     std::string path = this->GetPath();
@@ -54,11 +66,14 @@ void RequestHandler::doGET() {
         std::vector<std::string>::iterator it;
         try {
             std::vector<std::string> files = this->getFiles("../webserver/data");
+            std::string value;
             for (it = files.begin(); it != files.end(); it++) {
                 if (*it != "." && *it != "..")
-                    content += "<h4><a href=/../webserver/data/"+ *it +">"+ *it +"</a></h4>";
+                    value += renderTemplate("<h4><a href=\"{data}\"</a>{data}</h4>", *it);
             }
-            foundContent = true;
+            path = "/get.html";
+            content = this->getContent("wwwroot/" + path, foundContent);
+            content = this->renderTemplate(content, value);
         }
         catch (std::exception& e) {
             return this->sendJsonResponse("{\"message\": \"" + std::string(e.what()) + "\"}");
