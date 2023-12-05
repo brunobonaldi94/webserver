@@ -407,6 +407,12 @@ void IndexDirective::ParseDirective(std::string &line)
 void IndexDirective::PrintDirective() const
 {
     std::string index;
+    if (this->_index.size() == 0)
+    {
+        index = "No index found";
+        Logger::Debug("IndexDirective::PrintDirective", ERROR , index);
+        return ;
+    }
     for (size_t i = 0; i < this->_index.size() - 1; i++)
         index += this->_index[i] + " ";
     index += this->_index[this->_index.size() - 1];
@@ -416,6 +422,9 @@ void IndexDirective::PrintDirective() const
 void IndexDirective::FillDefaultValues()
 {
     if (this->SetDefaultFromParent())
+        return ;
+    AContext *context = this->GetParentContext();
+    if (!context || dynamic_cast<ServerContext *>(context))
         return ;
     this->_index.push_back("index.html");
 }

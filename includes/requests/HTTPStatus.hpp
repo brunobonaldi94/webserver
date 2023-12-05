@@ -22,6 +22,7 @@ class HTTPStatus {
         static StatusCode HTTP_VERSION_NOT_SUPPORTED;
         static StatusCode METHOD_NOT_ALLOWED;
         static StatusCode CONTENT_TOO_LARGE;
+        static StatusCode FORBIDDEN;
 };
 
 #endif

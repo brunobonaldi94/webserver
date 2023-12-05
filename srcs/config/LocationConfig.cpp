@@ -41,9 +41,9 @@ std::string LocationConfig::GetRootPath() const
     return this->_rootPath;
 }
 
-std::string LocationConfig::GetIndexFile() const
+std::vector<std::string> LocationConfig::GetIndexFiles() const
 {
-    return this->_indexFile;
+    return this->_indexFiles;
 }
 
 bool LocationConfig::GetAutoIndex() const
@@ -76,9 +76,9 @@ void LocationConfig::SetRootPath(std::string rootPath)
     this->_rootPath = rootPath;
 }
 
-void LocationConfig::SetIndexFile(std::string indexFile)
+void LocationConfig::SetIndexFiles(std::vector<std::string> indexFiles)
 {
-    this->_indexFile = indexFile;
+    this->_indexFiles = indexFiles;
 }
 
 void LocationConfig::SetAutoIndex(bool autoIndex)
@@ -116,7 +116,8 @@ void LocationConfig::SetValuesFromLocationContext()
     this->_rootPath = rootDirective->GetPath();
 
     IndexDirective *indexDirective = static_cast<IndexDirective *>(this->_locationContext->GetDirective("index"));
-    this->_indexFile = indexDirective->GetIndex()[0];
+    this->_indexFiles = indexDirective->GetIndex();
+    this->_indexFileNotFound = indexDirective->GetIndex().size() == 0 ? true : false;
 
     AutoIndexDirective *autoIndexDirective = static_cast<AutoIndexDirective *>(this->_locationContext->GetDirective("autoindex"));
     this->_autoIndex = autoIndexDirective->GetAutoIndex();
@@ -125,7 +126,22 @@ void LocationConfig::SetValuesFromLocationContext()
     this->allowedMethods = allowMethodsDirective->GetMethods();
 }
 
-std::string LocationConfig::GetFileFullPath() const
+std::vector<std::string> LocationConfig::GetFilesFullPath() const
 {
-    return this->_rootPath + "/" +this->_indexFile;
+    std::vector<std::string> filesFullPath;
+    for (std::vector<std::string>::const_iterator it = this->_indexFiles.begin(); it != this->_indexFiles.end(); it++)
+    {
+        filesFullPath.push_back(this->_rootPath + "/" + *it);
+    }
+    return  filesFullPath;
+}
+
+bool LocationConfig::GetIndexFileNotFound() const
+{
+    return this->_indexFileNotFound;
+}
+
+void LocationConfig::SetIndexFileNotFound(bool indexFileNotFound)
+{
+    this->_indexFileNotFound = indexFileNotFound;
 }

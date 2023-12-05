@@ -14,6 +14,7 @@
 #include "HTTPStatus.hpp"
 #include "ServerConfig.hpp"
 #include "Headers.hpp"
+#include "dirent.h"
 
 class BaseHTTPRequestHandler {
     public:
@@ -49,6 +50,7 @@ class BaseHTTPRequestHandler {
 		void parseHeaders(std::vector<std::string> headers);
 		std::vector<std::string> SplitRequest(const char* request);
 		bool checkBodyLimit();
+		std::string CreateDirectoryListing(LocationConfig *location, std::string path);
 
     private:
 		std::ostringstream headersBuffer;

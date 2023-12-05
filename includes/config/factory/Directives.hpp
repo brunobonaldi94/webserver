@@ -2,6 +2,7 @@
 
 #include "ADirective.hpp"
 #include "StringUtils.hpp"
+#include "ServerContext.hpp"
 #include "Logger.hpp"
 #include "defines.hpp"
 #include <vector>

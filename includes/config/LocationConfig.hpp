@@ -13,7 +13,8 @@ private:
     int errorPageCode;
     int _maxBodySize;
     std::string _rootPath;
-    std::string _indexFile;
+    std::vector<std::string> _indexFiles;
+    bool _indexFileNotFound;
     bool _autoIndex;
     std::vector<std::string> allowedMethods;
     void SetValuesFromLocationContext();
@@ -29,19 +30,21 @@ public:
     int GetErrorPageCode() const;
     int GetMaxBodySize() const;
     std::string GetRootPath() const;
-    std::string GetIndexFile() const;
+    std::vector<std::string> GetIndexFiles() const;
     bool GetAutoIndex() const;
     std::vector<std::string> GetAllowedMethods() const;
     std::string GetPath() const;
-    std::string GetFileFullPath() const;
+    std::vector<std::string> GetFilesFullPath() const;
+    bool GetIndexFileNotFound() const;
 
     void SetErrorPage(std::string errorPage);
     void SetErrorPageCode(int errorPageCode);
     void SetMaxBodySize(int maxBodySize);
     void SetRootPath(std::string rootPath);
-    void SetIndexFile(std::string indexFile);
+    void SetIndexFiles(std::vector<std::string> indexFiles);
     void SetAutoIndex(bool autoIndex);
     void SetAllowedMethods(std::vector<std::string> allowedMethods);
     void SetPath(std::string path);
+    void SetIndexFileNotFound(bool indexFileNotFound);
 
 };

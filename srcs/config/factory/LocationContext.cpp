@@ -8,6 +8,7 @@ LocationContext::LocationContext(): AContext(NULL, "location")
     std::string directives[] = {"listen", "server_name", "error_page", "client_max_body_size", "root", "index", "autoindex", "limit_except", "cgi"};
     ADirectiveCreator * directivesCreators[] = {NULL, NULL, new ErrorPageDirectiveCreator(), new ClientMaxBodySizeDirectiveCreator(), new RootDirectiveCreator(), new IndexDirectiveCreator(), new AutoIndexDirectiveCreator(), new LimitExceptDirectiveCreator(), NULL};
     MapUtils<std::string, ADirectiveCreator *>::FillMapFromArray(this->_allowedDirectives, directives, directivesCreators, sizeof(directives) / sizeof(std::string));
+
 };
 
 LocationContext::LocationContext(LocationContext const &other): AContext(other) {};

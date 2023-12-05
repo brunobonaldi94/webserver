@@ -189,13 +189,47 @@ std::string BaseHTTPRequestHandler::readContent(const std::string path)
   return content;
 }
 
+std::string BaseHTTPRequestHandler::CreateDirectoryListing(LocationConfig *location, std::string path)
+{
+	std::string content("<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre>");
+	std::string fullPath = location->GetRootPath() + path;
+	DIR *dir;
+	struct dirent *ent;
+	if ((dir = opendir (fullPath.c_str())) != NULL) {
+		std::string port = this->serverConfig->GetPort();
+		while ((ent = readdir (dir)) != NULL) {
+			std::string fileName(ent->d_name);
+			if (fileName == "." || fileName == "..")
+				continue;
+			content += "<a href=\"http://localhost:" + port + path + "/" + fileName + "\">" + fileName + "</a><br>";
+		}
+		closedir (dir);
+	}
+	else
+	{
+		this->sendError("<h1>Forbidden</h1>", HTTPStatus::FORBIDDEN);
+		return "";
+	}
+	content += "</pre><hr></body></html>";
+	return content;
+}
+
 std::string BaseHTTPRequestHandler::getContent(const std::string path)
 {
 	std::string content("");
 	LocationConfig *location = this->serverConfig->GetLocationConfig(path);
-	if (location == NULL || location->GetFileFullPath().empty())
+	if (location == NULL)
 		return content;
-	return this->readContent(location->GetFileFullPath());
+	if (location->GetIndexFileNotFound() && location->GetAutoIndex())
+		return this->CreateDirectoryListing(location, path);
+	std::vector <std::string> indexFiles = location->GetFilesFullPath();
+	for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); it++)
+	{
+		content = this->readContent(*it);
+		if (!content.empty())
+			return content;
+	}
+	return content;
 }
 
 BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::getMethod(const std::string& method) {
