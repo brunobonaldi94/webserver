@@ -50,7 +50,9 @@ class BaseHTTPRequestHandler {
 		void parseHeaders(std::vector<std::string> headers);
 		std::vector<std::string> SplitRequest(const char* request);
 		bool checkBodyLimit();
-		std::string CreateDirectoryListing(LocationConfig *location, std::string path);
+		std::string createDirectoryListing(LocationConfig *location, std::string path);
+		bool validateServerName();
+		bool checkRedirect();
 
     private:
 		std::ostringstream headersBuffer;

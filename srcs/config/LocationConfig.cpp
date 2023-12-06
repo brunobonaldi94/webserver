@@ -1,6 +1,6 @@
 #include "LocationConfig.hpp"
 
-LocationConfig::LocationConfig(LocationContext *locationContext): _locationContext(locationContext)
+LocationConfig::LocationConfig(LocationContext *locationContext): _locationContext(locationContext), _returnCode(-1)
 {
     this->SetValuesFromLocationContext();
 }
@@ -124,6 +124,10 @@ void LocationConfig::SetValuesFromLocationContext()
 
     LimitExceptDirective *allowMethodsDirective = static_cast<LimitExceptDirective *>(this->_locationContext->GetDirective("limit_except"));
     this->allowedMethods = allowMethodsDirective->GetMethods();
+
+    ReturnDirective *returnDirective = static_cast<ReturnDirective *>(this->_locationContext->GetDirective("return"));
+    this->_returnCode = std::atoi(returnDirective->GetCode().c_str());
+    this->_returnPath = returnDirective->GetPath();
 }
 
 std::vector<std::string> LocationConfig::GetFilesFullPath() const
@@ -144,4 +148,44 @@ bool LocationConfig::GetIndexFileNotFound() const
 void LocationConfig::SetIndexFileNotFound(bool indexFileNotFound)
 {
     this->_indexFileNotFound = indexFileNotFound;
+}
+
+int LocationConfig::GetReturnCode() const
+{
+    return this->_returnCode;
+}
+
+void LocationConfig::SetReturnCode(int returnCode)
+{
+    this->_returnCode = returnCode;
+}
+
+bool LocationConfig::ShouldRedirect() const
+{
+    return this->_returnCode != -1;
+}
+
+StatusCode LocationConfig::ReturnRedirectStatus() const
+{
+    if (this->_returnCode == 301)
+        return HTTPStatus::MOVED_PERMANENTLY;
+    else if (this->_returnCode == 302)
+        return HTTPStatus::FOUND;
+    else if (this->_returnCode == 303)
+        return HTTPStatus::SEE_OTHER;
+    else if (this->_returnCode == 307)
+        return HTTPStatus::TEMPORARY_REDIRECT;
+    else if (this->_returnCode == 308)
+        return HTTPStatus::PERMANENT_REDIRECT;
+    return HTTPStatus::INTERNAL_SERVER_ERROR;
+}
+
+std::string LocationConfig::GetReturnPath() const
+{
+    return this->_returnPath;
+}
+
+void LocationConfig::SetReturnPath(std::string returnPath)
+{
+    this->_returnPath = returnPath;
 }

@@ -3,6 +3,7 @@
 #include "ADirective.hpp"
 #include "StringUtils.hpp"
 #include "ServerContext.hpp"
+#include "HTTPStatus.hpp"
 #include "Logger.hpp"
 #include "defines.hpp"
 #include <vector>
@@ -187,6 +188,31 @@ public:
     std::string GetBinaryPath() const;
     bool ValidateExtension(std::string extension) const;
 
+    void ParseDirective(std::string &line);
+    void PrintDirective() const;
+    void FillDefaultValues();
+    bool SetDefaultFromParent();
+};
+
+class ReturnDirective : public ADirective
+{
+private:
+    std::string _code;
+    std::string _path;
+public:
+    ReturnDirective();
+    ~ReturnDirective();
+    ReturnDirective(ReturnDirective const & other);
+    ReturnDirective& operator=(ReturnDirective const & other);
+
+    void SetCode(int code);
+    void SetPath(std::string path);
+
+    std::string GetCode() const;
+    std::string GetPath() const;
+
+    bool ValidateCode(std::string code) const;
+    bool ValidatePath(std::string path) const;
     void ParseDirective(std::string &line);
     void PrintDirective() const;
     void FillDefaultValues();

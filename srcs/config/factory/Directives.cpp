@@ -211,25 +211,7 @@ std::string ErrorPageDirective::GetPath() const
 
 bool ErrorPageDirective::ValidateCode(std::string code) const
 {
-    for (size_t i = 0; i < code.size(); i++)
-    {
-        if (!isdigit(code[i]))
-            return false;
-    }
-    int codeNumber = std::atoi(code.c_str());
-    int httpStatusCodes[] = {100, 101, 102, 103, 200, 201, 202, 203, 204, 205,
-                            206, 207, 208, 226, 300, 301, 302, 303, 304, 305,
-                            306, 307, 308, 400, 401, 402, 403, 404, 405, 406,
-                            407, 408, 409, 410, 411, 412, 413, 414, 415, 416,
-                            417, 418, 421, 422, 423, 424, 425, 426, 428, 429,
-                            431, 451, 500, 501, 502, 503, 504, 505, 506, 507,
-                            508, 510, 511};
-    for (size_t i = 0; i < sizeof(httpStatusCodes) / sizeof(int); i++)
-    {
-        if (codeNumber == httpStatusCodes[i])
-            return true;
-    }
-    return false;
+    return HTTPStatus::validateStatusCode(code);
 }
 
 
@@ -759,5 +741,100 @@ bool CgiDirective::SetDefaultFromParent()
         return false;
     this->_extension = cgiDirective->GetExtension();
     this->_binaryPath = cgiDirective->GetBinaryPath();
+    return true;
+}
+
+ReturnDirective::ReturnDirective(): _code("-1"), _path("")
+{
+}
+
+ReturnDirective::ReturnDirective(ReturnDirective const & other)
+{
+    *this = other;
+}
+
+ReturnDirective::~ReturnDirective()
+{
+}
+
+ReturnDirective& ReturnDirective::operator=(ReturnDirective const & other)
+{
+    if (this != &other)
+    {
+        this->_code = other._code;
+        this->_path = other._path;
+    }
+    return (*this);
+}
+
+void ReturnDirective::SetCode(int code)
+{
+    this->_code = code;
+}
+
+void ReturnDirective::SetPath(std::string path)
+{
+    this->_path = path;
+}
+
+std::string ReturnDirective::GetCode() const
+{
+    return this->_code;
+}
+
+std::string ReturnDirective::GetPath() const
+{
+    return this->_path;
+}
+
+bool ReturnDirective::ValidateCode(std::string code) const
+{
+    int redirectStatusCodes[] = {301, 302, 303, 307, 308};
+    return HTTPStatus::validateStatusCode(code, redirectStatusCodes, sizeof(redirectStatusCodes) / sizeof(int));
+}
+
+bool ReturnDirective::ValidatePath(std::string path) const
+{
+    if (path[0] != '/')
+        return false;
+    return true;
+}
+
+void ReturnDirective::PrintDirective() const
+{
+    std::string msg = "code: " + this->_code + " path: " + this->_path;
+    Logger::Debug("ReturnDirective::PrintDirective", SUCCESS, msg);
+}
+
+void ReturnDirective::ParseDirective(std::string &line)
+{
+
+    ADirective::ParseDirective(line);
+    std::vector<std::string> tokens = StringUtils::Split(line, SPACE);
+    if (tokens.size() != 2 && !this->ValidateCode(tokens[0]) && !this->ValidatePath(tokens[1]))
+        throw SyntaxErrorException("Invalid return directive - " + line);
+    this->_code = tokens[0];
+    this->_path = tokens[1];
+}
+
+void ReturnDirective::FillDefaultValues()
+{
+   this->SetDefaultFromParent();
+}
+
+bool ReturnDirective::SetDefaultFromParent()
+{
+    AContext *parent = this->GetContextUpToLevel(2);
+    if (!parent)
+        return false;
+    MapDirectives directives = parent->GetDirectives();
+    PairDirectives *parentReturnDirective = MapUtils<std::string, ADirective* >::SafeFindMap(directives, "return");
+    if (parentReturnDirective == NULL)
+        return false;
+    ReturnDirective *returnDirective = dynamic_cast<ReturnDirective *>(parentReturnDirective->second);
+    if (!returnDirective)
+        return false;
+    this->_code = returnDirective->GetCode();
+    this->_path = returnDirective->GetPath();
     return true;
 }

@@ -112,6 +112,43 @@ bool BaseHTTPRequestHandler::checkBodyLimit()
 	return true;
 }
 
+bool BaseHTTPRequestHandler::validateServerName()
+{
+	std::string host = this->headers.getHeader("Host");
+	if (host.empty())
+		return false;
+	std::vector<std::string> hostParts = StringUtils::Split(host, ":");
+	if (hostParts.size() < 2)
+		return false;
+	std::string serverName = hostParts[0];
+	std::string port = hostParts[1];
+	std::string portServer = this->serverConfig->GetPort();
+	if (portServer != port)
+		return false;
+	std::vector<std::string> serverNames = this->serverConfig->GetServerNames();
+	for (std::vector<std::string>::iterator it = serverNames.begin(); it != serverNames.end(); it++)
+	{
+		if (*it == serverName)
+			return true;
+	}
+	return false;
+}
+
+bool BaseHTTPRequestHandler::checkRedirect()
+{
+	std::string path = this->path;
+	LocationConfig *location = this->serverConfig->GetLocationConfig(path);
+	if (location == NULL || location->ShouldRedirect() == false)
+		return false;
+	StatusCode status = location->ReturnRedirectStatus();
+	this->sendResponse(status.code, status.description);
+	std::string locationStr = location->GetReturnPath();
+	this->sendHeader("Location", locationStr);
+	this->endHeaders();
+	this->path = locationStr;
+	return true;
+}
+
 BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequest(const char *request)
 {
 	try
@@ -119,6 +156,11 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		std::vector<std::string> firstRequestLine;
 		std::vector<std::string> versionNumber;
 		std::vector<std::string> requestLines = this->SplitRequest(request);
+		if (!this->validateServerName())
+		{
+			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+			return NULL;
+		}
 		if (!this->checkBodyLimit())
 		{
 			this->sendError("<h1>Request Entity Too Large</h1>", HTTPStatus::CONTENT_TOO_LARGE);
@@ -150,6 +192,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		}
 		this->requestMethod = firstRequestLine[0];
 		this->path = firstRequestLine[1];
+		this->checkRedirect();
 		std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
 		if (methodsAllowed.size() == 0)
 		{
@@ -189,7 +232,7 @@ std::string BaseHTTPRequestHandler::readContent(const std::string path)
   return content;
 }
 
-std::string BaseHTTPRequestHandler::CreateDirectoryListing(LocationConfig *location, std::string path)
+std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *location, std::string path)
 {
 	std::string content("<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre>");
 	std::string fullPath = location->GetRootPath() + path;
@@ -221,7 +264,7 @@ std::string BaseHTTPRequestHandler::getContent(const std::string path)
 	if (location == NULL)
 		return content;
 	if (location->GetIndexFileNotFound() && location->GetAutoIndex())
-		return this->CreateDirectoryListing(location, path);
+		return this->createDirectoryListing(location, path);
 	std::vector <std::string> indexFiles = location->GetFilesFullPath();
 	for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); it++)
 	{

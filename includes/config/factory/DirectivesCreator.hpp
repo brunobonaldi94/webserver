@@ -110,3 +110,15 @@ public:
 
     ADirective *CreateDirective() const;
 };
+
+class ReturnDirectiveCreator : public ADirectiveCreator
+{
+public:
+    ReturnDirectiveCreator();
+    ReturnDirectiveCreator(ReturnDirectiveCreator const & other);
+    ~ReturnDirectiveCreator();
+
+    ReturnDirectiveCreator& operator=(ReturnDirectiveCreator const & other);
+
+    ADirective *CreateDirective() const;
+};

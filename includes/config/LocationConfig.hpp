@@ -17,6 +17,8 @@ private:
     bool _indexFileNotFound;
     bool _autoIndex;
     std::vector<std::string> allowedMethods;
+    int _returnCode;
+    std::string _returnPath;
     void SetValuesFromLocationContext();
 
 public:
@@ -36,6 +38,8 @@ public:
     std::string GetPath() const;
     std::vector<std::string> GetFilesFullPath() const;
     bool GetIndexFileNotFound() const;
+    int GetReturnCode() const;
+    std::string GetReturnPath() const;
 
     void SetErrorPage(std::string errorPage);
     void SetErrorPageCode(int errorPageCode);
@@ -46,5 +50,9 @@ public:
     void SetAllowedMethods(std::vector<std::string> allowedMethods);
     void SetPath(std::string path);
     void SetIndexFileNotFound(bool indexFileNotFound);
+    void SetReturnCode(int returnCode);
+    bool ShouldRedirect() const;
+    StatusCode ReturnRedirectStatus() const;
+    void SetReturnPath(std::string returnPath);
 
 };
