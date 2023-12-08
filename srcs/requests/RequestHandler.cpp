@@ -72,7 +72,7 @@ void RequestHandler::doGET() {
                     std::string label = (*it).substr(0, it->find_last_of("_"));
                     label = renderTemplate("<h4><a href=\"{data}\"></a>{data}", label);
                     std::string btnDelete = renderTemplate(
-                        "<a href=\"delete/{data}\" class=\"ml-5 text-red-600\">Delete</a></h4>", *it);
+                        "<a href=\"#\" onclick=\"deleteRecord('{data}')\" id=\"deleteLink\" class=\"ml-5 text-red-600\">Delete</a></h4>", *it);
                     value += (label + btnDelete);
                 }
             }
@@ -111,7 +111,6 @@ void RequestHandler::doPOST() {
 
 void RequestHandler::doDELETE() {
     std::string path = this->GetPath();
-    if (path == "/api/files/file1" || path == "/api/files/file2")
-        return this->sendJsonResponse("{\"message\": \"File deleted\"}");
+    std::string filename = path.substr(path.find_last_of("/") + 1);
+    std::remove(("../webserver/data/" + filename).c_str());
 }
-

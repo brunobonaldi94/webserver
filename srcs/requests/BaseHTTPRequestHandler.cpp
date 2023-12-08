@@ -178,7 +178,7 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
 
 std::string BaseHTTPRequestHandler::generateRandomString(int length) {
     const std::string charset =
-        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()-=+";
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     std::srand(static_cast<unsigned int>(std::time(NULL)));
 
     std::string randomString;
