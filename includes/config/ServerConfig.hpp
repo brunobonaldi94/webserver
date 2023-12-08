@@ -57,5 +57,6 @@ public:
     void SetCgiExtension(std::string cgiExtension);
 
     LocationConfig * GetLocationConfig(std::string path);
+     std::vector<LocationConfig *> GetLocationConfigs();
 
 };

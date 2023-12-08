@@ -181,3 +181,8 @@ LocationConfig *ServerConfig::GetLocationConfig(std::string path)
   }
   return NULL;
 }
+
+std::vector<LocationConfig *> ServerConfig::GetLocationConfigs()
+{
+  return this->_locations;
+}

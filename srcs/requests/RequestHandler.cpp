@@ -31,7 +31,7 @@ void RequestHandler::doGET() {
     if (path == "/api/files")
         return this->sendJsonResponse("{\"files\": [\"file1\", \"file2\"]}");
     std::string content = this->getContent(path);
-    if (content.empty())
+    if (this->contentNotFound)
         return this->sendNotFoundError();
     this->sendResponse(HTTPStatus::OK.code, HTTPStatus::OK.description);
 	this->sendHeader("Cache-Control", "no-cache, private");

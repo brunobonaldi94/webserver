@@ -18,6 +18,7 @@
 
 class BaseHTTPRequestHandler {
     public:
+		BaseHTTPRequestHandler();
 		virtual ~BaseHTTPRequestHandler();
 
 		typedef void (BaseHTTPRequestHandler::*RequestMethodFunction)(void);
@@ -53,6 +54,9 @@ class BaseHTTPRequestHandler {
 		std::string createDirectoryListing(LocationConfig *location, std::string path);
 		bool validateServerName();
 		bool checkRedirect();
+		bool isDirectoryListingAllowed(std::string path);
+		bool isInDirectory(std::string path, std::string directory);
+		bool contentNotFound;
 
     private:
 		std::ostringstream headersBuffer;
@@ -61,6 +65,8 @@ class BaseHTTPRequestHandler {
 		std::string path;
 		std::string requestVersion;
 		ServerConfig *serverConfig;
+		bool allowDirectoryListing;
+		std::string directoryListingPath;
 		Headers headers;
 };
 

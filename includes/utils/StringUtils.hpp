@@ -27,4 +27,6 @@ public:
   static std::string ConvertNumberToString(T number);
   static std::vector<std::string> SplitAtFirstDelimiter(std::string str, std::string delimiters);
   static std::string Trim(std::string str);
+  static size_t CountChar(std::string str, char c);
+  static size_t FindNthOccurrence(std::string str, char c, size_t n);
 };

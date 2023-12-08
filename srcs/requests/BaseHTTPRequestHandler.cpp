@@ -1,6 +1,8 @@
 #include "BaseHTTPRequestHandler.hpp"
 
 
+BaseHTTPRequestHandler::BaseHTTPRequestHandler() : allowDirectoryListing(false) {}
+
 BaseHTTPRequestHandler::~BaseHTTPRequestHandler() {}
 
 void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message) {
@@ -172,7 +174,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 			return NULL;
 		}
-		this->setRequestLines(firstRequestLine);	
+		this->setRequestLines(firstRequestLine);
 		std::string baseVersion = "HTTP/";
 		if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
 			throw std::invalid_argument("");
@@ -193,6 +195,8 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		this->requestMethod = firstRequestLine[0];
 		this->path = firstRequestLine[1];
 		this->checkRedirect();
+		if (isDirectoryListingAllowed(this->path) && this->requestMethod == "GET")
+			return this->getMethod("GET");
 		std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
 		if (methodsAllowed.size() == 0)
 		{
@@ -228,6 +232,8 @@ std::string BaseHTTPRequestHandler::readContent(const std::string path)
 		std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 		content = str;
 	}
+	else
+		this->contentNotFound = true; 
   f.close();
   return content;
 }
@@ -238,9 +244,11 @@ std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *locat
 	std::string fullPath = location->GetRootPath() + path;
 	DIR *dir;
 	struct dirent *ent;
-	if ((dir = opendir (fullPath.c_str())) != NULL) {
+	if ((dir = opendir (fullPath.c_str())) != NULL)
+	{
 		std::string port = this->serverConfig->GetPort();
-		while ((ent = readdir (dir)) != NULL) {
+		while ((ent = readdir (dir)) != NULL)
+		{
 			std::string fileName(ent->d_name);
 			if (fileName == "." || fileName == "..")
 				continue;
@@ -257,10 +265,56 @@ std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *locat
 	return content;
 }
 
+bool BaseHTTPRequestHandler::isInDirectory(std::string path, std::string directory)
+{
+	DIR *dir;
+	struct dirent *ent;
+
+	if ((dir = opendir (directory.c_str())) != NULL) 
+	{
+		std::string fileNameFromPath = StringUtils::Split(path, "/").back();
+		while ((ent = readdir (dir)) != NULL)
+		{
+			std::string fileName(ent->d_name);
+			if (fileName == fileNameFromPath)
+				return true;
+		}
+		closedir (dir);
+	}
+	return false;
+}
+
+bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
+{
+	std::vector<LocationConfig *> locations = this->serverConfig->GetLocationConfigs();
+	for (std::vector<LocationConfig *>::iterator it = locations.begin(); it != locations.end(); it++)
+	{
+		std::string locationPath = (*it)->GetPath();
+		if (locationPath == "/" && (*it)->GetAutoIndex() == true && path == "/")
+			return true;
+		size_t countSlashs = StringUtils::CountChar(locationPath, '/');
+		size_t findNthSlashOcurrence = StringUtils::FindNthOccurrence(path, '/', countSlashs + 1);
+		std::string pathToCompare = path.substr(0, findNthSlashOcurrence);
+		if (pathToCompare == locationPath && locationPath != path && (*it)->GetAutoIndex() == true)
+		{
+			std::string directory = (*it)->GetRootPath() + locationPath;
+			this->allowDirectoryListing = this->isInDirectory(path, directory);
+			this->directoryListingPath = (*it)->GetRootPath() + path;
+			return this->allowDirectoryListing;
+		}
+	}
+	return false;
+}
+
 std::string BaseHTTPRequestHandler::getContent(const std::string path)
 {
 	std::string content("");
 	LocationConfig *location = this->serverConfig->GetLocationConfig(path);
+	if (this->allowDirectoryListing)
+	{
+		this->allowDirectoryListing = false;
+		return this->readContent(this->directoryListingPath);
+	}
 	if (location == NULL)
 		return content;
 	if (location->GetIndexFileNotFound() && location->GetAutoIndex())

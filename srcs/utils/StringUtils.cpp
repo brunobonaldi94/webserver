@@ -174,6 +174,33 @@ std::string StringUtils::Trim(std::string str)
     return str;
 }
 
+size_t StringUtils::CountChar(std::string str, char c)
+{
+  size_t count = 0;
+  for (size_t i = 0; i < str.size(); i++)
+  {
+    if (str[i] == c)
+      count++;
+  }
+  return count;
+}
+
+size_t StringUtils::FindNthOccurrence(std::string str, char c, size_t n)
+{
+  size_t occurrences = n;
+  if (n == 0)
+    return std::string::npos;
+  for (size_t i = 0; i < str.size(); i++)
+  {
+    if (str[i] == c)
+      occurrences--;
+    if (occurrences == 0)
+      return i;
+  }
+  return std::string::npos;
+}
+
+
 template <typename T>
 std::string StringUtils::ConvertNumberToString(T number)
 {
