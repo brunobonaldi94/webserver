@@ -72,7 +72,7 @@ void RequestHandler::doGET() {
                     std::string label = (*it).substr(0, it->find_last_of("_"));
                     label = renderTemplate("<h4><a href=\"{data}\"></a>{data}", label);
                     std::string btnDelete = renderTemplate(
-                        "<a href=\"#\" onclick=\"deleteRecord('{data}')\" id=\"deleteLink\" class=\"ml-5 text-red-600\">Delete</a></h4>", *it);
+                        "<a href=\"/get\" onclick=\"deleteRecord('{data}')\" id=\"deleteLink\" class=\"ml-5 text-red-600\">Delete</a></h4>", *it);
                     value += (label + btnDelete);
                 }
             }
