@@ -70,6 +70,8 @@ void RequestHandler::doGET() {
             for (it = files.begin(); it != files.end(); it++) {
                 if (*it != "." && *it != "..") {
                     std::string label = (*it).substr(0, it->find_last_of("_"));
+                    std::vector<std::string> labelSplited = StringUtils::Split(label, "_");
+                    label = labelSplited[0] + " " + labelSplited[1];
                     label = renderTemplate("<h4><a href=\"{data}\"></a>{data}", label);
                     std::string btnDelete = renderTemplate(
                         "<a href=\"/get\" onclick=\"deleteRecord('{data}')\" id=\"deleteLink\" class=\"ml-5 text-red-600\">Delete</a></h4>", *it);
