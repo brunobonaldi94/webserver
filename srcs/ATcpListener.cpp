@@ -62,7 +62,7 @@ int ATcpListener::GetListenerSocket(ServerConfig * serverConfig)
 				return -1;
     if (listen(listener, SOMAXCONN) == -1)
         return -1;
-		Logger::Log(INFO, "Listening on host - " + serverConfig->GetHost() + ":" + serverConfig->GetPort());
+		Logger::Log(INFO, "Listening on host - http://" + serverConfig->GetHost() + ":" + serverConfig->GetPort());
     return listener;
 }
 

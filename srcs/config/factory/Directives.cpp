@@ -79,7 +79,7 @@ void ListenDirective::ParseDirective(std::string &line)
         throw SyntaxErrorException("No host:port specified");
     if (hostPort.size() == 1 && this->ValidatePort(hostPort[0]))
     {
-        this->_host = "0.0.0.0";
+        this->_host = "127.0.0.1";
         this->_port = hostPort[0];
     }
     else if (hostPort.size() == 1 && this->ValidateHost(hostPort[0]))
@@ -105,7 +105,7 @@ void ListenDirective::PrintDirective() const
 void ListenDirective::FillDefaultValues()
 {
     this->_port = "80";
-    this->_host = "0.0.0.0";
+    this->_host = "127.0.0.1";
 }
 
 ServerNameDirective::ServerNameDirective()

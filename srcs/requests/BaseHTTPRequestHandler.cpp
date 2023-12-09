@@ -127,12 +127,11 @@ bool BaseHTTPRequestHandler::validateServerName()
 	if (portServer != port)
 		return false;
 	std::vector<std::string> serverNames = this->serverConfig->GetServerNames();
-	for (std::vector<std::string>::iterator it = serverNames.begin(); it != serverNames.end(); it++)
-	{
-		if (*it == serverName)
-			return true;
-	}
-	return false;
+	bool hasServer = VectorUtils<std::string>::hasElement(serverNames, serverName);
+	bool isLocalhost = serverName == "localhost" || serverName == "127.0.0.1";
+	bool hasLocalhost = VectorUtils<std::string>::hasElement(serverNames, std::string("localhost")) 
+		|| VectorUtils<std::string>::hasElement(serverNames, std::string("127.0.0.1"));
+	return hasServer || (isLocalhost && hasLocalhost); 
 }
 
 bool BaseHTTPRequestHandler::checkRedirect()
