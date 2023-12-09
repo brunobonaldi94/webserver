@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
 			if (!configParser.ParseConfigFile())
 				return ERROR_CODE;
 			std::vector<ServerConfig *> serverConfigs = configParser.CreateServerConfigs();
-			RequestHandler requestHandler;
+			ADirectoryHandler *directoryHandler = new DirectoryHandler();
+			RequestHandler requestHandler(directoryHandler);
 			WebServer webServ(requestHandler, serverConfigs);
 			if (!webServ.Init())
 				return ERROR_CODE;

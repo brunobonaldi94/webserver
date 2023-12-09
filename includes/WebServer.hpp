@@ -9,7 +9,7 @@ class WebServer : public ATcpListener
 	public:
 
 	WebServer(RequestHandler requestHandler, std::vector<ServerConfig *> serverConfigs);
-
+	~WebServer();
 
 	protected:
 

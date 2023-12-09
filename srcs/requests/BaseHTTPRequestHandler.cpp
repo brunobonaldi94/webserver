@@ -1,9 +1,14 @@
 #include "BaseHTTPRequestHandler.hpp"
 
 
-BaseHTTPRequestHandler::BaseHTTPRequestHandler() : allowDirectoryListing(false) {}
+BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler) :_directoryHandler(directoryHandler),  allowDirectoryListing(false), contentNotFound(false)
+{
 
-BaseHTTPRequestHandler::~BaseHTTPRequestHandler() {}
+}
+
+BaseHTTPRequestHandler::~BaseHTTPRequestHandler()
+{
+}
 
 void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message) {
 	this->headersBuffer << "HTTP/1.1 " << statusCode << " " << message << CRLF;
@@ -31,11 +36,7 @@ void BaseHTTPRequestHandler::setServerConfig(ServerConfig *serverConfig) {
 
 void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status) {
   this->sendResponse(status.code, status.description);
-	this->sendHeader("Cache-Control", "no-cache, private");
-	this->sendHeader("Content-Type", "text/html");
-	this->sendHeader("Content-Length", content.size());
-	this->endHeaders();
-	this->writeContent(content);
+	this->writeDefaultResponse(content);
 }
 
 void BaseHTTPRequestHandler::sendNotFoundError()
@@ -109,8 +110,6 @@ bool BaseHTTPRequestHandler::checkBodyLimit()
 	ssize_t maxContentLength = this->serverConfig->GetMaxBodySize();
 	if (contentLengthNbr < 0 || contentLengthNbr > maxContentLength)
 		return false;
-	// if (this->body.size() > static_cast<size_t>(contentLengthNbr))
-	// 	return false;
 	return true;
 }
 
@@ -240,49 +239,37 @@ std::string BaseHTTPRequestHandler::readContent(const std::string path)
 
 std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *location, std::string path)
 {
-	std::string content("<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre>");
+	struct stat sb;
+
+	std::string content("<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><pre>");
+	content += "<table style=\"width: 25%;text-align: justify;\"><thead><tr><th>Name</th><th>Size</th><th>Last Modified</th></tr></thead>";
+	content += "<tbody>";
+
+	std::string port = this->serverConfig->GetPort();
 	std::string fullPath = location->GetRootPath() + path;
-	DIR *dir;
-	struct dirent *ent;
-	if ((dir = opendir (fullPath.c_str())) != NULL)
-	{
-		std::string port = this->serverConfig->GetPort();
-		while ((ent = readdir (dir)) != NULL)
-		{
-			std::string fileName(ent->d_name);
-			if (fileName == "." || fileName == "..")
-				continue;
-			content += "<a href=\"http://localhost:" + port + path + "/" + fileName + "\">" + fileName + "</a><br>";
-		}
-		closedir (dir);
-	}
-	else
+	bool directoryExists = false;
+	std::vector<std::string> files = this->_directoryHandler->getFilesInDirectory(fullPath, directoryExists);
+	if (directoryExists == false)
 	{
 		this->sendError("<h1>Forbidden</h1>", HTTPStatus::FORBIDDEN);
 		return "";
 	}
-	content += "</pre><hr></body></html>";
+	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
+	{
+		std::string fileName = *it;
+		std::string filePath = fullPath + "/" + fileName;
+		if (this->_directoryHandler->getFileStat(filePath.c_str(), &sb) == false)
+			continue;
+		if (S_ISDIR(sb.st_mode))
+			fileName += "/";
+		content +=  "<tr><td><a href=\"http://localhost:" + port + path + "/" + fileName + "\">" + fileName + "</a><td>";
+		content += StringUtils::ConvertNumberToString(sb.st_size) + "</td>";
+		content += "<td>" + this->_directoryHandler->getLastModified(sb) + "</td></tr>";
+	}
+	content += "</tbody></pre><hr></table></body></html>";
 	return content;
 }
 
-bool BaseHTTPRequestHandler::isInDirectory(std::string path, std::string directory)
-{
-	DIR *dir;
-	struct dirent *ent;
-
-	if ((dir = opendir (directory.c_str())) != NULL) 
-	{
-		std::string fileNameFromPath = StringUtils::Split(path, "/").back();
-		while ((ent = readdir (dir)) != NULL)
-		{
-			std::string fileName(ent->d_name);
-			if (fileName == fileNameFromPath)
-				return true;
-		}
-		closedir (dir);
-	}
-	return false;
-}
 
 bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 {
@@ -298,7 +285,7 @@ bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 		if (pathToCompare == locationPath && locationPath != path && (*it)->GetAutoIndex() == true)
 		{
 			std::string directory = (*it)->GetRootPath() + locationPath;
-			this->allowDirectoryListing = this->isInDirectory(path, directory);
+			this->allowDirectoryListing = this->_directoryHandler->isInDirectory(path, directory);
 			this->directoryListingPath = (*it)->GetRootPath() + path;
 			return this->allowDirectoryListing;
 		}
@@ -345,7 +332,6 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowedForApi() const
 	std::vector<std::string> api = StringUtils::Split(path, "/");
 	if (api.size() < 3 || (api[1] != "api" && api[2] != "files"))
 		return methodsAllowed;
-	
 	if (api.size() == 3)
 	{
 		methodsAllowed.push_back("GET");
@@ -367,4 +353,18 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
 	if (location == NULL)
 		return methodsAllowed;
 	return location->GetAllowedMethods();
+}
+
+void BaseHTTPRequestHandler::writeDefaultResponse(std::string content, std::string content_type) 
+{
+	this->sendHeader("Cache-Control", "no-cache, private");
+	this->sendHeader("Content-Type", content_type);
+	this->sendHeader("Content-Length", content.size());
+	this->endHeaders();
+	this->writeContent(content);
+}
+
+bool BaseHTTPRequestHandler::getContentNotFound() const
+{
+	return this->contentNotFound;
 }

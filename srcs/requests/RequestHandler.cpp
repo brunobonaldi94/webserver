@@ -1,10 +1,17 @@
 #include "RequestHandler.hpp"
 
-RequestHandler::RequestHandler(){
+RequestHandler::RequestHandler(ADirectoryHandler *directoryHandler)
+: BaseHTTPRequestHandler(directoryHandler)
+{
 
 }
 
-RequestHandler::RequestHandler(const RequestHandler& other) {
+RequestHandler::~RequestHandler()
+{
+}
+
+RequestHandler::RequestHandler(const RequestHandler& other): BaseHTTPRequestHandler(other._directoryHandler)
+{
     (void) other;
 }
 
@@ -31,14 +38,10 @@ void RequestHandler::doGET() {
     if (path == "/api/files")
         return this->sendJsonResponse("{\"files\": [\"file1\", \"file2\"]}");
     std::string content = this->getContent(path);
-    if (this->contentNotFound)
+    if (this->getContentNotFound())
         return this->sendNotFoundError();
     this->sendResponse(HTTPStatus::OK.code, HTTPStatus::OK.description);
-	this->sendHeader("Cache-Control", "no-cache, private");
-	this->sendHeader("Content-Type", "text/html");
-	this->sendHeader("Content-Length", content.size());
-	this->endHeaders();
-	this->writeContent(content);
+    this->writeDefaultResponse(content);
 }
 
 void RequestHandler::doPOST() {

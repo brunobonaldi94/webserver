@@ -3,9 +3,11 @@
 
 #include "BaseHTTPRequestHandler.hpp"
 
-class RequestHandler : public BaseHTTPRequestHandler {
+class RequestHandler : public BaseHTTPRequestHandler
+{
     public:
-		RequestHandler();
+		RequestHandler(ADirectoryHandler *directoryHandler);
+		~RequestHandler();
 		RequestHandler(const RequestHandler& other);
 		RequestHandler& operator=(const RequestHandler& other);
 

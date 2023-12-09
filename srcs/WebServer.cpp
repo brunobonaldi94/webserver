@@ -12,6 +12,11 @@ WebServer::WebServer(RequestHandler requestHandler, std::vector<ServerConfig *> 
 {
 }
 
+WebServer::~WebServer()
+{
+	this->requestHandler.~RequestHandler();
+}
+
 // Handler for when a message is received from the client
 void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, const char* msg)
 {

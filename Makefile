@@ -29,13 +29,14 @@ BASE_SRCS :=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/log/Logger.cpp \
 							$(SRCS_DIR)/utils/StringUtils.cpp \
 							$(SRCS_DIR)/utils/Conversor.cpp \
+							$(SRCS_DIR)/utils/DirectoryHandler.cpp \
 							$(SRCS_DIR)/errors/NotAllowedException.cpp \
 							$(SRCS_DIR)/errors/NotFoundException.cpp \
 							$(SRCS_DIR)/errors/SyntaxErrorException.cpp \
 							$(SRCS_DIR)/requests/BaseHTTPRequestHandler.cpp \
 							$(SRCS_DIR)/requests/RequestHandler.cpp \
 							$(SRCS_DIR)/requests/HTTPStatus.cpp \
-							$(SRCS_DIR)/requests/Headers.cpp
+							$(SRCS_DIR)/requests/Headers.cpp \
 
 SRCS = $(BASE_SRCS) $(SRCS_DIR)/main.cpp
 

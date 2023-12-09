@@ -10,15 +10,17 @@
 #include <iterator> 
 #include <stdlib.h>
 #include <stdexcept>
+#include <dirent.h>
+#include <sys/stat.h>
 #include "StringUtils.hpp"
 #include "HTTPStatus.hpp"
 #include "ServerConfig.hpp"
 #include "Headers.hpp"
-#include "dirent.h"
+#include "DirectoryHandler.hpp"
 
 class BaseHTTPRequestHandler {
     public:
-		BaseHTTPRequestHandler();
+		BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler);
 		virtual ~BaseHTTPRequestHandler();
 
 		typedef void (BaseHTTPRequestHandler::*RequestMethodFunction)(void);
@@ -29,6 +31,7 @@ class BaseHTTPRequestHandler {
 		void clearHeadersBuffers();
 		ServerConfig *getServerConfig() const;
 		void setServerConfig(ServerConfig *serverConfig);
+		bool getContentNotFound() const;
 	
 		virtual void doGET() = 0;
 		virtual void doPOST() = 0;
@@ -56,7 +59,8 @@ class BaseHTTPRequestHandler {
 		bool checkRedirect();
 		bool isDirectoryListingAllowed(std::string path);
 		bool isInDirectory(std::string path, std::string directory);
-		bool contentNotFound;
+		void writeDefaultResponse(std::string content, std::string mimeType = "text/html");
+		ADirectoryHandler *_directoryHandler;
 
     private:
 		std::ostringstream headersBuffer;
@@ -65,8 +69,9 @@ class BaseHTTPRequestHandler {
 		std::string path;
 		std::string requestVersion;
 		ServerConfig *serverConfig;
-		bool allowDirectoryListing;
 		std::string directoryListingPath;
+		bool allowDirectoryListing;
+		bool contentNotFound;
 		Headers headers;
 };
 
