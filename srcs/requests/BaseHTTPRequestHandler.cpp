@@ -1,7 +1,7 @@
 #include "BaseHTTPRequestHandler.hpp"
 
 
-BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler) :_directoryHandler(directoryHandler),  allowDirectoryListing(false), contentNotFound(false)
+BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler) :_directoryHandler(directoryHandler),  allowDirectoryListing(false), contentNotFound(false), currentServerConfig(NULL), currentRequestContent(NULL)
 {
 
 }
@@ -10,7 +10,8 @@ BaseHTTPRequestHandler::~BaseHTTPRequestHandler()
 {
 }
 
-void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message) {
+void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message)
+{
 	this->headersBuffer << "HTTP/1.1 " << statusCode << " " << message << CRLF;
 }
 
@@ -18,31 +19,26 @@ void BaseHTTPRequestHandler::endHeaders() {
 	this->headersBuffer << CRLF;
 }
 
-void BaseHTTPRequestHandler::writeContent(const std::string content) {
+void BaseHTTPRequestHandler::writeContent(const std::string content)
+{
 	this->headersBuffer << content;
 }
 
-std::string BaseHTTPRequestHandler::GetPath() const {
+std::string BaseHTTPRequestHandler::GetPath() const
+{
 	return this->path;
 }
 
-ServerConfig *BaseHTTPRequestHandler::getServerConfig() const {
-	return this->serverConfig;
-}
-
-void BaseHTTPRequestHandler::setServerConfig(ServerConfig *serverConfig) {
-	this->serverConfig = serverConfig;
-}
-
-void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status) {
+void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status)
+{
   this->sendResponse(status.code, status.description);
 	this->writeDefaultResponse(content);
 }
 
 void BaseHTTPRequestHandler::sendNotFoundError()
 {
-	std::string page = this->serverConfig->GetErrorPage();
-	int code = this->serverConfig->GetErrorPageCode();
+	std::string page = this->currentServerConfig->GetErrorPage();
+	int code = this->currentServerConfig->GetErrorPageCode();
 	std::string content = this->readContent(page);
 	if (content.empty())
 		this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
@@ -53,61 +49,67 @@ void BaseHTTPRequestHandler::sendNotFoundError()
 	}
 }
 
-void BaseHTTPRequestHandler::clearHeadersBuffers() {
+void BaseHTTPRequestHandler::clearHeadersBuffers()
+{
 	this->headersBuffer.str("");
 	this->headersBuffer.clear();
 }
 
-void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requestLines) {
+void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requestLines)
+{
 	this->requestMethod = requestLines[0];
 	this->path = requestLines[1];
 	this->requestVersion = requestLines[2];
 }
 
-void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> headers)
+std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request)
 {
-	for (std::vector<std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-	{
-		std::vector<std::string> keyValue = StringUtils::SplitAtFirstDelimiter(*it, ":");
-		if (keyValue.size() < 2)
-			continue;
-		std::string key = keyValue[0];
-		std::string value = keyValue[1];
-		this->headers.setHeader(key, value);
-	}
-}
-
-std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request) {
 	std::istringstream iss(request);
 	std::cout << request << std::endl;
 	std::vector<std::string> requestLines;
 	std::string line;
+	std::string contentLength;
 	bool bodyStart = false;
+	ssize_t contentLengthNbr = -1;
+	bool hasContentLength = false;
 
+	if (!this->currentRequestContent->getBody().empty())
+		bodyStart = true;
 	while (std::getline(iss, line))
 	{
-		if (!line.empty() && line[line.size() - 1] == CR) {
-			  if (line.size() == 1) {
+		if (!line.empty() && line[line.size() - 1] == CR)
+		{
+			  if (line.size() == 1)
 					bodyStart = true;
-				}
 				line.erase(line.size() - 1);
 		}
-		if (bodyStart == true)
-			this->body += line;
+		if (bodyStart == true && hasContentLength == true)
+			this->currentRequestContent->parseBody(line, contentLengthNbr);
 		else 
+		{
 			requestLines.push_back(line);
+			this->currentRequestContent->parseHeader(line);
+			if (contentLength.empty())
+			{
+				contentLength = this->currentRequestContent->getHeader("Content-Length");
+				if (!contentLength.empty())
+				{
+					contentLengthNbr = std::atoll(contentLength.c_str());
+					hasContentLength = true;
+				}
+			}
+		}
 	}
-	this->parseHeaders(requestLines);
 	return requestLines;
 }
 
 bool BaseHTTPRequestHandler::checkBodyLimit()
 {
-	std::string contentLength = this->headers.getHeader("Content-Length");
+	std::string contentLength = this->currentRequestContent->getHeader("Content-Length");
 	if (contentLength.empty())
 		return true;
 	ssize_t contentLengthNbr = std::atoll(contentLength.c_str());
-	ssize_t maxContentLength = this->serverConfig->GetMaxBodySize();
+	ssize_t maxContentLength = this->currentServerConfig->GetMaxBodySize();
 	if (contentLengthNbr < 0 || contentLengthNbr > maxContentLength)
 		return false;
 	return true;
@@ -115,7 +117,7 @@ bool BaseHTTPRequestHandler::checkBodyLimit()
 
 bool BaseHTTPRequestHandler::validateServerName()
 {
-	std::string host = this->headers.getHeader("Host");
+	std::string host = this->currentRequestContent->getHeader("Host");
 	if (host.empty())
 		return false;
 	std::vector<std::string> hostParts = StringUtils::Split(host, ":");
@@ -123,10 +125,10 @@ bool BaseHTTPRequestHandler::validateServerName()
 		return false;
 	std::string serverName = hostParts[0];
 	std::string port = hostParts[1];
-	std::string portServer = this->serverConfig->GetPort();
+	std::string portServer = this->currentServerConfig->GetPort();
 	if (portServer != port)
 		return false;
-	std::vector<std::string> serverNames = this->serverConfig->GetServerNames();
+	std::vector<std::string> serverNames = this->currentServerConfig->GetServerNames();
 	bool hasServer = VectorUtils<std::string>::hasElement(serverNames, serverName);
 	bool isLocalhost = serverName == "localhost" || serverName == "127.0.0.1";
 	bool hasLocalhost = VectorUtils<std::string>::hasElement(serverNames, std::string("localhost")) 
@@ -137,7 +139,7 @@ bool BaseHTTPRequestHandler::validateServerName()
 bool BaseHTTPRequestHandler::checkRedirect()
 {
 	std::string path = this->path;
-	LocationConfig *location = this->serverConfig->GetLocationConfig(path);
+	LocationConfig *location = this->currentServerConfig->GetLocationConfig(path);
 	if (location == NULL || location->ShouldRedirect() == false)
 		return false;
 	StatusCode status = location->ReturnRedirectStatus();
@@ -149,6 +151,25 @@ bool BaseHTTPRequestHandler::checkRedirect()
 	return true;
 }
 
+void BaseHTTPRequestHandler::addCurrentRequestContentAndServerConfig(int clientSocket, ServerConfig *serverConfig)
+{
+	this->setClientSockerRequestContentMap(clientSocket, serverConfig);
+	this->currentRequestContent = &this->clientSocketRequestContentMap[clientSocket];
+	this->currentServerConfig = this->currentRequestContent->getServerConfig();
+}
+
+BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequestForClientSocket(const char* request, int clientSocket, ServerConfig *serverConfig)
+{
+	this->addCurrentRequestContentAndServerConfig(clientSocket, serverConfig);
+	if (this->currentServerConfig == NULL)
+	{
+		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		return NULL;
+	}
+	BaseHTTPRequestHandler::RequestMethodFunction method = this->parseRequest(request);
+	return method;
+}
+
 BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequest(const char *request)
 {
 	try
@@ -156,6 +177,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		std::vector<std::string> firstRequestLine;
 		std::vector<std::string> versionNumber;
 		std::vector<std::string> requestLines = this->SplitRequest(request);
+		Logger::Debug("BaseHTTPRequestHandler::parseRequest", SUCCESS , this->currentRequestContent->getBody());
 		if (!this->validateServerName())
 		{
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
@@ -244,7 +266,7 @@ std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *locat
 	content += "<table style=\"width: 25%;text-align: justify;\"><thead><tr><th>Name</th><th>Size</th><th>Last Modified</th></tr></thead>";
 	content += "<tbody>";
 
-	std::string port = this->serverConfig->GetPort();
+	std::string port = this->currentServerConfig->GetPort();
 	std::string fullPath = location->GetRootPath() + path;
 	bool directoryExists = false;
 	std::vector<std::string> files = this->_directoryHandler->getFilesInDirectory(fullPath, directoryExists);
@@ -272,7 +294,7 @@ std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *locat
 
 bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 {
-	std::vector<LocationConfig *> locations = this->serverConfig->GetLocationConfigs();
+	std::vector<LocationConfig *> locations = this->currentServerConfig->GetLocationConfigs();
 	for (std::vector<LocationConfig *>::iterator it = locations.begin(); it != locations.end(); it++)
 	{
 		std::string locationPath = (*it)->GetPath();
@@ -295,7 +317,7 @@ bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 std::string BaseHTTPRequestHandler::getContent(const std::string path)
 {
 	std::string content("");
-	LocationConfig *location = this->serverConfig->GetLocationConfig(path);
+	LocationConfig *location = this->currentServerConfig->GetLocationConfig(path);
 	if (this->allowDirectoryListing)
 	{
 		this->allowDirectoryListing = false;
@@ -348,7 +370,7 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
 	std::vector<std::string> methodsAllowed = this->getMethodsAllowedForApi();
 	if (methodsAllowed.size() > 0)
 		return methodsAllowed;
-	LocationConfig *location = this->serverConfig->GetLocationConfig(this->path);
+	LocationConfig *location = this->currentServerConfig->GetLocationConfig(this->path);
 	if (location == NULL)
 		return methodsAllowed;
 	return location->GetAllowedMethods();
@@ -366,4 +388,11 @@ void BaseHTTPRequestHandler::writeDefaultResponse(std::string content, std::stri
 bool BaseHTTPRequestHandler::getContentNotFound() const
 {
 	return this->contentNotFound;
+}
+
+void BaseHTTPRequestHandler::setClientSockerRequestContentMap(int clientSocket, ServerConfig *serverConfig)
+{
+	if (MapUtils<int, RequestContent>::SafeFindMap(this->clientSocketRequestContentMap, clientSocket))
+		return;
+	this->clientSocketRequestContentMap[clientSocket] = RequestContent(serverConfig);
 }

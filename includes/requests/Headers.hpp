@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include "StringUtils.hpp"
+#include "MapUtils.hpp"
 
 class Headers
 {
@@ -16,5 +17,6 @@ class Headers
 		std::string getHeader(std::string key);
 		void setHeader(std::string key, std::string value);
     std::map<std::string, std::string> getHeaders() const;
+		void clearHeaders();
 };
 

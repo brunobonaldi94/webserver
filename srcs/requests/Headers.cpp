@@ -20,6 +20,9 @@ Headers &Headers::operator=(const Headers &other)
 std::string Headers::getHeader(std::string key)
 {
 	std::string keyLower = StringUtils::LowerCase(key);
+	std::pair<const std::string, std::string> *header = MapUtils<std::string, std::string>::SafeFindMap(this->headers, keyLower);
+	if (header == NULL)
+		return "";
 	return this->headers[keyLower];
 }
 
@@ -33,4 +36,9 @@ void Headers::setHeader(std::string key, std::string value)
 std::map<std::string, std::string> Headers::getHeaders() const
 {
 	return this->headers;
+}
+
+void Headers::clearHeaders()
+{
+	this->headers.clear();
 }

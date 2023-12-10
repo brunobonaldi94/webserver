@@ -20,8 +20,7 @@ WebServer::~WebServer()
 // Handler for when a message is received from the client
 void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, const char* msg)
 {
-	this->requestHandler.setServerConfig(serverConfig);
-	BaseHTTPRequestHandler::RequestMethodFunction method = this->requestHandler.parseRequest(msg);
+	BaseHTTPRequestHandler::RequestMethodFunction method = this->requestHandler.parseRequestForClientSocket(msg, clientSocket, serverConfig);
 	if (method != NULL)
 		(this->requestHandler.*method)();
 	this->SendToClient(
@@ -36,5 +35,6 @@ void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, 
 void WebServer::OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
 {
 	ATcpListener::OnClientDisconnected(clientSocket, socketIndex, nbytes);
+	this->requestHandler.clearRequestContent(clientSocket);
 	std::cout << "Client disconnected: " << clientSocket << std::endl;
 }

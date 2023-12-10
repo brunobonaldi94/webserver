@@ -14,7 +14,7 @@ class RequestHandler : public BaseHTTPRequestHandler
 		void doGET();
 		void doPOST();
 		void doDELETE();
-
+		void clearRequestContent(int clientSocket);
 		void sendJsonResponse(std::string json);
 
     private:

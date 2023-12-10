@@ -17,6 +17,7 @@
 #include "ServerConfig.hpp"
 #include "Headers.hpp"
 #include "DirectoryHandler.hpp"
+#include "RequestContent.hpp"
 
 class BaseHTTPRequestHandler {
     public:
@@ -27,17 +28,18 @@ class BaseHTTPRequestHandler {
 		
 		const std::string headersBufferToString() const;
 		RequestMethodFunction getMethod(const std::string& method);
-		RequestMethodFunction parseRequest(const char* request);
+		RequestMethodFunction parseRequestForClientSocket(const char* request, int clientSocket, ServerConfig *serverConfig);
 		void clearHeadersBuffers();
-		ServerConfig *getServerConfig() const;
-		void setServerConfig(ServerConfig *serverConfig);
 		bool getContentNotFound() const;
-	
+		void setClientSockerRequestContentMap(int clientSocket, ServerConfig *serverConfig);
+
 		virtual void doGET() = 0;
 		virtual void doPOST() = 0;
 		virtual void doDELETE() = 0;
+		virtual void clearRequestContent(int clientSocket) = 0;
 
 	protected:
+		RequestMethodFunction parseRequest(const char* request);
 		void sendResponse(int statusCode, std::string message);
 		template <typename T>
 		void sendHeader(std::string key, T value);
@@ -52,27 +54,31 @@ class BaseHTTPRequestHandler {
 	  std::string GetPath() const;
 		std::vector<std::string> getMethodsAllowedForApi() const;
 		void parseHeaders(std::vector<std::string> headers);
+		bool parseHeader(std::string header);
 		std::vector<std::string> SplitRequest(const char* request);
 		bool checkBodyLimit();
 		std::string createDirectoryListing(LocationConfig *location, std::string path);
+		bool isDirectoryListingAllowed(std::string path);
 		bool validateServerName();
 		bool checkRedirect();
-		bool isDirectoryListingAllowed(std::string path);
-		bool isInDirectory(std::string path, std::string directory);
 		void writeDefaultResponse(std::string content, std::string mimeType = "text/html");
 		ADirectoryHandler *_directoryHandler;
+		void addCurrentRequestContentAndServerConfig(int clientSocket, ServerConfig *serverConfig);
+		std::map<int, RequestContent> clientSocketRequestContentMap;
+
 
     private:
 		std::ostringstream headersBuffer;
-		std::string body;
 		std::string requestMethod;
 		std::string path;
 		std::string requestVersion;
-		ServerConfig *serverConfig;
 		std::string directoryListingPath;
 		bool allowDirectoryListing;
 		bool contentNotFound;
-		Headers headers;
+		ServerConfig *currentServerConfig;
+		RequestContent *currentRequestContent;
+
+
 };
 
 template <typename T>

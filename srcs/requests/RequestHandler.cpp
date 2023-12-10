@@ -54,3 +54,9 @@ void RequestHandler::doDELETE() {
         return this->sendJsonResponse("{\"message\": \"File deleted\"}");
 }
 
+
+void RequestHandler::clearRequestContent(int clientSocket)
+{
+    if (MapUtils<int, RequestContent>::SafeFindMap(this->clientSocketRequestContentMap, clientSocket))
+        this->clientSocketRequestContentMap[clientSocket].clear();
+}
