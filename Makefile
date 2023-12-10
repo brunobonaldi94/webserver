@@ -37,6 +37,7 @@ BASE_SRCS :=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/requests/RequestHandler.cpp \
 							$(SRCS_DIR)/requests/HTTPStatus.cpp \
 							$(SRCS_DIR)/requests/Headers.cpp \
+							$(SRCS_DIR)/requests/Body.cpp \
 							$(SRCS_DIR)/requests/RequestContent.cpp
 
 SRCS = $(BASE_SRCS) $(SRCS_DIR)/main.cpp

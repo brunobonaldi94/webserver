@@ -165,12 +165,22 @@ std::vector<std::string> StringUtils::SplitAtFirstDelimiter(std::string str, std
   return  vec;
 }
 
+std::string StringUtils::TrimLeft(std::string str)
+{
+    str.erase(0, str.find_first_not_of(WHITE_SPACE));
+    return str;
+}
+
+std::string StringUtils::TrimRight(std::string str)
+{
+    str.erase(str.find_last_not_of(WHITE_SPACE) + 1);
+    return str;
+}
 
 std::string StringUtils::Trim(std::string str)
 {
-    const char* whiteSpace = " \t\n\r\f\v";
-    str.erase(str.find_last_not_of(whiteSpace) + 1);
-    str.erase(0, str.find_first_not_of(whiteSpace));
+    str = StringUtils::TrimLeft(str);
+    str = StringUtils::TrimRight(str);
     return str;
 }
 
@@ -198,6 +208,16 @@ size_t StringUtils::FindNthOccurrence(std::string str, char c, size_t n)
       return i;
   }
   return std::string::npos;
+}
+
+ void StringUtils::AddToString(std::string &str, std::string line, bool addNewLine)
+{
+  if (str.empty())
+    str = line;
+  else if (addNewLine)
+    str += "\n" + line;
+  else
+    str += line;
 }
 
 

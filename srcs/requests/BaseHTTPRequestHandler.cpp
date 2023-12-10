@@ -55,6 +55,16 @@ void BaseHTTPRequestHandler::clearHeadersBuffers()
 	this->headersBuffer.clear();
 }
 
+bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
+{
+	if (this->currentRequestContent->hasParsedAllRequest())
+	{
+		this->clearRequestContent(clientSocket);
+		return true;
+	}
+	return false;
+}
+
 void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requestLines)
 {
 	this->requestMethod = requestLines[0];
@@ -74,18 +84,27 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* reques
 	bool hasContentLength = false;
 
 	if (!this->currentRequestContent->getBody().empty())
+	{
 		bodyStart = true;
+		hasContentLength = true;
+		contentLengthNbr = std::atoll(this->currentRequestContent->getHeader("Content-Length").c_str());
+	}
 	while (std::getline(iss, line))
 	{
 		if (!line.empty() && line[line.size() - 1] == CR)
 		{
 			  if (line.size() == 1)
+				{
 					bodyStart = true;
+					this->currentRequestContent->setHeadersFullyRead(true);
+				}
 				line.erase(line.size() - 1);
 		}
+		if (bodyStart == true && hasContentLength == false && !line.empty())
+			throw std::runtime_error("body start without content length");
 		if (bodyStart == true && hasContentLength == true)
 			this->currentRequestContent->parseBody(line, contentLengthNbr);
-		else 
+		else
 		{
 			requestLines.push_back(line);
 			this->currentRequestContent->parseHeader(line);
@@ -177,6 +196,8 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		std::vector<std::string> firstRequestLine;
 		std::vector<std::string> versionNumber;
 		std::vector<std::string> requestLines = this->SplitRequest(request);
+		if (requestLines.size() == 0)
+			return NULL;
 		Logger::Debug("BaseHTTPRequestHandler::parseRequest", SUCCESS , this->currentRequestContent->getBody());
 		if (!this->validateServerName())
 		{

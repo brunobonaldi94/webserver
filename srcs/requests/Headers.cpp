@@ -42,3 +42,14 @@ void Headers::clearHeaders()
 {
 	this->headers.clear();
 }
+
+bool Headers::parseHeader(std::string header)
+{
+  std::vector<std::string> keyValue = StringUtils::SplitAtFirstDelimiter(header, ":");
+	if (keyValue.size() < 2)
+		return false;
+	std::string key = keyValue[0];
+	std::string value = keyValue[1];
+	this->setHeader(key, value);
+	return true;
+}

@@ -29,6 +29,7 @@ void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, 
 		this->requestHandler.headersBufferToString().size()
 	);
 	this->requestHandler.clearHeadersBuffers();
+	this->requestHandler.shouldClearRequestContent(clientSocket);
 }
 
 // Handler for client disconnections

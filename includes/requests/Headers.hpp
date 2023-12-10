@@ -18,5 +18,6 @@ class Headers
 		void setHeader(std::string key, std::string value);
     std::map<std::string, std::string> getHeaders() const;
 		void clearHeaders();
+		bool parseHeader(std::string header);
 };
 

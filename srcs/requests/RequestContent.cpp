@@ -1,9 +1,10 @@
 #include "RequestContent.hpp"
 
 
-RequestContent::RequestContent(){}
+RequestContent::RequestContent(): headersFullyRead(false)
+{}
 
-RequestContent::RequestContent(ServerConfig *serverConfig): serverConfig(serverConfig)
+RequestContent::RequestContent(ServerConfig *serverConfig): serverConfig(serverConfig), headersFullyRead(false)
 {
 
 }
@@ -28,17 +29,7 @@ RequestContent &RequestContent::operator=(const RequestContent &other)
   }
   return *this;
 }
-
-std::string RequestContent::getBody() const
-{
-  return this->body;
-}
-
-void RequestContent::setBody(std::string body)
-{
-  this->body = body;
-}
-
+ 
 Headers RequestContent::getHeaders() const
 {
   return this->headers;
@@ -64,15 +55,10 @@ void RequestContent::clearHeaders()
   this->headers.clearHeaders();
 }
 
-void RequestContent::clearBody()
-{
-  this->body.clear();
-}
-
 void RequestContent::clear()
 {
   this->clearHeaders();
-  this->clearBody();
+  this->body.clear();
 }
 
 ServerConfig *RequestContent::getServerConfig()
@@ -80,35 +66,43 @@ ServerConfig *RequestContent::getServerConfig()
   return this->serverConfig;
 }
 
-void RequestContent::addToBody(std::string body)
-{
-  this->body += body;
-}
-
 bool RequestContent::parseHeader(std::string header)
 {
-  std::vector<std::string> keyValue = StringUtils::SplitAtFirstDelimiter(header, ":");
-	if (keyValue.size() < 2)
-		return false;
-	std::string key = keyValue[0];
-	std::string value = keyValue[1];
-	this->setHeader(key, value);
-	return true;
+  return this->headers.parseHeader(header);
 }
 
 bool RequestContent::parseBody(std::string line, ssize_t contentLengthNbr)
 {
-  size_t contentLength = static_cast<size_t>(contentLengthNbr);
-	if (contentLengthNbr <= 0)
-				return false;
-  if (contentLength == this->getBody().size())
-    return true;
-	if (static_cast<size_t>(contentLengthNbr) < this->getBody().size() + line.size())
-	{
-		line = line.substr(0, contentLengthNbr - this->getBody().size());
-		this->addToBody(line);
-		return true;
-	}
-	this->addToBody(line);
-  return true;
+  if (this->isMultiPartFormData())
+    return this->body.parseBody(line, contentLengthNbr, this->boundary);
+  return this->body.parseBody(line, contentLengthNbr);
+}
+
+bool RequestContent::hasParsedAllRequest()
+{
+  bool hasBody = this->getHeader("Content-Length") != "";
+  bool requestWithBodyFullyRead = this->body.getBodyFullyRead() && hasBody && this->headersFullyRead;
+  bool requestWithoutBodyFullyRead = !hasBody && this->headersFullyRead;
+  return requestWithBodyFullyRead || requestWithoutBodyFullyRead;
+}
+
+void RequestContent::setHeadersFullyRead(bool headersFullyRead)
+{
+  this->headersFullyRead = headersFullyRead;
+}
+
+std::string RequestContent::getBody() const
+{
+  return this->body.getBody();
+}
+
+bool RequestContent::isMultiPartFormData()
+{
+  std::string contentType = this->headers.getHeader("Content-Type");
+  bool multipartFormData = contentType.find("multipart/form-data") != std::string::npos;
+  size_t boundaryPos = contentType.find(BOUNDARY);
+  if (boundaryPos == std::string::npos && multipartFormData)
+    throw std::runtime_error("No boundary found in Content-Type");
+  this->boundary = contentType.substr(boundaryPos + std::string(BOUNDARY).size());
+  return multipartFormData;
 }

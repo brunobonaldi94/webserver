@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include "Headers.hpp"
+#include "Body.hpp"
 #include "ServerConfig.hpp"
 
 class RequestContent
@@ -13,23 +14,25 @@ class RequestContent
 		~RequestContent();
 		RequestContent(const RequestContent &other);
 		RequestContent &operator=(const RequestContent &other);
-		std::string getBody() const;
-		void setBody(std::string body);
 		Headers getHeaders() const;
 		void setHeaders(Headers headers);
     void setHeader(std::string key, std::string value);
     std::string getHeader(std::string key);
     void clearHeaders();
-    void clearBody();
     void clear();
     ServerConfig *getServerConfig();
-		void addToBody(std::string body);
 		bool parseHeader(std::string header);
-		bool parseBody(std::string line, ssize_t contentLength);
+		bool hasParsedAllRequest();
+		void setHeadersFullyRead(bool headersFullyRead);
+		bool parseBody(std::string line, ssize_t contentLengthNbr);
+		std::string getBody() const;
+		bool isMultiPartFormData();
 
 	private:
 		Headers headers;
-		std::string body;
+		Body body;
+		std::string boundary;
     ServerConfig *serverConfig;
+		bool headersFullyRead;
 };
 

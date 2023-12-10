@@ -32,7 +32,7 @@ class BaseHTTPRequestHandler {
 		void clearHeadersBuffers();
 		bool getContentNotFound() const;
 		void setClientSockerRequestContentMap(int clientSocket, ServerConfig *serverConfig);
-
+		bool shouldClearRequestContent(int clientSocket);
 		virtual void doGET() = 0;
 		virtual void doPOST() = 0;
 		virtual void doDELETE() = 0;
