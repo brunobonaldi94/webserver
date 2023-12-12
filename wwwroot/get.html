@@ -261,17 +261,38 @@
           >Upload</a
         >
       </nav>
-      <div class="h-full flex items-center justify-center">
-        <div
-          class="hover:skew-x-[24deg] hover:bg-gradient-to-r rounded-lg from-teal-700 hover:to-teal-900 transition-all shadow-md border-b"
-        >
-          <h1
-            class="w-full text-gray-800 border-teal-800/60 font-bold text-center text-5xl p-2 transition-all hover:skew-x-[-24deg] hover:text-white"
-          >
-            Welcome to the Webserver - bbonaldi, harndt, sjhony-x
-          </h1>
+      <div id="data" class="ml-5">
+        {data}
         </div>
       </div>
     </div>
+
+
+    <script>
+
+      function deleteRecord(filename) {
+          const url = `/delete/${filename}`;
+
+          const requestOptions = {
+              method: 'DELETE',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({}),
+          };
+
+          fetch(url, requestOptions)
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error(`Erro na requisição DELETE: ${response.status}`);
+                  }
+                  console.log('Arquivo deletado com sucesso!');
+              })
+              .catch(error => {
+                  console.error('Erro:', error);
+              });
+      }
+  </script>
+
   </body>
 </html>

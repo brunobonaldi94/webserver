@@ -39,7 +39,19 @@ void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requ
 	this->requestVersion = requestLines[2];
 }
 
+void BaseHTTPRequestHandler::setBody(const std::string line) {
+	if (!line.empty()) {
+		std::vector<std::string> lineSplited = StringUtils::Split(line, ":");
+		if (lineSplited[0] == "Content-Length")
+			this->contentLength = std::atoi(lineSplited[1].c_str());
+		this->body = this->body.substr(0, this->contentLength);
+	}
+}
+
 std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request) {
+	this->body = "";
+	this->contentLength = 0;
+
 	std::istringstream iss(request);
 	std::cout << request << std::endl;
 	std::vector<std::string> requestLines;
@@ -57,7 +69,8 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* reques
 				this->body += line;
 			else 
 				requestLines.push_back(line);
-	}
+			this->setBody(line);
+	}		
 	return requestLines;
 }
 
@@ -161,4 +174,17 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::getMethod(
 std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
 	std::vector<std::string> methodsAllowed;
 	return StringUtils::Split("GET PUT POST DELETE PATCH HEAD OPTIONS TRACE CONNECT", " ");
+}
+
+std::string BaseHTTPRequestHandler::generateRandomString(int length) {
+    const std::string charset =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    std::srand(static_cast<unsigned int>(std::time(NULL)));
+
+    std::string randomString;
+    for (int i = 0; i < length; ++i) {
+        int randomIndex = std::rand() % charset.length();
+        randomString += charset[randomIndex];
+    }
+    return randomString;
 }
