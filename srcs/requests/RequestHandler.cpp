@@ -32,23 +32,6 @@ void RequestHandler::sendJsonResponse(std::string json) {
 	this->writeContent(json);
 }
 
-std::vector<std::string> RequestHandler::getFiles(const std::string& path) {
-    std::vector<std::string> files;
-    DIR *dir;
-    struct dirent *ent;
-
-    if ((dir = opendir (path.c_str())) != NULL) {
-        while ((ent = readdir (dir)) != NULL)
-            files.push_back(ent->d_name);
-        closedir (dir);
-    } 
-    else {
-        perror ("");
-        throw std::runtime_error("Error while reading directory");
-    }
-    return files;
-}
-
 std::string RequestHandler::renderTemplate(const std::string& templateStr, const std::string& value) {
     std::string placeholder = "{data}";
     std::string result = templateStr;
@@ -65,13 +48,11 @@ void RequestHandler::doGET() {
     std::string content;
     std::string path = this->GetPath();
 
-    if (path == "/")
-        path = "/index.html";
     content = this->getContent(path);
     if (path == "/get") {
         std::vector<std::string>::iterator it;
         try {
-            std::vector<std::string> files = this->getFiles("../webserver/data");
+            std::vector<std::string> files = this->_directoryHandler->getFilesInDirectory("../webserver/data");
             std::string value;
             for (it = files.begin(); it != files.end(); it++) {
                 if (*it != "." && *it != "..") {
@@ -84,7 +65,6 @@ void RequestHandler::doGET() {
                     value += (label + btnDelete);
                 }
             }
-            path = "/get.html";
             content = this->getContent(path);
             content = this->renderTemplate(content, value);
         }
@@ -101,15 +81,15 @@ void RequestHandler::doGET() {
 }
 
 void RequestHandler::doPOST() {
-    if (this->body.empty())
+    if (this->getCurrentRequestContent()->getBody().empty())
         return ;
-    std::vector<std::string> body = StringUtils::Split(this->body, "&");
+    std::vector<std::string> body = StringUtils::Split(this->getCurrentRequestContent()->getBody(), "&");
     std::map<std::string, std::string> data;
     data["first_name"] = StringUtils::Split(body[0], "=")[1];
     data["last_name"] = StringUtils::Split(body[1], "=")[1];
     std::string filename = "data/" + data["first_name"] + "_" + data["last_name"] + "_" + this->generateRandomString(30) + ".json";
     JsonSerializer::save(JsonSerializer::serialize(data), filename);
-    this->body = std::string("");
+    this->getCurrentRequestContent()->clear();
     this->doGET();
 }
 

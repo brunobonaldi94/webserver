@@ -19,7 +19,6 @@ class RequestHandler : public BaseHTTPRequestHandler
 		void sendJsonResponse(std::string json);
 
     private:
-		std::vector<std::string> getFiles(const std::string& path);
 		std::string renderTemplate(const std::string& templateStr, const std::string& value);
 };
 

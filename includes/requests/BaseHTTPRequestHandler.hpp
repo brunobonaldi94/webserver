@@ -68,9 +68,9 @@ class BaseHTTPRequestHandler {
 		void addCurrentRequestContentAndServerConfig(int clientSocket, ServerConfig *serverConfig);
 		std::map<int, RequestContent> clientSocketRequestContentMap;
 
-		void setBody(const std::string line);
 		std::string generateRandomString(int length);
-		std::string body;
+		RequestContent *getCurrentRequestContent();
+		ServerConfig *getCurrentServerConfig();
 		int contentLength;
 
     private:

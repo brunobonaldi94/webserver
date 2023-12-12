@@ -25,6 +25,24 @@ DirectoryHandler::DirectoryHandler() {}
 
 DirectoryHandler::~DirectoryHandler() {}
 
+std::vector<std::string> DirectoryHandler::getFilesInDirectory(std::string path)
+{
+    std::vector<std::string> files;
+    DIR *dir;
+    struct dirent *ent;
+
+    if ((dir = opendir (path.c_str())) != NULL) {
+        while ((ent = readdir (dir)) != NULL)
+            files.push_back(ent->d_name);
+        closedir (dir);
+    } 
+    else 
+    {
+        throw std::runtime_error("Error while reading directory");
+    }
+    return files;
+}
+
 std::vector<std::string> DirectoryHandler::getFilesInDirectory(std::string path, bool &directoryExists)
 {
   std::vector<std::string> files;
