@@ -8,8 +8,8 @@ ServerContext::ServerContext(): AContext(NULL, "server")
     AContextCreator * subContextsCreators[] = {NULL, new LocationContextCreator()};
     MapUtils<std::string, AContextCreator *>::FillMapFromArray(this->_allowedSubContexts, subContexts, subContextsCreators, sizeof(subContexts) / sizeof(std::string));
     
-    std::string directives[] = {"listen", "server_name", "error_page", "client_max_body_size", "root", "index", "autoindex", "cgi"};
-    ADirectiveCreator * directivesCreators[] = {new ListenDirectiveCreator(), new ServerNameDirectiveCreator(), new ErrorPageDirectiveCreator(), new ClientMaxBodySizeDirectiveCreator(), new RootDirectiveCreator(), new IndexDirectiveCreator(), new AutoIndexDirectiveCreator(), new CgiDirectiveCreator()};
+    std::string directives[] = {"listen", "server_name", "error_page", "client_max_body_size", "root", "index", "autoindex", "cgi", "return"};
+    ADirectiveCreator * directivesCreators[] = {new ListenDirectiveCreator(), new ServerNameDirectiveCreator(), new ErrorPageDirectiveCreator(), new ClientMaxBodySizeDirectiveCreator(), new RootDirectiveCreator(), new IndexDirectiveCreator(), new AutoIndexDirectiveCreator(), new CgiDirectiveCreator(), NULL};
     MapUtils<std::string, ADirectiveCreator *>::FillMapFromArray(this->_allowedDirectives, directives, directivesCreators, sizeof(directives) / sizeof(std::string));
 }
 
@@ -50,6 +50,7 @@ void ServerContext::ParseContext(std::string &content)
             break;
         }
         StringUtils::AdvaceOnWhiteSpace(it, content);
+        StringUtils::AdvanceOnComment(it, content);
         word = StringUtils::ExtractWord(it, content);
         AContext::HandleContextCreation(content, word, "server");
         AContext::HandleDirectiveCreation(it, content, word, "server");
@@ -75,10 +76,4 @@ void ServerContext::FillDefaultValues()
         for (std::vector<AContext *>::iterator it2 = contexts.begin(); it2 != contexts.end(); ++it2)
             (*it2)->FillDefaultValues();
     }
-}
-
-ListenDirective *ServerContext::GetListenDirective()
-{
-    ADirective *directive = this->GetDirective("listen");
-    return (dynamic_cast<ListenDirective *>(directive));
 }

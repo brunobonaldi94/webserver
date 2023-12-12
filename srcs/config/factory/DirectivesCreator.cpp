@@ -128,4 +128,26 @@ ADirective *CgiDirectiveCreator::CreateDirective() const
     return new CgiDirective();
 }
 
+ReturnDirectiveCreator::ReturnDirectiveCreator()
+{
+}
 
+ReturnDirectiveCreator::~ReturnDirectiveCreator()
+{
+}
+
+ReturnDirectiveCreator::ReturnDirectiveCreator(ReturnDirectiveCreator const &other)
+{
+    *this = other;
+}
+
+ReturnDirectiveCreator &ReturnDirectiveCreator::operator=(ReturnDirectiveCreator const &other)
+{
+    (void)other;
+    return (*this);
+}
+
+ADirective *ReturnDirectiveCreator::CreateDirective() const
+{
+    return new ReturnDirective();
+}

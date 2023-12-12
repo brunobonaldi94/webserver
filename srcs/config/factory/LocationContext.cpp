@@ -5,9 +5,10 @@ LocationContext::LocationContext(): AContext(NULL, "location")
     std::string contexts[] = {"server", "location"};
     AContextCreator* contextsCreators[] = {NULL, NULL};
     MapUtils<std::string, AContextCreator *>::FillMapFromArray(this->_allowedSubContexts, contexts, contextsCreators, sizeof(contexts) / sizeof(std::string));
-    std::string directives[] = {"listen", "server_name", "error_page", "client_max_body_size", "root", "index", "autoindex", "limit_except", "cgi"};
-    ADirectiveCreator * directivesCreators[] = {NULL, NULL, new ErrorPageDirectiveCreator(), new ClientMaxBodySizeDirectiveCreator(), new RootDirectiveCreator(), new IndexDirectiveCreator(), new AutoIndexDirectiveCreator(), new LimitExceptDirectiveCreator(), NULL};
+    std::string directives[] = {"listen", "server_name", "error_page", "client_max_body_size", "root", "index", "autoindex", "limit_except", "cgi", "return"};
+    ADirectiveCreator * directivesCreators[] = {NULL, NULL, new ErrorPageDirectiveCreator(), new ClientMaxBodySizeDirectiveCreator(), new RootDirectiveCreator(), new IndexDirectiveCreator(), new AutoIndexDirectiveCreator(), new LimitExceptDirectiveCreator(), NULL, new ReturnDirectiveCreator()};
     MapUtils<std::string, ADirectiveCreator *>::FillMapFromArray(this->_allowedDirectives, directives, directivesCreators, sizeof(directives) / sizeof(std::string));
+
 };
 
 LocationContext::LocationContext(LocationContext const &other): AContext(other) {};
@@ -47,6 +48,7 @@ void LocationContext::ParseContext(std::string &content)
     for (; it != content.end(); it++)
     {
         StringUtils::AdvaceOnWhiteSpace(it, content);
+        StringUtils::AdvanceOnComment(it, content);
         if (*it == '{')
             throw SyntaxErrorException("Duplicated {");
         if (*it == '}')
@@ -84,3 +86,4 @@ void LocationContext::FillDefaultValues()
 {
     AContext::FillDefaultValuesDirectives();
 }
+

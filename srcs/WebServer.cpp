@@ -8,30 +8,34 @@
 #include <iterator>
 #include "WebServer.hpp"
 
-WebServer::WebServer(RequestHandler requestHandler, std::vector<AContext *> serverContexts) : ATcpListener(requestHandler, serverContexts)
+WebServer::WebServer(RequestHandler requestHandler, std::vector<ServerConfig *> serverConfigs) : ATcpListener(requestHandler, serverConfigs)
 {
 }
 
-// Handler for when a message is received from the client
-void WebServer::OnMessageReceived(ServerContext *serverContext, int clientSocket, const char* msg)
+WebServer::~WebServer()
 {
-	ListenDirective *listenDirective = serverContext->GetListenDirective();
-	Logger::Log(INFO, "Received from client: " + listenDirective->GetHost() + ":" + listenDirective->GetPort());
-	BaseHTTPRequestHandler::RequestMethodFunction method = this->requestHandler.parseRequest(msg);
+	this->requestHandler.~RequestHandler();
+}
+
+// Handler for when a message is received from the client
+void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, const char* msg)
+{
+	BaseHTTPRequestHandler::RequestMethodFunction method = this->requestHandler.parseRequestForClientSocket(msg, clientSocket, serverConfig);
 	if (method != NULL)
 		(this->requestHandler.*method)();
-	
 	this->SendToClient(
 		clientSocket, 
 		this->requestHandler.headersBufferToString().c_str(), 
-		this->requestHandler.headersBufferToString().size());
-
+		this->requestHandler.headersBufferToString().size()
+	);
 	this->requestHandler.clearHeadersBuffers();
+	this->requestHandler.shouldClearRequestContent(clientSocket);
 }
 
 // Handler for client disconnections
 void WebServer::OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
 {
 	ATcpListener::OnClientDisconnected(clientSocket, socketIndex, nbytes);
+	this->requestHandler.clearRequestContent(clientSocket);
 	std::cout << "Client disconnected: " << clientSocket << std::endl;
 }

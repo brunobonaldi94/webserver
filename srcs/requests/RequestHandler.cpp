@@ -1,11 +1,18 @@
 #include "RequestHandler.hpp"
 #include "JsonSerializer.hpp"
 
-RequestHandler::RequestHandler(){
+RequestHandler::RequestHandler(ADirectoryHandler *directoryHandler)
+: BaseHTTPRequestHandler(directoryHandler)
+{
 
 }
 
-RequestHandler::RequestHandler(const RequestHandler& other) {
+RequestHandler::~RequestHandler()
+{
+}
+
+RequestHandler::RequestHandler(const RequestHandler& other): BaseHTTPRequestHandler(other._directoryHandler)
+{
     (void) other;
 }
 
@@ -60,8 +67,7 @@ void RequestHandler::doGET() {
 
     if (path == "/")
         path = "/index.html";
-    bool foundContent = false;
-    content = this->getContent("wwwroot/" + path, foundContent);
+    content = this->getContent(path);
     if (path == "/get") {
         std::vector<std::string>::iterator it;
         try {
@@ -79,7 +85,7 @@ void RequestHandler::doGET() {
                 }
             }
             path = "/get.html";
-            content = this->getContent("wwwroot/" + path, foundContent);
+            content = this->getContent(path);
             content = this->renderTemplate(content, value);
         }
         catch (std::exception& e) {
@@ -88,14 +94,10 @@ void RequestHandler::doGET() {
     }
     if (path == "/api/files")
         return this->sendJsonResponse("{\"files\": [\"file1\", \"file2\"]}");
-    if (foundContent == false)
-        return this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+    if (this->getContentNotFound())
+        return this->sendNotFoundError();
     this->sendResponse(HTTPStatus::OK.code, HTTPStatus::OK.description);
-	this->sendHeader("Cache-Control", "no-cache, private");
-	this->sendHeader("Content-Type", "text/html");
-	this->sendHeader("Content-Length", content.size());
-	this->endHeaders();
-	this->writeContent(content);
+    this->writeDefaultResponse(content);
 }
 
 void RequestHandler::doPOST() {
@@ -115,4 +117,10 @@ void RequestHandler::doDELETE() {
     std::string path = this->GetPath();
     std::string filename = path.substr(path.find_last_of("/") + 1);
     std::remove(("../webserver/data/" + filename).c_str());
+}
+
+void RequestHandler::clearRequestContent(int clientSocket)
+{
+    if (MapUtils<int, RequestContent>::SafeFindMap(this->clientSocketRequestContentMap, clientSocket))
+        this->clientSocketRequestContentMap[clientSocket].clear();
 }

@@ -4,16 +4,18 @@
 #include <dirent.h>
 #include "BaseHTTPRequestHandler.hpp"
 
-class RequestHandler : public BaseHTTPRequestHandler {
+class RequestHandler : public BaseHTTPRequestHandler
+{
     public:
-		RequestHandler();
+		RequestHandler(ADirectoryHandler *directoryHandler);
+		~RequestHandler();
 		RequestHandler(const RequestHandler& other);
 		RequestHandler& operator=(const RequestHandler& other);
 
 		void doGET();
 		void doPOST();
 		void doDELETE();
-
+		void clearRequestContent(int clientSocket);
 		void sendJsonResponse(std::string json);
 
     private:

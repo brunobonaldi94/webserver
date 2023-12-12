@@ -14,9 +14,10 @@ int main(int argc, char *argv[])
 			ConfigParser configParser(fileName);
 			if (!configParser.ParseConfigFile())
 				return ERROR_CODE;
-			std::vector<AContext *> serverContexts = configParser.GetServerContexts();
-			RequestHandler requestHandler;
-			WebServer webServ(requestHandler, serverContexts);
+			std::vector<ServerConfig *> serverConfigs = configParser.CreateServerConfigs();
+			ADirectoryHandler *directoryHandler = new DirectoryHandler();
+			RequestHandler requestHandler(directoryHandler);
+			WebServer webServ(requestHandler, serverConfigs);
 			if (!webServ.Init())
 				return ERROR_CODE;
 			if (!webServ.Run())

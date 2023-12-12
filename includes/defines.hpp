@@ -8,3 +8,6 @@
 #define FILE_EXTENSION ".conf"
 #define ERROR_CODE -1
 #define SUCCESS_CODE 0
+#define BOUNDARY "boundary="
+#define FORM_DATA "form-data"
+#define WHITE_SPACE " \t\n\r\f\v"

@@ -146,3 +146,15 @@ void ConfigParser::FillDefaultValues()
     (*it)->FillDefaultValues();
   }
 }
+
+std::vector<ServerConfig *> ConfigParser::CreateServerConfigs()
+{
+	std::vector<ServerConfig *> serverConfigs;
+  std::vector<AContext *> serverContexts = this->GetServerContexts();
+	for (std::vector<AContext *>::iterator it = serverContexts.begin(); it != serverContexts.end(); it++)
+	{
+		ServerConfig *serverConfig = new ServerConfig(dynamic_cast<ServerContext *>(*it));
+		serverConfigs.push_back(serverConfig);
+	}
+  return serverConfigs;
+}

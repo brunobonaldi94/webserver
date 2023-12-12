@@ -29,6 +29,17 @@ void StringUtils::AdvaceOnWhiteSpace(std::string::iterator &it, std::string &fil
     }
 }
 
+std::string::iterator StringUtils::AdvaceOnWhiteSpace(std::string str)
+{
+  std::string::iterator it;
+  for (it = str.begin(); it != str.end(); it++)
+  {
+    if (std::isspace(*it))
+      continue;
+  }
+  return it;
+}
+
 void StringUtils::AdvaceOnDelimiters(std::string::iterator &it, std::string &fileContent, std::string delimeters)
 {
   for (size_t i = 0; i < delimeters.size(); i++)
@@ -95,13 +106,24 @@ std::vector<std::string> StringUtils::Split(std::string str, std::string delimit
 
 std::string StringUtils::UpperCase(std::string str)
 {
-  std::string upperCaseStr;
+  return StringUtils::ForEach(str, std::toupper);
+}
+
+std::string StringUtils::LowerCase(std::string str)
+{
+  return StringUtils::ForEach(str, std::tolower);
+}
+
+std::string StringUtils::ForEach(std::string str, int (* fun)(int))
+{
+  std::string transformedStr;
   for (size_t i = 0; i < str.size(); i++)
   {
-    upperCaseStr += std::toupper(str[i]);
+    transformedStr += fun(static_cast<int>(str[i]));
   }
-  return upperCaseStr;
+  return transformedStr;
 }
+
 
 std::string StringUtils::ExtractLine(std::string::iterator &it, std::string &fileContent)
 {
@@ -132,6 +154,71 @@ bool StringUtils::CheckNextCharAfterWhiteSpace(std::string::iterator &it, std::s
   return false;
 }
 
+std::vector<std::string> StringUtils::SplitAtFirstDelimiter(std::string str, std::string delimiters)
+{
+  std::vector<std::string> vec;
+  size_t pos = str.find_first_of(delimiters);
+  if (pos == std::string::npos)
+    return std::vector<std::string>();
+  vec.push_back(str.substr(0, pos));
+  vec.push_back(str.substr(pos + 1, str.size()));
+  return  vec;
+}
+
+std::string StringUtils::TrimLeft(std::string str)
+{
+    str.erase(0, str.find_first_not_of(WHITE_SPACE));
+    return str;
+}
+
+std::string StringUtils::TrimRight(std::string str)
+{
+    str.erase(str.find_last_not_of(WHITE_SPACE) + 1);
+    return str;
+}
+
+std::string StringUtils::Trim(std::string str)
+{
+    str = StringUtils::TrimLeft(str);
+    str = StringUtils::TrimRight(str);
+    return str;
+}
+
+size_t StringUtils::CountChar(std::string str, char c)
+{
+  size_t count = 0;
+  for (size_t i = 0; i < str.size(); i++)
+  {
+    if (str[i] == c)
+      count++;
+  }
+  return count;
+}
+
+size_t StringUtils::FindNthOccurrence(std::string str, char c, size_t n)
+{
+  size_t occurrences = n;
+  if (n == 0)
+    return std::string::npos;
+  for (size_t i = 0; i < str.size(); i++)
+  {
+    if (str[i] == c)
+      occurrences--;
+    if (occurrences == 0)
+      return i;
+  }
+  return std::string::npos;
+}
+
+ void StringUtils::AddToString(std::string &str, std::string line, bool addNewLine)
+{
+  if (str.empty())
+    str = line;
+  else if (addNewLine)
+    str += "\n" + line;
+  else
+    str += line;
+}
 
 
 template <typename T>

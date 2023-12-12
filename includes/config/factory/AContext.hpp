@@ -38,6 +38,7 @@ public:
     MapDirectives  GetDirectives() const;
     void AddDirective(std::string name, ADirective *directive);
     MapContexts GetSubContexts() const;
+    std::vector<AContext *> *GetSubContextsByName(std::string name);
     void AddSubContext(std::string name, AContext *subContext);
     AContext *GetParentContext() const;
     void SetParentContext(AContext *parentContext);

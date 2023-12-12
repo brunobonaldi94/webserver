@@ -10,11 +10,12 @@ MAKE			:=	make
 # ==============================================================================
 
 SRCS_DIR		:=	./srcs
+
 BASE_SRCS :=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/WebServer.cpp \
-							$(SRCS_DIR)/config/factory/AContext.cpp \
 							$(SRCS_DIR)/config/factory/LocationContext.cpp \
 							$(SRCS_DIR)/config/factory/ServerContext.cpp \
+							$(SRCS_DIR)/config/factory/AContext.cpp \
 							$(SRCS_DIR)/config/factory/ADirective.cpp \
 							$(SRCS_DIR)/config/factory/AContextCreator.cpp \
 							$(SRCS_DIR)/config/factory/ServerContextCreator.cpp \
@@ -23,15 +24,22 @@ BASE_SRCS :=	$(SRCS_DIR)/ATcpListener.cpp \
 							$(SRCS_DIR)/config/factory/DirectivesCreator.cpp \
 							$(SRCS_DIR)/config/factory/Directives.cpp \
 							$(SRCS_DIR)/config/ConfigParser.cpp \
+							$(SRCS_DIR)/config/ServerConfig.cpp \
+							$(SRCS_DIR)/config/LocationConfig.cpp \
 							$(SRCS_DIR)/log/Logger.cpp \
 							$(SRCS_DIR)/utils/StringUtils.cpp \
 							$(SRCS_DIR)/utils/JsonSerializer.cpp \
+							$(SRCS_DIR)/utils/Conversor.cpp \
+							$(SRCS_DIR)/utils/DirectoryHandler.cpp \
 							$(SRCS_DIR)/errors/NotAllowedException.cpp \
 							$(SRCS_DIR)/errors/NotFoundException.cpp \
 							$(SRCS_DIR)/errors/SyntaxErrorException.cpp \
 							$(SRCS_DIR)/requests/BaseHTTPRequestHandler.cpp \
 							$(SRCS_DIR)/requests/RequestHandler.cpp \
 							$(SRCS_DIR)/requests/HTTPStatus.cpp \
+							$(SRCS_DIR)/requests/Headers.cpp \
+							$(SRCS_DIR)/requests/Body.cpp \
+							$(SRCS_DIR)/requests/RequestContent.cpp
 
 SRCS = $(BASE_SRCS) $(SRCS_DIR)/main.cpp
 
