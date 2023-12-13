@@ -74,7 +74,7 @@ bool RequestContent::parseHeader(std::string header)
 bool RequestContent::parseBody(std::string line, ssize_t contentLengthNbr)
 {
   if (this->isMultiPartFormData())
-    return this->body.parseBody(line, contentLengthNbr, this->boundary);
+    return this->body.parseMultiPartBody(line, contentLengthNbr, this->boundary);
   return this->body.parseBody(line, contentLengthNbr);
 }
 
@@ -105,4 +105,9 @@ bool RequestContent::isMultiPartFormData()
     throw std::runtime_error("No boundary found in Content-Type");
   this->boundary = contentType.substr(boundaryPos + std::string(BOUNDARY).size());
   return multipartFormData;
+}
+
+MultiPartData RequestContent::getMultiPartData() const
+{
+  return this->body.getMultiPartData();
 }

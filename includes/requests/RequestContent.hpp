@@ -27,6 +27,7 @@ class RequestContent
 		bool parseBody(std::string line, ssize_t contentLengthNbr);
 		std::string getBody() const;
 		bool isMultiPartFormData();
+		MultiPartData getMultiPartData() const;
 
 	private:
 		Headers headers;

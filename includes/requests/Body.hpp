@@ -38,8 +38,8 @@ class Body
     void setBodyFullyRead(bool bodyFullyRead);
     bool getBodyFullyRead() const;
     virtual bool parseBody(std::string line, ssize_t contentLength);
-    virtual bool parseBody(std::string line, ssize_t contentLength, std::string boundary);
-
+    virtual bool parseMultiPartBody(std::string line, ssize_t contentLength, std::string boundary);
+    MultiPartData getMultiPartData() const;
   private:
     std::string body;
     MultiPartData multiPartData;

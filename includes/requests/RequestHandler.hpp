@@ -2,6 +2,7 @@
 #define REQUESTHANDLER_HPP
 
 #include <dirent.h>
+#include <fstream>
 #include "BaseHTTPRequestHandler.hpp"
 
 class RequestHandler : public BaseHTTPRequestHandler
@@ -17,6 +18,9 @@ class RequestHandler : public BaseHTTPRequestHandler
 		void doDELETE();
 		void clearRequestContent(int clientSocket);
 		void sendJsonResponse(std::string json);
+		void savePostData();
+		void saveDefaultData();
+		void saveMultiPartData();
 
     private:
 		std::string renderTemplate(const std::string& templateStr, const std::string& value);

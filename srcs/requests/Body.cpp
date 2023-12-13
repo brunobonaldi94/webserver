@@ -145,7 +145,7 @@ bool Body::parseBody(std::string line, ssize_t contentLengthNbr)
   return true;
 }
 
-bool Body::parseBody(std::string line, ssize_t contentLength, std::string boundary)
+bool Body::parseMultiPartBody(std::string line, ssize_t contentLength, std::string boundary)
 {
   if (line.empty() && !this->multiPartData.boundaryFound)
     return true;
@@ -181,4 +181,9 @@ bool Body::parseBody(std::string line, ssize_t contentLength, std::string bounda
 bool Body::getBodyFullyRead() const
 {
   return this->bodyFullyRead;
+}
+
+MultiPartData Body::getMultiPartData() const
+{
+  return this->multiPartData;
 }

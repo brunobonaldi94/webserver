@@ -24,7 +24,7 @@ void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, 
 	if (method != NULL)
 		(this->requestHandler.*method)();
 	this->SendToClient(
-		clientSocket, 
+		clientSocket,
 		this->requestHandler.headersBufferToString().c_str(), 
 		this->requestHandler.headersBufferToString().size()
 	);

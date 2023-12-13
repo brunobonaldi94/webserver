@@ -80,15 +80,48 @@ void RequestHandler::doGET() {
     this->writeDefaultResponse(content);
 }
 
-void RequestHandler::doPOST() {
+void RequestHandler::saveDefaultData() {
+    std::vector<std::string> bodySplit = StringUtils::Split(this->getCurrentRequestContent()->getBody(), "&");
+    std::map<std::string, std::string> data;
+    std::string dynamic_file_name;
+    for (std::vector<std::string>::iterator it = bodySplit.begin(); it != bodySplit.end(); it++)
+    {
+        std::vector<std::string> body = StringUtils::SplitAtFirstDelimiter(*it, "=");
+        if (body.size() != 2)
+            throw std::runtime_error("Invalid body");
+        data[body[0]] = body[1];
+        dynamic_file_name += body[1] + "_";
+    }
+    std::string filename = "data/" + dynamic_file_name + this->generateRandomString(30) + ".json";
+    JsonSerializer::save(JsonSerializer::serialize(data), filename);
+}
+
+void RequestHandler::saveMultiPartData()
+{
+    RequestContent *requestContent = this->getCurrentRequestContent();
+    MultiPartData multiPartData = requestContent->getMultiPartData();
+    std::string filename = "data/" + multiPartData.fileName;
+    std::string data = multiPartData.data;
+    std::ofstream file(filename.c_str());
+    file << data;
+    file.close();
+}
+
+void RequestHandler::savePostData()
+{
     if (this->getCurrentRequestContent()->getBody().empty())
         return ;
-    std::vector<std::string> body = StringUtils::Split(this->getCurrentRequestContent()->getBody(), "&");
-    std::map<std::string, std::string> data;
-    data["first_name"] = StringUtils::Split(body[0], "=")[1];
-    data["last_name"] = StringUtils::Split(body[1], "=")[1];
-    std::string filename = "data/" + data["first_name"] + "_" + data["last_name"] + "_" + this->generateRandomString(30) + ".json";
-    JsonSerializer::save(JsonSerializer::serialize(data), filename);
+    if (this->getCurrentRequestContent()->isMultiPartFormData())
+    {
+        this->saveMultiPartData();
+        return;
+    }
+    this->saveDefaultData();
+}
+
+void RequestHandler::doPOST() {
+   
+    this->savePostData();
     this->getCurrentRequestContent()->clear();
     this->doGET();
 }
