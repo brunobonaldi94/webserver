@@ -122,7 +122,6 @@ void RequestHandler::savePostData()
 void RequestHandler::doPOST() {
    
     this->savePostData();
-    this->getCurrentRequestContent()->clear();
     this->doGET();
 }
 

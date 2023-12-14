@@ -181,7 +181,6 @@ bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 		bodyParsed = this->currentRequestContent->parseMultiPartBody(requestBodyLines, this->contentLength);
 	else
 		bodyParsed = this->currentRequestContent->parseBody(requestBodyLines, this->contentLength);
-	this->currentRequestContent->setBodyFullyRead(bodyParsed);
 	return bodyParsed;
 }
 

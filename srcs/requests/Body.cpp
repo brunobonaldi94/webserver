@@ -49,22 +49,28 @@ bool MultiPartData::parseHeaders(std::vector<std::string> &headers)
 
 bool MultiPartData::parseBody(std::string line, ssize_t contentLengthNbr, std::string boundary)
 {
-   size_t contentLength = static_cast<size_t>(contentLengthNbr);
-   std::string boundaryWithTwoDashes = "--" + boundary + "--";
-   size_t boundaryPos = line.find(boundaryWithTwoDashes);
-    if (boundaryPos == std::string::npos)
-     return false;
-   line = line.substr(0, boundaryPos - std::string(CRLF).size() - std::string("\n").size());
-   if (contentLengthNbr <= 0)
-          return false;
-    if (line.size() > contentLength)
-    {
-      line = line.substr(0, contentLengthNbr);  
-      StringUtils::AddToString(this->data, line, false);
-      return true;
-    }
-    StringUtils::AddToString(this->data, line);
-    return true;
+  size_t contentLength = static_cast<size_t>(contentLengthNbr);
+  std::string boundaryWithTwoDashes = "--" + boundary + "--";
+  size_t boundaryPos = line.find(boundaryWithTwoDashes);
+  if (boundaryPos != std::string::npos)
+  {
+    size_t substPos = boundaryPos - std::string(CRLF).size() - std::string("\n").size();
+    line = line.substr(0, substPos);
+    this->bodyParsed = true;
+  }
+  else
+    this->bodyParsed = false;
+  if (contentLengthNbr <= 0)
+    throw std::runtime_error("Invalid Content-Length header");
+  if (line.size() > contentLength)
+  {
+    line = line.substr(0, contentLengthNbr);  
+    StringUtils::AddToString(this->data, line, false);
+    this->bodyParsed = true;
+    return this->bodyParsed;
+  }
+  StringUtils::AddToString(this->data, line);
+  return this->bodyParsed;
 }
 
 Body::Body(): bodyFullyRead(false)
@@ -125,7 +131,7 @@ bool Body::parseBody(std::string bodyLines, ssize_t contentLengthNbr)
     this->bodyFullyRead = true;
 		return true;
 	}
-  StringUtils::AddToString(this->body, bodyLines, false);
+  StringUtils::AddToString(this->body, bodyLines);
   this->bodyFullyRead = true;
   return true;
 }
@@ -159,8 +165,7 @@ bool Body::parseMultiPartBody(std::string multiPartBody, ssize_t contentLength, 
     return false;
 	std::string multiPartBodyLines((std::istreambuf_iterator<char>(iss)), std::istreambuf_iterator<char>());
   this->multiPartData.bodyParsed = this->multiPartData.parseBody(multiPartBodyLines, contentLength, boundary);
-  if (!this->multiPartData.bodyParsed)
-    return false;
+  this->bodyFullyRead = this->multiPartData.bodyParsed;
   this->body = this->multiPartData.data;
   return true;
 }
