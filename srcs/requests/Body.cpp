@@ -1,6 +1,6 @@
 #include "Body.hpp"
 
-MultiPartData::MultiPartData(): boundaryFound(false), dataStart(false), dataEnd(false), bodyParsed(false), headersParsed(false)
+MultiPartData::MultiPartData(): bodyParsed(false), headersParsed(false)
 {}
 
 void MultiPartData::setContentDisposition(std::string contentDisposition)
@@ -19,31 +19,30 @@ void MultiPartData::setContentDisposition(std::string contentDisposition)
     std::string key = splittedContentDispositionKeyValue[0];
     std::string value = splittedContentDispositionKeyValue[1];
     if (key == "name")
-      this->name = value;
+      this->name = StringUtils::Trim(value, "\"");
     else if (key == "filename")
-      this->fileName = value;
+      this->fileName = StringUtils::Trim(value, "\"");
   }
 }
 
-bool MultiPartData::parseHeaders(std::string line)
+bool MultiPartData::parseHeaders(std::vector<std::string> &headers)
 {
-  Headers headers;
-  bool headersParsed = false;
-
-  headersParsed = !this->contentDisposition.empty() && !this->contentType.empty();
-  if (headersParsed)
-    return true;
-  headers.parseHeader(line);
-  std::string headerContentDisposition = headers.getHeader("Content-Disposition");
-  if (headerContentDisposition != "")
+  for (size_t i = 0; i < headers.size(); i++)
   {
-    this->setContentDisposition(headerContentDisposition);
-    return true;
-  }
-  if (headers.getHeader("Content-Type") != "")
-  {
-    this->contentType = headers.getHeader("Content-Type");
-    return true;
+    Headers header;
+    std::string currentHeader = headers[i];
+    header.parseHeader(currentHeader);
+    std::string headerContentDisposition = header.getHeader("Content-Disposition");
+    if (!headerContentDisposition.empty())
+    {
+      this->setContentDisposition(headerContentDisposition);
+      continue;
+    }
+    else if (header.getHeader("Content-Type") != "")
+    {
+      this->contentType = header.getHeader("Content-Type");
+      continue;
+    }
   }
   return !this->contentDisposition.empty() && !this->contentType.empty();;
 }
@@ -51,26 +50,17 @@ bool MultiPartData::parseHeaders(std::string line)
 bool MultiPartData::parseBody(std::string line, ssize_t contentLengthNbr, std::string boundary)
 {
    size_t contentLength = static_cast<size_t>(contentLengthNbr);
-    if (contentLengthNbr <= 0)
+   std::string boundaryWithTwoDashes = "--" + boundary + "--";
+   size_t boundaryPos = line.find(boundaryWithTwoDashes);
+    if (boundaryPos == std::string::npos)
+     return false;
+   line = line.substr(0, boundaryPos - std::string(CRLF).size() - std::string("\n").size());
+   if (contentLengthNbr <= 0)
           return false;
-    if (contentLength == this->data.size())
+    if (line.size() > contentLength)
     {
-      this->bodyParsed = true;
-      this->data.erase(this->data.size() - 1);
-      return true;
-    }
-    if (line == "--" + boundary + "--")
-    {
-      this->dataEnd = true;
-      this->bodyParsed = true;
-      this->data.erase(this->data.size() - 1);
-      return true;
-    }
-    if (static_cast<size_t>(contentLengthNbr) < this->data.size() + line.size())
-    {
-      line = line.substr(0, contentLengthNbr - this->data.size());  
+      line = line.substr(0, contentLengthNbr);  
       StringUtils::AddToString(this->data, line, false);
-      this->bodyParsed = true;
       return true;
     }
     StringUtils::AddToString(this->data, line);
@@ -123,58 +113,55 @@ void Body::setBodyFullyRead(bool bodyFullyRead)
   this->bodyFullyRead = bodyFullyRead;
 }
 
-bool Body::parseBody(std::string line, ssize_t contentLengthNbr)
+bool Body::parseBody(std::string bodyLines, ssize_t contentLengthNbr)
 {
-  size_t contentLength = static_cast<size_t>(contentLengthNbr);
 	if (contentLengthNbr <= 0)
 				return false;
-  if (contentLength == this->getBody().size())
-  {
-    this->bodyFullyRead = true;
-    this->body.erase(this->body.size() - 1);
-    return true;
-  }
-	if (static_cast<size_t>(contentLengthNbr) < this->getBody().size() + line.size())
+  size_t contentLength = static_cast<size_t>(contentLengthNbr);
+	if (bodyLines.size() > contentLength)
 	{
-		line = line.substr(0, contentLengthNbr - this->getBody().size());
-		StringUtils::AddToString(this->body, line, false);
+		bodyLines = bodyLines.substr(0, contentLengthNbr);
+		StringUtils::AddToString(this->body, bodyLines, false);
     this->bodyFullyRead = true;
 		return true;
 	}
-	StringUtils::AddToString(this->body, line);
+  StringUtils::AddToString(this->body, bodyLines, false);
+  this->bodyFullyRead = true;
   return true;
 }
 
-bool Body::parseMultiPartBody(std::string line, ssize_t contentLength, std::string boundary)
+bool Body::parseMultiPartBody(std::string multiPartBody, ssize_t contentLength, std::string boundary)
 {
-  if (line.empty() && !this->multiPartData.boundaryFound)
-    return true;
-  if (!this->multiPartData.boundaryFound)
-  {
-    if (line.find("--" + boundary) != std::string::npos)
-    {
-      this->multiPartData.boundaryFound = true;
-      return true;
-    }
-  }
-  if (!this->multiPartData.boundaryFound)
+  std::string line;
+  std::vector<std::string> multiPartHeaders;
+  std::string boundaryWithTwoDashes = "--" + boundary;
+  size_t boundaryPos = multiPartBody.find_first_of(boundaryWithTwoDashes);
+  bool bodyStart = false;
+  if (boundaryPos == std::string::npos)
     return false;
-  if (line.empty())
-  {
-    this->multiPartData.dataStart = true;
-    if (this->multiPartData.dataStart && !this->multiPartData.headersParsed)
-      throw std::runtime_error("Invalid multipart/form-data");
-    return true;
-  }
-  this->multiPartData.headersParsed = this->multiPartData.parseHeaders(line);
-  if (this->multiPartData.dataStart && this->multiPartData.headersParsed)
-    this->multiPartData.parseBody(line, contentLength, boundary);
-  if (this->multiPartData.bodyParsed)
-  {
-    this->bodyFullyRead = true;
-    this->body = this->multiPartData.data;
-    return true;
-  }
+  multiPartBody = multiPartBody.substr(boundaryPos + boundaryWithTwoDashes.size() + std::string(CRLF).size());
+  std::istringstream iss(multiPartBody);
+  while (std::getline(iss, line))
+	{
+		if (!line.empty() && line[line.size() - 1] == CR)
+		{
+			if (line.size() == 1)
+				bodyStart = true;
+			line.erase(line.size() - 1);
+		}
+		if (bodyStart)
+			break;
+		else
+			multiPartHeaders.push_back(line);
+	}
+  this->multiPartData.headersParsed = this->multiPartData.parseHeaders(multiPartHeaders);
+  if (!this->multiPartData.headersParsed)
+    return false;
+	std::string multiPartBodyLines((std::istreambuf_iterator<char>(iss)), std::istreambuf_iterator<char>());
+  this->multiPartData.bodyParsed = this->multiPartData.parseBody(multiPartBodyLines, contentLength, boundary);
+  if (!this->multiPartData.bodyParsed)
+    return false;
+  this->body = this->multiPartData.data;
   return true;
 }
 

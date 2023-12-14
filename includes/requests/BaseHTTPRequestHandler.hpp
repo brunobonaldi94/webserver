@@ -50,13 +50,14 @@ class BaseHTTPRequestHandler {
 		void sendNotFoundError();
 		void writeContent(const std::string content);
 		void setRequestLines(const std::vector<std::string> requestLines);
+		bool isValidFirstRequestHeaderLine(std::string firstRequestHeaderLine);
 		std::vector<std::string> getMethodsAllowed() const;
 		std::string readContent(const std::string path);
 		std::string getContent(const std::string path);
 	  std::string GetPath() const;
 		std::vector<std::string> getMethodsAllowedForApi() const;
-		void parseHeaders(std::vector<std::string> headers);
-		bool parseHeader(std::string header);
+		void parseHeaders(std::vector<std::string> &headers);
+		bool parseBody(std::string &bodyLines);
 		std::vector<std::string> SplitRequest(const char* request);
 		bool checkBodyLimit();
 		std::string createDirectoryListing(LocationConfig *location, std::string path);
@@ -64,16 +65,16 @@ class BaseHTTPRequestHandler {
 		bool validateServerName();
 		bool checkRedirect();
 		void writeDefaultResponse(std::string content, std::string mimeType = "text/html");
-		ADirectoryHandler *_directoryHandler;
 		void addCurrentRequestContentAndServerConfig(int clientSocket, ServerConfig *serverConfig);
-		std::map<int, RequestContent> clientSocketRequestContentMap;
-
 		std::string generateRandomString(int length);
 		RequestContent *getCurrentRequestContent();
 		ServerConfig *getCurrentServerConfig();
-		int contentLength;
 
-    private:
+		ssize_t contentLength;
+		ADirectoryHandler *_directoryHandler;
+		std::map<int, RequestContent> clientSocketRequestContentMap;
+    
+		private:
 		std::ostringstream headersBuffer;
 		std::string requestMethod;
 		std::string path;
@@ -83,8 +84,6 @@ class BaseHTTPRequestHandler {
 		bool contentNotFound;
 		ServerConfig *currentServerConfig;
 		RequestContent *currentRequestContent;
-
-
 };
 
 template <typename T>

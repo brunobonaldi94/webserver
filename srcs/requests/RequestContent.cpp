@@ -2,7 +2,9 @@
 
 
 RequestContent::RequestContent(): headersFullyRead(false)
-{}
+{
+
+}
 
 RequestContent::RequestContent(ServerConfig *serverConfig): serverConfig(serverConfig), headersFullyRead(false)
 {
@@ -73,8 +75,6 @@ bool RequestContent::parseHeader(std::string header)
 
 bool RequestContent::parseBody(std::string line, ssize_t contentLengthNbr)
 {
-  if (this->isMultiPartFormData())
-    return this->body.parseMultiPartBody(line, contentLengthNbr, this->boundary);
   return this->body.parseBody(line, contentLengthNbr);
 }
 
@@ -91,6 +91,11 @@ void RequestContent::setHeadersFullyRead(bool headersFullyRead)
   this->headersFullyRead = headersFullyRead;
 }
 
+void RequestContent::setBodyFullyRead(bool bodyFullyRead)
+{
+  this->body.setBodyFullyRead(bodyFullyRead);
+}
+
 std::string RequestContent::getBody() const
 {
   return this->body.getBody();
@@ -98,16 +103,25 @@ std::string RequestContent::getBody() const
 
 bool RequestContent::isMultiPartFormData()
 {
+  bool hasMultiPartFormData = false;
+
   std::string contentType = this->headers.getHeader("Content-Type");
-  bool multipartFormData = contentType.find("multipart/form-data") != std::string::npos;
+  hasMultiPartFormData = contentType.find("multipart/form-data") != std::string::npos;
+  if (hasMultiPartFormData == false)
+    return false;
   size_t boundaryPos = contentType.find(BOUNDARY);
-  if (boundaryPos == std::string::npos && multipartFormData)
+  if (boundaryPos == std::string::npos && hasMultiPartFormData)
     throw std::runtime_error("No boundary found in Content-Type");
   this->boundary = contentType.substr(boundaryPos + std::string(BOUNDARY).size());
-  return multipartFormData;
+  return hasMultiPartFormData;
 }
 
 MultiPartData RequestContent::getMultiPartData() const
 {
   return this->body.getMultiPartData();
+}
+
+bool RequestContent::parseMultiPartBody(std::string line, ssize_t contentLengthNbr)
+{
+  return this->body.parseMultiPartBody(line, contentLengthNbr, this->boundary);
 }

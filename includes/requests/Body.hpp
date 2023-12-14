@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <sys/types.h>
 #include "defines.hpp"
 #include "Headers.hpp"
@@ -14,12 +15,9 @@ struct MultiPartData
   std::string contentDisposition;
   std::string contentType;
   std::string data;
-  bool boundaryFound;
-  bool dataStart;
-  bool dataEnd;
   bool bodyParsed;
   bool headersParsed;
-  bool parseHeaders(std::string line);
+  bool parseHeaders(std::vector<std::string> &headers);
   bool parseBody(std::string line, ssize_t contentLengthNbr, std::string boundary);
   void setContentDisposition(std::string contentDisposition);
 };

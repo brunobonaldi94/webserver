@@ -165,26 +165,26 @@ std::vector<std::string> StringUtils::SplitAtFirstDelimiter(std::string str, std
   return  vec;
 }
 
-std::string StringUtils::TrimLeft(std::string str)
+std::string StringUtils::TrimLeft(std::string str, const char *chars)
 {
-    str.erase(0, str.find_first_not_of(WHITE_SPACE));
+    str.erase(0, str.find_first_not_of(chars));
     return str;
 }
 
-std::string StringUtils::TrimRight(std::string str)
+std::string StringUtils::TrimRight(std::string str, const char *chars)
 {
-    str.erase(str.find_last_not_of(WHITE_SPACE) + 1);
+    str.erase(str.find_last_not_of(chars) + 1);
     return str;
 }
 
-std::string StringUtils::Trim(std::string str)
+std::string StringUtils::Trim(std::string str, const char *chars)
 {
-    str = StringUtils::TrimLeft(str);
-    str = StringUtils::TrimRight(str);
+    str = StringUtils::TrimLeft(str, chars);
+    str = StringUtils::TrimRight(str, chars);
     return str;
 }
 
-size_t StringUtils::CountChar(std::string str, char c)
+size_t StringUtils::CountChar(std::string str, const char c)
 {
   size_t count = 0;
   for (size_t i = 0; i < str.size(); i++)

@@ -1,7 +1,7 @@
 #include "BaseHTTPRequestHandler.hpp"
 
 
-BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler) :_directoryHandler(directoryHandler),  allowDirectoryListing(false), contentNotFound(false), currentServerConfig(NULL), currentRequestContent(NULL)
+BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler): contentLength(0), _directoryHandler(directoryHandler),  allowDirectoryListing(false), contentNotFound(false), currentServerConfig(NULL), currentRequestContent(NULL)
 {
 
 }
@@ -72,56 +72,151 @@ void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requ
 	this->requestVersion = requestLines[2];
 }
 
+// std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request)
+// {
+// 	this->contentLength = 0;
+
+// 	std::istringstream iss(request);
+// 	std::cout << request << std::endl;
+// 	std::vector<std::string> requestLines;
+// 	std::string line;
+// 	std::string contentLength;
+// 	bool bodyStart = false;
+// 	ssize_t contentLengthNbr = -1;
+// 	bool hasContentLength = false;
+
+// 	if (!this->currentRequestContent->getBody().empty())
+// 	{
+// 		bodyStart = true;
+// 		hasContentLength = true;
+// 		contentLengthNbr = std::atoll(this->currentRequestContent->getHeader("Content-Length").c_str());
+// 	}
+// 	while (std::getline(iss, line))
+// 	{
+// 		if (!line.empty() && line[line.size() - 1] == CR)
+// 		{
+// 			  if (line.size() == 1)
+// 				{
+// 					bodyStart = true;
+// 					this->currentRequestContent->setHeadersFullyRead(true);
+// 				}
+// 				line.erase(line.size() - 1);
+// 		}
+// 		if (bodyStart == true && hasContentLength == false && !line.empty())
+// 			throw std::runtime_error("body start without content length");
+// 		if (bodyStart == true && hasContentLength == true)
+// 			this->currentRequestContent->parseBody(line, contentLengthNbr);
+// 		else
+// 		{
+// 			requestLines.push_back(line);
+// 			this->currentRequestContent->parseHeader(line);
+// 			if (contentLength.empty())
+// 			{
+// 				contentLength = this->currentRequestContent->getHeader("Content-Length");
+// 				if (!contentLength.empty())
+// 				{
+// 					contentLengthNbr = std::atoll(contentLength.c_str());
+// 					hasContentLength = true;
+// 				}
+// 			}
+// 		}
+// 	}		
+// 	return requestLines;
+// }
+
+bool BaseHTTPRequestHandler::isValidFirstRequestHeaderLine(std::string firstRequestHeaderLine)
+{
+	std::vector<std::string> versionNumber;
+
+	std::vector<std::string> firstRequestLine = StringUtils::Split(firstRequestHeaderLine, " ");
+	if (firstRequestLine.size() < 2 || (firstRequestLine.size() == 2 && firstRequestLine[0] != "GET"))
+	{
+			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+			return false;
+	}
+	this->setRequestLines(firstRequestLine);
+	std::string baseVersion = "HTTP/";
+	if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
+		throw std::invalid_argument("");
+	std::vector<std::string> baseVersionNumberVector = StringUtils::Split(this->requestVersion, "/");
+	if (baseVersionNumberVector.size() != 2)
+		throw std::runtime_error("");
+	std::string baseVersionNumber = baseVersionNumberVector[1];
+	versionNumber = StringUtils::Split(baseVersionNumber, ".");
+	if (versionNumber.size() != 2 ||
+		(versionNumber.size() == 2 && versionNumber[0] == ""))
+		throw std::runtime_error("");
+	if (std::atoi(versionNumber[0].c_str()) != 1 ||
+		std::atoi(versionNumber[1].c_str()) != 1)
+	{
+		this->sendError("<h1>HTTP Version Not Supported</h1>", HTTPStatus::HTTP_VERSION_NOT_SUPPORTED);
+		return false;
+	}
+	return true;
+}
+
+void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> &requestLines)
+{
+	std::string contentLengthStr;
+	for (std::vector<std::string>::iterator it = requestLines.begin(); it != requestLines.end(); it++)
+	{
+		std::string line = *it;
+		if (line.empty())
+			break;
+		this->currentRequestContent->parseHeader(line);
+	}
+	contentLengthStr = this->currentRequestContent->getHeader("Content-Length");
+	if (!contentLengthStr.empty())
+		this->contentLength = std::atoll(contentLengthStr.c_str());
+	this->currentRequestContent->setHeadersFullyRead(true);
+}
+
+bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
+{
+	std::cout << requestBodyLines << std::endl;
+	if (this->contentLength == 0)
+		return true;
+	bool bodyParsed = false;
+	if (this->currentRequestContent->isMultiPartFormData())
+		bodyParsed = this->currentRequestContent->parseMultiPartBody(requestBodyLines, this->contentLength);
+	else
+		bodyParsed = this->currentRequestContent->parseBody(requestBodyLines, this->contentLength);
+	this->currentRequestContent->setBodyFullyRead(bodyParsed);
+	return bodyParsed;
+}
+
 std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request)
 {
-	this->contentLength = 0;
 
 	std::istringstream iss(request);
 	std::cout << request << std::endl;
-	std::vector<std::string> requestLines;
+	std::vector<std::string> requestHeaderLines;
 	std::string line;
-	std::string contentLength;
 	bool bodyStart = false;
-	ssize_t contentLengthNbr = -1;
-	bool hasContentLength = false;
 
-	if (!this->currentRequestContent->getBody().empty())
+	std::getline(iss, line);
+	if (!this->isValidFirstRequestHeaderLine(line))
 	{
-		bodyStart = true;
-		hasContentLength = true;
-		contentLengthNbr = std::atoll(this->currentRequestContent->getHeader("Content-Length").c_str());
+		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		throw std::runtime_error("Bad Request");
 	}
 	while (std::getline(iss, line))
 	{
 		if (!line.empty() && line[line.size() - 1] == CR)
 		{
-			  if (line.size() == 1)
-				{
-					bodyStart = true;
-					this->currentRequestContent->setHeadersFullyRead(true);
-				}
-				line.erase(line.size() - 1);
+			if (line.size() == 1)
+				bodyStart = true;
+			line.erase(line.size() - 1);
 		}
-		if (bodyStart == true && hasContentLength == false && !line.empty())
-			throw std::runtime_error("body start without content length");
-		if (bodyStart == true && hasContentLength == true)
-			this->currentRequestContent->parseBody(line, contentLengthNbr);
+		if (bodyStart)
+			break;
 		else
-		{
-			requestLines.push_back(line);
-			this->currentRequestContent->parseHeader(line);
-			if (contentLength.empty())
-			{
-				contentLength = this->currentRequestContent->getHeader("Content-Length");
-				if (!contentLength.empty())
-				{
-					contentLengthNbr = std::atoll(contentLength.c_str());
-					hasContentLength = true;
-				}
-			}
-		}
-	}		
-	return requestLines;
+			requestHeaderLines.push_back(line);
+	}
+	this->parseHeaders(requestHeaderLines);
+	std::string requestBodyLines((std::istreambuf_iterator<char>(iss)), std::istreambuf_iterator<char>());
+	this->parseBody(requestBodyLines);
+	return requestHeaderLines;
 }
 
 bool BaseHTTPRequestHandler::checkBodyLimit()
@@ -211,32 +306,6 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 			this->sendError("<h1>Request Entity Too Large</h1>", HTTPStatus::CONTENT_TOO_LARGE);
 			return NULL;
 		}
-		firstRequestLine = StringUtils::Split(requestLines[0], " ");
-		if (firstRequestLine.size() < 2 || (firstRequestLine.size() == 2 && firstRequestLine[0] != "GET"))
-		{
-			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
-			return NULL;
-		}
-		this->setRequestLines(firstRequestLine);
-		std::string baseVersion = "HTTP/";
-		if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)
-			throw std::invalid_argument("");
-		std::vector<std::string> baseVersionNumberVector = StringUtils::Split(this->requestVersion, "/");
-		if (baseVersionNumberVector.size() != 2)
-			throw std::runtime_error("");
-		std::string baseVersionNumber = baseVersionNumberVector[1];
-		versionNumber = StringUtils::Split(baseVersionNumber, ".");
-		if (versionNumber.size() != 2 ||
-			(versionNumber.size() == 2 && versionNumber[0] == ""))
-			throw std::runtime_error("");
-		if (std::atoi(versionNumber[0].c_str()) != 1 ||
-			std::atoi(versionNumber[1].c_str()) != 1)
-		{
-			this->sendError("<h1>HTTP Version Not Supported</h1>", HTTPStatus::HTTP_VERSION_NOT_SUPPORTED);
-			return NULL;
-		}
-		this->requestMethod = firstRequestLine[0];
-		this->path = firstRequestLine[1];
 		this->checkRedirect();
 		if (isDirectoryListingAllowed(this->path) && this->requestMethod == "GET")
 			return this->getMethod("GET");

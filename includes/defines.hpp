@@ -4,6 +4,7 @@
 #define DEBUG true
 #define CRLF "\r\n"
 #define CR '\r'
+#define LF '\n'
 
 #define FILE_EXTENSION ".conf"
 #define ERROR_CODE -1
