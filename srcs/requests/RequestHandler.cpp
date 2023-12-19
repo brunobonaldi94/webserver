@@ -100,7 +100,7 @@ void RequestHandler::saveMultiPartData()
 {
     RequestContent *requestContent = this->getCurrentRequestContent();
     MultiPartData multiPartData = requestContent->getMultiPartData();
-    std::string filename = "data/" + multiPartData.fileName;
+    std::string filename = "upload/" + multiPartData.fileName;
     std::string data = multiPartData.data;
     std::ofstream file(filename.c_str());
     file << data;
@@ -110,6 +110,8 @@ void RequestHandler::saveMultiPartData()
 void RequestHandler::savePostData()
 {
     if (this->getCurrentRequestContent()->getBody().empty())
+        return ;
+    if (!this->getCurrentRequestContent()->hasParsedAllRequest())
         return ;
     if (this->getCurrentRequestContent()->isMultiPartFormData())
     {

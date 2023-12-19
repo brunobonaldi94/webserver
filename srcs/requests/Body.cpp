@@ -1,6 +1,6 @@
 #include "Body.hpp"
 
-MultiPartData::MultiPartData(): bodyParsed(false), headersParsed(false)
+MultiPartData::MultiPartData(): bodyParsed(false), headersParsed(false), dataHasStarted(false)
 {}
 
 void MultiPartData::setContentDisposition(std::string contentDisposition)
@@ -54,7 +54,7 @@ bool MultiPartData::parseBody(std::string line, ssize_t contentLengthNbr, std::s
   size_t boundaryPos = line.find(boundaryWithTwoDashes);
   if (boundaryPos != std::string::npos)
   {
-    size_t substPos = boundaryPos - std::string(CRLF).size() - std::string("\n").size();
+    size_t substPos = boundaryPos - std::string(CRLF).size();
     line = line.substr(0, substPos);
     this->bodyParsed = true;
   }
@@ -136,29 +136,46 @@ bool Body::parseBody(std::string bodyLines, ssize_t contentLengthNbr)
   return true;
 }
 
+std::string Body::findBoundaryStart(std::string line, std::string boundary)
+{
+  if (this->multiPartData.dataHasStarted)
+    return line;
+  std::string boundaryWithTwoDashes = "--" + boundary;
+  size_t boundaryPos = line.find_first_of(boundaryWithTwoDashes);
+  if (boundaryPos == std::string::npos)
+    throw std::runtime_error("No boundary found in Body");
+  line = line.substr(boundaryPos + boundaryWithTwoDashes.size() + std::string(CRLF).size());
+  return line;
+}
+
+bool Body::hasFoundBoundaryEnd(std::string line, std::string boundary)
+{
+  std::string boundaryWithTwoDashes = "--" + boundary + "--";
+  size_t boundaryPos = line.find(boundaryWithTwoDashes);
+  if (boundaryPos != std::string::npos)
+    return true;
+  return false;
+}
+
 bool Body::parseMultiPartBody(std::string multiPartBody, ssize_t contentLength, std::string boundary)
 {
   std::string line;
   std::vector<std::string> multiPartHeaders;
-  std::string boundaryWithTwoDashes = "--" + boundary;
-  size_t boundaryPos = multiPartBody.find_first_of(boundaryWithTwoDashes);
-  bool bodyStart = false;
-  if (boundaryPos == std::string::npos)
-    return false;
-  multiPartBody = multiPartBody.substr(boundaryPos + boundaryWithTwoDashes.size() + std::string(CRLF).size());
+
+  multiPartBody = this->findBoundaryStart(multiPartBody, boundary);
   std::istringstream iss(multiPartBody);
-  while (std::getline(iss, line))
+  while (!this->multiPartData.dataHasStarted && std::getline(iss, line))
 	{
 		if (!line.empty() && line[line.size() - 1] == CR)
 		{
-			if (line.size() == 1)
-				bodyStart = true;
+      if (line.size() == 1)
+      {
+        this->multiPartData.dataHasStarted = true;
+        break;
+      }
 			line.erase(line.size() - 1);
 		}
-		if (bodyStart)
-			break;
-		else
-			multiPartHeaders.push_back(line);
+		multiPartHeaders.push_back(line);
 	}
   this->multiPartData.headersParsed = this->multiPartData.parseHeaders(multiPartHeaders);
   if (!this->multiPartData.headersParsed)

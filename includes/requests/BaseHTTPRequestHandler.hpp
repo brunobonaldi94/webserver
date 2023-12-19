@@ -39,6 +39,7 @@ class BaseHTTPRequestHandler {
 		virtual void doPOST() = 0;
 		virtual void doDELETE() = 0;
 		virtual void clearRequestContent(int clientSocket) = 0;
+		bool hasParsedAllRequestContent();
 
 	protected:
 		RequestMethodFunction parseRequest(const char* request);
@@ -50,7 +51,7 @@ class BaseHTTPRequestHandler {
 		void sendNotFoundError();
 		void writeContent(const std::string content);
 		void setRequestLines(const std::vector<std::string> requestLines);
-		bool isValidFirstRequestHeaderLine(std::string firstRequestHeaderLine);
+		bool isValidFirstRequestHeaderLine(std::string requestHeaderLine);
 		std::vector<std::string> getMethodsAllowed() const;
 		std::string readContent(const std::string path);
 		std::string getContent(const std::string path);
@@ -58,7 +59,7 @@ class BaseHTTPRequestHandler {
 		std::vector<std::string> getMethodsAllowedForApi() const;
 		void parseHeaders(std::vector<std::string> &headers);
 		bool parseBody(std::string &bodyLines);
-		std::vector<std::string> SplitRequest(const char* request);
+		std::vector<std::string> SplitRequest(std::string request);
 		bool checkBodyLimit();
 		std::string createDirectoryListing(LocationConfig *location, std::string path);
 		bool isDirectoryListingAllowed(std::string path);

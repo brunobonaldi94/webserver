@@ -6,6 +6,7 @@
 #define CR '\r'
 #define LF '\n'
 
+
 #define FILE_EXTENSION ".conf"
 #define ERROR_CODE -1
 #define SUCCESS_CODE 0

@@ -59,10 +59,16 @@ bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 {
 	if (this->currentRequestContent->hasParsedAllRequest())
 	{
+		this->clearHeadersBuffers();
 		this->clearRequestContent(clientSocket);
 		return true;
 	}
 	return false;
+}
+
+bool BaseHTTPRequestHandler::hasParsedAllRequestContent()
+{
+	return this->currentRequestContent->hasParsedAllRequest();
 }
 
 void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requestLines)
@@ -184,33 +190,32 @@ bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 	return bodyParsed;
 }
 
-std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request)
+std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(std::string request)
 {
 
 	std::istringstream iss(request);
 	std::cout << request << std::endl;
 	std::vector<std::string> requestHeaderLines;
 	std::string line;
-	bool bodyStart = false;
+	bool isBodyEmpty = this->currentRequestContent->getBody().empty();
 
 	std::getline(iss, line);
-	if (!this->isValidFirstRequestHeaderLine(line))
+	if (isBodyEmpty && !this->isValidFirstRequestHeaderLine(line))
 	{
 		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 		throw std::runtime_error("Bad Request");
 	}
-	while (std::getline(iss, line))
+	if (!isBodyEmpty)
+		iss.str(request);
+	while (isBodyEmpty && std::getline(iss, line))
 	{
 		if (!line.empty() && line[line.size() - 1] == CR)
 		{
 			if (line.size() == 1)
-				bodyStart = true;
+				break;
 			line.erase(line.size() - 1);
 		}
-		if (bodyStart)
-			break;
-		else
-			requestHeaderLines.push_back(line);
+		requestHeaderLines.push_back(line);
 	}
 	this->parseHeaders(requestHeaderLines);
 	std::string requestBodyLines((std::istreambuf_iterator<char>(iss)), std::istreambuf_iterator<char>());
@@ -291,8 +296,8 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 	{
 		std::vector<std::string> firstRequestLine;
 		std::vector<std::string> versionNumber;
-		std::vector<std::string> requestLines = this->SplitRequest(request);
-		if (requestLines.size() == 0)
+		std::vector<std::string> requestLines = this->SplitRequest(std::string(request));
+		if (requestLines.size() == 0 && this->currentRequestContent->hasParsedAllRequest() == false)
 			return NULL;
 		Logger::Debug("BaseHTTPRequestHandler::parseRequest", SUCCESS , this->currentRequestContent->getBody());
 		if (!this->validateServerName())

@@ -23,12 +23,12 @@ void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, 
 	BaseHTTPRequestHandler::RequestMethodFunction method = this->requestHandler.parseRequestForClientSocket(msg, clientSocket, serverConfig);
 	if (method != NULL)
 		(this->requestHandler.*method)();
-	this->SendToClient(
-		clientSocket,
-		this->requestHandler.headersBufferToString().c_str(), 
-		this->requestHandler.headersBufferToString().size()
-	);
-	this->requestHandler.clearHeadersBuffers();
+	if (this->requestHandler.hasParsedAllRequestContent())
+		this->SendToClient(
+			clientSocket,
+			this->requestHandler.headersBufferToString().c_str(), 
+			this->requestHandler.headersBufferToString().size()
+		);
 	this->requestHandler.shouldClearRequestContent(clientSocket);
 }
 
