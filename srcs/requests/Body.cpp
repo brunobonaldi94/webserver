@@ -65,7 +65,7 @@ bool MultiPartData::parseBody(std::string line, ssize_t contentLengthNbr, std::s
   if (line.size() > contentLength)
   {
     line = line.substr(0, contentLengthNbr);  
-    StringUtils::AddToString(this->data, line, false);
+    StringUtils::AddToString(this->data, line);
     this->bodyParsed = true;
     return this->bodyParsed;
   }
@@ -127,7 +127,7 @@ bool Body::parseBody(std::string bodyLines, ssize_t contentLengthNbr)
 	if (bodyLines.size() > contentLength)
 	{
 		bodyLines = bodyLines.substr(0, contentLengthNbr);
-		StringUtils::AddToString(this->body, bodyLines, false);
+		StringUtils::AddToString(this->body, bodyLines);
     this->bodyFullyRead = true;
 		return true;
 	}
@@ -148,7 +148,7 @@ std::string Body::findBoundaryStart(std::string line, std::string boundary)
   return line;
 }
 
-bool Body::hasFoundBoundaryEnd(std::string line, std::string boundary)
+bool MultiPartData::hasFoundBoundaryEnd(std::string line, std::string boundary)
 {
   std::string boundaryWithTwoDashes = "--" + boundary + "--";
   size_t boundaryPos = line.find(boundaryWithTwoDashes);

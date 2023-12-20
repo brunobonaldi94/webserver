@@ -55,11 +55,17 @@ void BaseHTTPRequestHandler::clearHeadersBuffers()
 	this->headersBuffer.clear();
 }
 
+void BaseHTTPRequestHandler::clearBodyBuffers()
+{
+	this->bodyUnparsed.clear();
+}
+
 bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 {
 	if (this->currentRequestContent->hasParsedAllRequest())
 	{
 		this->clearHeadersBuffers();
+		this->clearBodyBuffers();
 		this->clearRequestContent(clientSocket);
 		return true;
 	}
@@ -163,6 +169,8 @@ bool BaseHTTPRequestHandler::isValidFirstRequestHeaderLine(std::string firstRequ
 
 void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> &requestLines)
 {
+	if (requestLines.size() == 0)
+		return;
 	std::string contentLengthStr;
 	for (std::vector<std::string>::iterator it = requestLines.begin(); it != requestLines.end(); it++)
 	{
@@ -174,19 +182,28 @@ void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> &requestLines
 	contentLengthStr = this->currentRequestContent->getHeader("Content-Length");
 	if (!contentLengthStr.empty())
 		this->contentLength = std::atoll(contentLengthStr.c_str());
+	this->currentRequestContent->isMultiPartFormData();
 	this->currentRequestContent->setHeadersFullyRead(true);
 }
 
 bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 {
-	std::cout << requestBodyLines << std::endl;
 	if (this->contentLength == 0)
 		return true;
+	StringUtils::AddToString(this->bodyUnparsed, requestBodyLines);
+	if (this->bodyUnparsed.size() < this->contentLength)
+	{
+		bool foundBoundary = this->currentRequestContent->getHasMultiPartFormData() && this->currentRequestContent->getMultiPartData().hasFoundBoundaryEnd(this->bodyUnparsed, this->currentRequestContent->getBoundary());
+		if (!foundBoundary) {
+			return false;
+		}
+	}
 	bool bodyParsed = false;
-	if (this->currentRequestContent->isMultiPartFormData())
-		bodyParsed = this->currentRequestContent->parseMultiPartBody(requestBodyLines, this->contentLength);
+	Logger::Debug("BaseHTTPRequestHandler::parseBody", ERROR , this->bodyUnparsed);
+	if (this->currentRequestContent->getHasMultiPartFormData())
+		bodyParsed = this->currentRequestContent->parseMultiPartBody(this->bodyUnparsed, this->contentLength);
 	else
-		bodyParsed = this->currentRequestContent->parseBody(requestBodyLines, this->contentLength);
+		bodyParsed = this->currentRequestContent->parseBody(this->bodyUnparsed, this->contentLength);
 	return bodyParsed;
 }
 
@@ -194,20 +211,20 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(std::string reques
 {
 
 	std::istringstream iss(request);
-	std::cout << request << std::endl;
+	//Logger::Debug("BaseHTTPRequestHandler::SplitRequest", ERROR , request);
 	std::vector<std::string> requestHeaderLines;
 	std::string line;
-	bool isBodyEmpty = this->currentRequestContent->getBody().empty();
+	bool isBodyUnparsedEmpty = this->bodyUnparsed.empty();
 
 	std::getline(iss, line);
-	if (isBodyEmpty && !this->isValidFirstRequestHeaderLine(line))
+	if (isBodyUnparsedEmpty && !this->isValidFirstRequestHeaderLine(line))
 	{
 		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 		throw std::runtime_error("Bad Request");
 	}
-	if (!isBodyEmpty)
+	if (!isBodyUnparsedEmpty)
 		iss.str(request);
-	while (isBodyEmpty && std::getline(iss, line))
+	while (isBodyUnparsedEmpty && std::getline(iss, line))
 	{
 		if (!line.empty() && line[line.size() - 1] == CR)
 		{
@@ -219,6 +236,7 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(std::string reques
 	}
 	this->parseHeaders(requestHeaderLines);
 	std::string requestBodyLines((std::istreambuf_iterator<char>(iss)), std::istreambuf_iterator<char>());
+	std::cout << RED << (requestBodyLines == std::string(request) ? "true" : "false") << RESET << std::endl;
 	this->parseBody(requestBodyLines);
 	return requestHeaderLines;
 }
@@ -299,7 +317,6 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		std::vector<std::string> requestLines = this->SplitRequest(std::string(request));
 		if (requestLines.size() == 0 && this->currentRequestContent->hasParsedAllRequest() == false)
 			return NULL;
-		Logger::Debug("BaseHTTPRequestHandler::parseRequest", SUCCESS , this->currentRequestContent->getBody());
 		if (!this->validateServerName())
 		{
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);

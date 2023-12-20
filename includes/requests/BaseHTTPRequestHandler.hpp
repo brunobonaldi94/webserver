@@ -32,6 +32,7 @@ class BaseHTTPRequestHandler {
 		RequestMethodFunction getMethod(const std::string& method);
 		RequestMethodFunction parseRequestForClientSocket(const char* request, int clientSocket, ServerConfig *serverConfig);
 		void clearHeadersBuffers();
+		void clearBodyBuffers();
 		bool getContentNotFound() const;
 		void setClientSockerRequestContentMap(int clientSocket, ServerConfig *serverConfig);
 		bool shouldClearRequestContent(int clientSocket);
@@ -71,7 +72,7 @@ class BaseHTTPRequestHandler {
 		RequestContent *getCurrentRequestContent();
 		ServerConfig *getCurrentServerConfig();
 
-		ssize_t contentLength;
+		size_t contentLength;
 		ADirectoryHandler *_directoryHandler;
 		std::map<int, RequestContent> clientSocketRequestContentMap;
     
@@ -85,6 +86,7 @@ class BaseHTTPRequestHandler {
 		bool contentNotFound;
 		ServerConfig *currentServerConfig;
 		RequestContent *currentRequestContent;
+		std::string bodyUnparsed;
 };
 
 template <typename T>

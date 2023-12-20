@@ -210,14 +210,9 @@ size_t StringUtils::FindNthOccurrence(std::string str, char c, size_t n)
   return std::string::npos;
 }
 
- void StringUtils::AddToString(std::string &str, std::string line, bool addNewLine)
+ void StringUtils::AddToString(std::string &str, std::string str2)
 {
-  if (str.empty())
-    str = line;
-  else if (addNewLine)
-    str += "\n" + line;
-  else
-    str += line;
+  str.append(str2);
 }
 
 
@@ -234,3 +229,7 @@ template std::string StringUtils::ConvertNumberToString<float>(float number);
 template std::string StringUtils::ConvertNumberToString<double>(double number);
 template std::string StringUtils::ConvertNumberToString<long>(long number);
 template std::string StringUtils::ConvertNumberToString<long long>(long long number);
+template std::string StringUtils::ConvertNumberToString<unsigned int>(unsigned int number);
+template std::string StringUtils::ConvertNumberToString<unsigned long>(unsigned long number);
+template std::string StringUtils::ConvertNumberToString<unsigned long long>(unsigned long long number);
+template std::string StringUtils::ConvertNumberToString<short>(short number);

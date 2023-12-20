@@ -30,6 +30,8 @@ class RequestContent
 		bool isMultiPartFormData();
 		MultiPartData getMultiPartData() const;
 		bool parseMultiPartBody(std::string line, ssize_t contentLengthNbr);
+		bool getHasMultiPartFormData() const;
+		std::string getBoundary() const;
 
 	private:
 		Headers headers;
@@ -37,5 +39,6 @@ class RequestContent
 		std::string boundary;
     ServerConfig *serverConfig;
 		bool headersFullyRead;
+		bool hasMultiPartFormData;
 };
 

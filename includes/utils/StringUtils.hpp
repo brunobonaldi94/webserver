@@ -31,5 +31,5 @@ public:
   static std::string Trim(std::string str, const char *chars = WHITE_SPACE);
   static size_t CountChar(std::string str, char c);
   static size_t FindNthOccurrence(std::string str, char c, size_t n);
-  static void AddToString(std::string &str, std::string line, bool addNewLine = true);
+  static void AddToString(std::string &str, std::string str2);
 };

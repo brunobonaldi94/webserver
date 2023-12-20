@@ -1,12 +1,12 @@
 #include "RequestContent.hpp"
 
 
-RequestContent::RequestContent(): headersFullyRead(false)
+RequestContent::RequestContent(): headersFullyRead(false), hasMultiPartFormData(false)
 {
 
 }
 
-RequestContent::RequestContent(ServerConfig *serverConfig): serverConfig(serverConfig), headersFullyRead(false)
+RequestContent::RequestContent(ServerConfig *serverConfig): serverConfig(serverConfig), headersFullyRead(false), hasMultiPartFormData(false)
 {
 
 }
@@ -28,6 +28,9 @@ RequestContent &RequestContent::operator=(const RequestContent &other)
     this->headers = other.headers;
     this->body = other.body;
     this->serverConfig = other.serverConfig;
+    this->headersFullyRead = other.headersFullyRead;
+    this->hasMultiPartFormData = other.hasMultiPartFormData;
+    this->boundary = other.boundary;
   }
   return *this;
 }
@@ -103,17 +106,17 @@ std::string RequestContent::getBody() const
 
 bool RequestContent::isMultiPartFormData()
 {
-  bool hasMultiPartFormData = false;
-
+  if (this->hasMultiPartFormData)
+    return true;
   std::string contentType = this->headers.getHeader("Content-Type");
-  hasMultiPartFormData = contentType.find("multipart/form-data") != std::string::npos;
+  this->hasMultiPartFormData = contentType.find("multipart/form-data") != std::string::npos;
   if (hasMultiPartFormData == false)
     return false;
   size_t boundaryPos = contentType.find(BOUNDARY);
-  if (boundaryPos == std::string::npos && hasMultiPartFormData)
+  if (boundaryPos == std::string::npos && this->hasMultiPartFormData)
     throw std::runtime_error("No boundary found in Content-Type");
   this->boundary = contentType.substr(boundaryPos + std::string(BOUNDARY).size());
-  return hasMultiPartFormData;
+  return this->hasMultiPartFormData;
 }
 
 MultiPartData RequestContent::getMultiPartData() const
@@ -124,4 +127,14 @@ MultiPartData RequestContent::getMultiPartData() const
 bool RequestContent::parseMultiPartBody(std::string line, ssize_t contentLengthNbr)
 {
   return this->body.parseMultiPartBody(line, contentLengthNbr, this->boundary);
+}
+
+bool RequestContent::getHasMultiPartFormData() const
+{
+  return this->hasMultiPartFormData;
+}
+
+std::string RequestContent::getBoundary() const
+{
+  return this->boundary;
 }

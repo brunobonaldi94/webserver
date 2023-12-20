@@ -21,6 +21,7 @@ struct MultiPartData
   bool parseHeaders(std::vector<std::string> &headers);
   bool parseBody(std::string line, ssize_t contentLengthNbr, std::string boundary);
   void setContentDisposition(std::string contentDisposition);
+  bool hasFoundBoundaryEnd(std::string line, std::string boundary);
 };
 
 class Body
@@ -44,5 +45,4 @@ class Body
     MultiPartData multiPartData;
     bool bodyFullyRead;
     std::string findBoundaryStart(std::string line, std::string boundary);
-    bool hasFoundBoundaryEnd(std::string line, std::string boundary);
 };
