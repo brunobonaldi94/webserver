@@ -40,8 +40,10 @@ class Body
     virtual bool parseBody(std::string line, ssize_t contentLength);
     virtual bool parseMultiPartBody(std::string line, ssize_t contentLength, std::string boundary);
     MultiPartData getMultiPartData() const;
+    std::string getBodyUnparsed() const;
   private:
     std::string body;
+    std::string bodyUnparsed;
     MultiPartData multiPartData;
     bool bodyFullyRead;
     std::string findBoundaryStart(std::string line, std::string boundary);

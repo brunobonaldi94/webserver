@@ -32,6 +32,7 @@ class RequestContent
 		bool parseMultiPartBody(std::string line, ssize_t contentLengthNbr);
 		bool getHasMultiPartFormData() const;
 		std::string getBoundary() const;
+		Body getBodyObject() const;
 
 	private:
 		Headers headers;

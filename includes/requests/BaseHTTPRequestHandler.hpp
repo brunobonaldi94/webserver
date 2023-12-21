@@ -32,7 +32,6 @@ class BaseHTTPRequestHandler {
 		RequestMethodFunction getMethod(const std::string& method);
 		RequestMethodFunction parseRequestForClientSocket(std::string request, int clientSocket, ServerConfig *serverConfig);
 		void clearHeadersBuffers();
-		void clearBodyBuffers();
 		bool getContentNotFound() const;
 		void setClientSockerRequestContentMap(int clientSocket, ServerConfig *serverConfig);
 		bool shouldClearRequestContent(int clientSocket);
@@ -86,7 +85,6 @@ class BaseHTTPRequestHandler {
 		bool contentNotFound;
 		ServerConfig *currentServerConfig;
 		RequestContent *currentRequestContent;
-		std::string bodyUnparsed;
 };
 
 template <typename T>

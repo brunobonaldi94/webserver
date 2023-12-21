@@ -56,18 +56,13 @@ void BaseHTTPRequestHandler::clearHeadersBuffers()
 	this->headersBuffer.clear();
 }
 
-void BaseHTTPRequestHandler::clearBodyBuffers()
-{
-	this->bodyUnparsed.clear();
-}
-
 bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 {
 	if (this->currentRequestContent->hasParsedAllRequest())
 	{
 		this->clearHeadersBuffers();
-		this->clearBodyBuffers();
 		this->clearRequestContent(clientSocket);
+		this->directoryListingPath.clear();
 		return true;
 	}
 	return false;
@@ -137,17 +132,19 @@ void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> &requestLines
 
 bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 {
+	std::string bodyUnparsed;
 	if (this->contentLength == 0)
 		return true;
-	StringUtils::AddToString(this->bodyUnparsed, requestBodyLines);
-	if (this->bodyUnparsed.size() < this->contentLength)
+	bodyUnparsed = this->currentRequestContent->getBodyObject().getBodyUnparsed();
+	StringUtils::AddToString(bodyUnparsed, requestBodyLines);
+	if (bodyUnparsed.size() < this->contentLength)
 		return false;
 	bool bodyParsed = false;
-	Logger::Debug("BaseHTTPRequestHandler::parseBody", ERROR , this->bodyUnparsed);
+	Logger::Debug("BaseHTTPRequestHandler::parseBody", ERROR , bodyUnparsed);
 	if (this->currentRequestContent->getHasMultiPartFormData())
-		bodyParsed = this->currentRequestContent->parseMultiPartBody(this->bodyUnparsed, this->contentLength);
+		bodyParsed = this->currentRequestContent->parseMultiPartBody(bodyUnparsed, this->contentLength);
 	else
-		bodyParsed = this->currentRequestContent->parseBody(this->bodyUnparsed, this->contentLength);
+		bodyParsed = this->currentRequestContent->parseBody(bodyUnparsed, this->contentLength);
 	return bodyParsed;
 }
 
@@ -158,7 +155,7 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(std::string reques
 	//Logger::Debug("BaseHTTPRequestHandler::SplitRequest", ERROR , request);
 	std::vector<std::string> requestHeaderLines;
 	std::string line;
-	bool isBodyUnparsedEmpty = this->bodyUnparsed.empty();
+	bool isBodyUnparsedEmpty = this->currentRequestContent->getBodyObject().getBodyUnparsed().empty();
 
 	std::getline(iss, line);
 	if (isBodyUnparsedEmpty && !this->isValidFirstRequestHeaderLine(line))
@@ -307,6 +304,7 @@ std::string BaseHTTPRequestHandler::readContent(const std::string path)
 	{
 		std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 		content = str;
+		this->contentNotFound = false;
 	}
 	else
 		this->contentNotFound = true; 
@@ -407,18 +405,9 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowedForApi() const
 	std::vector<std::string> methodsAllowed;
 
 	std::vector<std::string> api = StringUtils::Split(path, "/");
-	if (api.size() < 3 || (api[1] != "api" && api[2] != "files"))
+	if (api.size() < 3 || api[1] != "delete" || !StringUtils::EndsWith(api[2], ".json"))
 		return methodsAllowed;
-	if (api.size() == 3)
-	{
-		methodsAllowed.push_back("GET");
-		return methodsAllowed;
-	}
-	else
-	{
-		methodsAllowed.push_back("DELETE");
-		return methodsAllowed;
-	}
+	methodsAllowed.push_back("DELETE");
 	return methodsAllowed;
 }
 

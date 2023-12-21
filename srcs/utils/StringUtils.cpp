@@ -215,6 +215,18 @@ size_t StringUtils::FindNthOccurrence(std::string str, char c, size_t n)
   str.append(str2);
 }
 
+bool StringUtils::EndsWith(std::string const &fullString, std::string const &ending)
+{
+  if (fullString.length() >= ending.length())
+  {
+    return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+  }
+  else
+  {
+    return false;
+  }
+}
+
 
 template <typename T>
 std::string StringUtils::ConvertNumberToString(T number)

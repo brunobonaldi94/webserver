@@ -107,6 +107,8 @@ void Body::clearBody()
 {
   this->body.clear();
   this->multiPartData = MultiPartData();
+  this->bodyFullyRead = false;
+  this->bodyUnparsed.clear();
 }
 
 void Body::clear()
@@ -195,4 +197,9 @@ bool Body::getBodyFullyRead() const
 MultiPartData Body::getMultiPartData() const
 {
   return this->multiPartData;
+}
+
+std::string Body::getBodyUnparsed() const
+{
+  return this->bodyUnparsed;
 }

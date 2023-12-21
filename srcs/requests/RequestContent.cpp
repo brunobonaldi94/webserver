@@ -138,3 +138,8 @@ std::string RequestContent::getBoundary() const
 {
   return this->boundary;
 }
+
+Body RequestContent::getBodyObject() const
+{
+  return this->body;
+}
