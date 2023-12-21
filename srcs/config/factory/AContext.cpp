@@ -2,7 +2,6 @@
 
 AContext::AContext(AContext *parentContext, std::string contextName) : _parentContext(parentContext), _contextName(contextName)
 {
-    
 }
 
 AContext::AContext(AContext const & other): _parentContext(other._parentContext) 
@@ -10,7 +9,12 @@ AContext::AContext(AContext const & other): _parentContext(other._parentContext)
     *this = other;
 }
 
-AContext::~AContext() {}
+AContext::~AContext()
+{
+    MapUtils<std::string, ADirective *>::ClearMap(this->_directives);
+    for (MapContexts::iterator it = this->_subContexts.begin(); it != this->_subContexts.end(); ++it)
+        VectorUtils<AContext *>::clearVector(it->second);
+}
 
 AContext& AContext::operator=(AContext const & other)
 {

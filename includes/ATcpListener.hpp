@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <csignal>
 #include "Logger.hpp"
 #include "requests/RequestHandler.hpp"
 #include "StringUtils.hpp"
@@ -25,7 +26,9 @@ class ATcpListener
 
 public:
 
-	ATcpListener(RequestHandler requestHandler, std::vector<ServerConfig *> serverConfigs);
+	ATcpListener(BaseHTTPRequestHandler *requestHandler, std::vector<ServerConfig *> serverConfigs);
+	static ATcpListener* runningInstance;
+
 	virtual ~ATcpListener();
 
 	// Initialize the listener
@@ -33,6 +36,8 @@ public:
 
 	// Run the listener
 	bool Run();
+
+	void Stop(int sig);
 
 protected:
 
@@ -47,12 +52,12 @@ protected:
 	virtual void OnClientDisconnected(int clientSocket, int socketIndex,ssize_t nbytes);
 
 	// Handler for when a message is received from the client
-	virtual void OnMessageReceived(ServerConfig *serverConfig, int clientSocket, const char* msg) = 0;
+	virtual void OnMessageReceived(ServerConfig *serverConfig, int clientSocket, std::string msg) = 0;
 
 	// Send a message to a client
-	void SendToClient(int clientSocket, const char* msg, int length) const;
+	void SendToClient(int clientSocket, std::string msg, int length) const;
 
-	RequestHandler requestHandler;
+	BaseHTTPRequestHandler *requestHandler;
 
 private:
 
@@ -70,10 +75,11 @@ private:
 
 	//int														m_socket;		// Internal FD for the listening socket
 	std::vector<ServerConfig *> 	m_serverConfigs;
-	char 													m_buffer[4096];	// Buffer for incoming data
+	char 													m_buffer[BUFFER_SIZE];	// Buffer for incoming data
 	std::vector<struct pollfd>		pfds;			// Pointer to the pollfd array
 	static const int 							MAXFDS = 100;	// Maximum number of file descriptors
 	std::map<int, ServerConfig*> listenFds;
 	std::map<int, ServerConfig*> m_socketFdToServerConfigs;
-	
+	bool 													m_isRunning;	// Flag indicating the listener is running
+	static void StaticStop(int signal);
 };

@@ -8,7 +8,7 @@ class WebServer : public ATcpListener
 {
 	public:
 
-	WebServer(RequestHandler requestHandler, std::vector<ServerConfig *> serverConfigs);
+	WebServer(BaseHTTPRequestHandler *requestHandler, std::vector<ServerConfig *> serverConfigs);
 	~WebServer();
 
 	protected:
@@ -16,5 +16,5 @@ class WebServer : public ATcpListener
 	// Handler for client disconnections
 	void OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes);
 	// Handler for when a message is received from the client
-	void OnMessageReceived(ServerConfig *ServerConfig, int clientSocket, const char* msg);
+	void OnMessageReceived(ServerConfig *ServerConfig, int clientSocket, std::string msg);
 };

@@ -30,7 +30,7 @@ class BaseHTTPRequestHandler {
 		
 		const std::string headersBufferToString() const;
 		RequestMethodFunction getMethod(const std::string& method);
-		RequestMethodFunction parseRequestForClientSocket(const char* request, int clientSocket, ServerConfig *serverConfig);
+		RequestMethodFunction parseRequestForClientSocket(std::string request, int clientSocket, ServerConfig *serverConfig);
 		void clearHeadersBuffers();
 		void clearBodyBuffers();
 		bool getContentNotFound() const;
@@ -43,7 +43,7 @@ class BaseHTTPRequestHandler {
 		bool hasParsedAllRequestContent();
 
 	protected:
-		RequestMethodFunction parseRequest(const char* request);
+		RequestMethodFunction parseRequest(std::string request);
 		void sendResponse(int statusCode, std::string message);
 		template <typename T>
 		void sendHeader(std::string key, T value);

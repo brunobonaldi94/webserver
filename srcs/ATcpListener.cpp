@@ -4,8 +4,8 @@
 #include <sstream>
 #include <stdio.h>
 
-ATcpListener::ATcpListener(RequestHandler requestHandler, std::vector<ServerConfig *> serverConfigs) :
-	requestHandler(requestHandler), m_serverConfigs(serverConfigs) 
+ATcpListener::ATcpListener(BaseHTTPRequestHandler *requestHandler, std::vector<ServerConfig *> serverConfigs) :
+	requestHandler(requestHandler), m_serverConfigs(serverConfigs), m_isRunning(true)
 {
 }
 
@@ -141,19 +141,20 @@ bool ATcpListener::Init()
 
 void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 {
-	memset(this->m_buffer, 0, sizeof this->m_buffer);
+	
 	ssize_t nbytes = recv(clientSocket, this->m_buffer, sizeof this->m_buffer - 1, 0);
+	this->m_buffer[nbytes] = '\0';
 	if (nbytes > 0)
 	{
-		this->OnMessageReceived(this->m_socketFdToServerConfigs[clientSocket], clientSocket, this->m_buffer);
+		this->OnMessageReceived(this->m_socketFdToServerConfigs[clientSocket], clientSocket, std::string(this->m_buffer, nbytes));
 		return ;
 	}
 	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);
 }
 
-void ATcpListener::SendToClient(int clientSocket, const char* msg, int length) const
+void ATcpListener::SendToClient(int clientSocket, std::string msg, int length) const
 {
-	if (send(clientSocket, msg, length, 0) == -1)
+	if (send(clientSocket, msg.c_str(), length, 0) == -1)
 		Logger::Log(ERROR, "send");
 }
 
@@ -173,8 +174,10 @@ void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex, ssize
 
 bool ATcpListener::Run()
 {
-	bool running = true;
-	while (running)
+	this->runningInstance = this;
+	std::signal(SIGINT, ATcpListener::StaticStop);
+	std::signal(SIGQUIT, ATcpListener::StaticStop);
+	while (this->m_isRunning)
 	{
 		int poll_count = poll(&this->pfds[0], this->pfds.size(), -1);
 		int socketCount = this->pfds.size();
@@ -200,4 +203,24 @@ bool ATcpListener::Run()
 ATcpListener::~ATcpListener()
 {
 	VectorUtils<ServerConfig *>::clearVector(this->m_serverConfigs);
+	delete this->requestHandler;
 }
+
+void ATcpListener::Stop(int sig)
+{
+	if (sig == SIGINT || sig == SIGQUIT)
+	{
+		this->m_isRunning = false;
+		Logger::Log(INFO, "Stopping server");
+	}
+}
+
+void ATcpListener::StaticStop(int signal)
+{
+	if (runningInstance)
+	{
+  	runningInstance->Stop(signal);
+	}
+}
+
+ATcpListener* ATcpListener::runningInstance = NULL;

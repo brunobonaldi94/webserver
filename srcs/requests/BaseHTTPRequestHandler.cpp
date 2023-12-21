@@ -8,6 +8,7 @@ BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandl
 
 BaseHTTPRequestHandler::~BaseHTTPRequestHandler()
 {
+	delete this->_directoryHandler;
 }
 
 void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message)
@@ -84,58 +85,6 @@ void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requ
 	this->requestVersion = requestLines[2];
 }
 
-// std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(const char* request)
-// {
-// 	this->contentLength = 0;
-
-// 	std::istringstream iss(request);
-// 	std::cout << request << std::endl;
-// 	std::vector<std::string> requestLines;
-// 	std::string line;
-// 	std::string contentLength;
-// 	bool bodyStart = false;
-// 	ssize_t contentLengthNbr = -1;
-// 	bool hasContentLength = false;
-
-// 	if (!this->currentRequestContent->getBody().empty())
-// 	{
-// 		bodyStart = true;
-// 		hasContentLength = true;
-// 		contentLengthNbr = std::atoll(this->currentRequestContent->getHeader("Content-Length").c_str());
-// 	}
-// 	while (std::getline(iss, line))
-// 	{
-// 		if (!line.empty() && line[line.size() - 1] == CR)
-// 		{
-// 			  if (line.size() == 1)
-// 				{
-// 					bodyStart = true;
-// 					this->currentRequestContent->setHeadersFullyRead(true);
-// 				}
-// 				line.erase(line.size() - 1);
-// 		}
-// 		if (bodyStart == true && hasContentLength == false && !line.empty())
-// 			throw std::runtime_error("body start without content length");
-// 		if (bodyStart == true && hasContentLength == true)
-// 			this->currentRequestContent->parseBody(line, contentLengthNbr);
-// 		else
-// 		{
-// 			requestLines.push_back(line);
-// 			this->currentRequestContent->parseHeader(line);
-// 			if (contentLength.empty())
-// 			{
-// 				contentLength = this->currentRequestContent->getHeader("Content-Length");
-// 				if (!contentLength.empty())
-// 				{
-// 					contentLengthNbr = std::atoll(contentLength.c_str());
-// 					hasContentLength = true;
-// 				}
-// 			}
-// 		}
-// 	}		
-// 	return requestLines;
-// }
-
 bool BaseHTTPRequestHandler::isValidFirstRequestHeaderLine(std::string firstRequestHeaderLine)
 {
 	std::vector<std::string> versionNumber;
@@ -192,12 +141,7 @@ bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 		return true;
 	StringUtils::AddToString(this->bodyUnparsed, requestBodyLines);
 	if (this->bodyUnparsed.size() < this->contentLength)
-	{
-		bool foundBoundary = this->currentRequestContent->getHasMultiPartFormData() && this->currentRequestContent->getMultiPartData().hasFoundBoundaryEnd(this->bodyUnparsed, this->currentRequestContent->getBoundary());
-		if (!foundBoundary) {
-			return false;
-		}
-	}
+		return false;
 	bool bodyParsed = false;
 	Logger::Debug("BaseHTTPRequestHandler::parseBody", ERROR , this->bodyUnparsed);
 	if (this->currentRequestContent->getHasMultiPartFormData())
@@ -236,7 +180,6 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(std::string reques
 	}
 	this->parseHeaders(requestHeaderLines);
 	std::string requestBodyLines((std::istreambuf_iterator<char>(iss)), std::istreambuf_iterator<char>());
-	std::cout << RED << (requestBodyLines == std::string(request) ? "true" : "false") << RESET << std::endl;
 	this->parseBody(requestBodyLines);
 	return requestHeaderLines;
 }
@@ -296,7 +239,7 @@ void BaseHTTPRequestHandler::addCurrentRequestContentAndServerConfig(int clientS
 	this->currentServerConfig = this->currentRequestContent->getServerConfig();
 }
 
-BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequestForClientSocket(const char* request, int clientSocket, ServerConfig *serverConfig)
+BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequestForClientSocket(std::string request, int clientSocket, ServerConfig *serverConfig)
 {
 	this->addCurrentRequestContentAndServerConfig(clientSocket, serverConfig);
 	if (this->currentServerConfig == NULL)
@@ -308,13 +251,13 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 	return method;
 }
 
-BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequest(const char *request)
+BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseRequest(std::string request)
 {
 	try
 	{
 		std::vector<std::string> firstRequestLine;
 		std::vector<std::string> versionNumber;
-		std::vector<std::string> requestLines = this->SplitRequest(std::string(request));
+		std::vector<std::string> requestLines = this->SplitRequest(request);
 		if (requestLines.size() == 0 && this->currentRequestContent->hasParsedAllRequest() == false)
 			return NULL;
 		if (!this->validateServerName())

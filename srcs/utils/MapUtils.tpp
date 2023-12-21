@@ -22,8 +22,7 @@ void MapUtils<T, K>::ClearMap(std::map<T, K> &map)
     if (map.size() == 0)
         return;
     for (typename std::map<T, K>::iterator it = map.begin(); it != map.end(); it++)
-        if (it->second != NULL)
-            delete it->second;
+        delete it->second;
     map.clear();
 }
 

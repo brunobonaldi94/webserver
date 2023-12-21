@@ -38,6 +38,7 @@ ConfigParser::ConfigParser(ConfigParser const & other)
 
 ConfigParser::~ConfigParser()
 {
+  VectorUtils<AContext *>::clearVector(this->_serverContexts);
 }
 
 ConfigParser& ConfigParser::operator=(ConfigParser const & other)
