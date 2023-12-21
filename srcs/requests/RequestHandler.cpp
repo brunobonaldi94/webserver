@@ -100,7 +100,7 @@ void RequestHandler::saveMultiPartData()
 {
     RequestContent *requestContent = this->getCurrentRequestContent();
     MultiPartData multiPartData = requestContent->getMultiPartData();
-    std::string filename = "upload/" + multiPartData.fileName;
+    std::string filename = "wwwroot/upload_files/" + multiPartData.fileName;
     std::string data = multiPartData.data;
     std::ofstream file(filename.c_str(), std::ios::out | std::ios::binary);
     file << data;
