@@ -132,10 +132,10 @@ void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> &requestLines
 
 bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 {
-	std::string bodyUnparsed;
+	
 	if (this->contentLength == 0)
 		return true;
-	bodyUnparsed = this->currentRequestContent->getBodyObject().getBodyUnparsed();
+	std::string &bodyUnparsed = this->currentRequestContent->getBodyObject().getBodyUnparsed();
 	StringUtils::AddToString(bodyUnparsed, requestBodyLines);
 	if (bodyUnparsed.size() < this->contentLength)
 		return false;

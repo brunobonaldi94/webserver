@@ -58,12 +58,15 @@ std::string RequestContent::getHeader(std::string key)
 void RequestContent::clearHeaders()
 {
   this->headers.clearHeaders();
+  this->headersFullyRead = false;
 }
 
 void RequestContent::clear()
 {
   this->clearHeaders();
   this->body.clear();
+  this->boundary.clear();
+  this->hasMultiPartFormData = false;
 }
 
 ServerConfig *RequestContent::getServerConfig()
@@ -139,7 +142,7 @@ std::string RequestContent::getBoundary() const
   return this->boundary;
 }
 
-Body RequestContent::getBodyObject() const
+Body &RequestContent::getBodyObject()
 {
   return this->body;
 }

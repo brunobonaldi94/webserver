@@ -44,7 +44,7 @@ bool MultiPartData::parseHeaders(std::vector<std::string> &headers)
       continue;
     }
   }
-  return !this->contentDisposition.empty() && !this->contentType.empty();;
+  return !this->contentDisposition.empty() && !this->contentType.empty();
 }
 
 bool MultiPartData::parseBody(std::string line, ssize_t contentLengthNbr, std::string boundary)
@@ -199,7 +199,7 @@ MultiPartData Body::getMultiPartData() const
   return this->multiPartData;
 }
 
-std::string Body::getBodyUnparsed() const
+std::string &Body::getBodyUnparsed()
 {
   return this->bodyUnparsed;
 }
