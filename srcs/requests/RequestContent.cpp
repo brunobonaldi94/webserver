@@ -1,12 +1,12 @@
 #include "RequestContent.hpp"
 
 
-RequestContent::RequestContent(): headersFullyRead(false), hasMultiPartFormData(false)
+RequestContent::RequestContent(): headersFullyRead(false), hasMultiPartFormData(false), hasChunkedBody(false)
 {
 
 }
 
-RequestContent::RequestContent(ServerConfig *serverConfig): serverConfig(serverConfig), headersFullyRead(false), hasMultiPartFormData(false)
+RequestContent::RequestContent(ServerConfig *serverConfig): serverConfig(serverConfig), headersFullyRead(false), hasMultiPartFormData(false), hasChunkedBody(false)
 {
 
 }
@@ -67,6 +67,7 @@ void RequestContent::clear()
   this->body.clear();
   this->boundary.clear();
   this->hasMultiPartFormData = false;
+  this->hasChunkedBody = false;
 }
 
 ServerConfig *RequestContent::getServerConfig()
@@ -145,4 +146,17 @@ std::string RequestContent::getBoundary() const
 Body &RequestContent::getBodyObject()
 {
   return this->body;
+}
+
+bool RequestContent::isChunkedBody()
+{
+  if (this->hasChunkedBody)
+    return true;
+  this->hasChunkedBody = this->headers.getHeader("Transfer-Encoding") == "chunked";
+  return this->hasChunkedBody;
+}
+
+bool RequestContent::parseChunkedBody(std::string line)
+{
+  return this->body.parseChunkedBody(line);
 }

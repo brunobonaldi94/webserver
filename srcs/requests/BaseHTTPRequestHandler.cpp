@@ -127,22 +127,41 @@ void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> &requestLines
 	if (!contentLengthStr.empty())
 		this->contentLength = std::atoll(contentLengthStr.c_str());
 	this->currentRequestContent->isMultiPartFormData();
+	this->currentRequestContent->isChunkedBody();
 	this->currentRequestContent->setHeadersFullyRead(true);
+}
+
+bool BaseHTTPRequestHandler::shouldContinueParsing(std::string requestBodyLines)
+{
+	std::string &bodyUnparsed = this->currentRequestContent->getBodyObject().getBodyUnparsed();
+	if (this->contentLength == 0 && this->currentRequestContent->isChunkedBody())
+	{
+		size_t posEnd = requestBodyLines.find("0\r\n\r\n");
+		if (posEnd == std::string::npos)
+			return false;
+		StringUtils::AddToString(bodyUnparsed, requestBodyLines);
+		return true;
+	}
+	else if (this->contentLength == 0)
+		return false;
+	StringUtils::AddToString(bodyUnparsed, requestBodyLines);
+	if (bodyUnparsed.size() < this->contentLength)
+		return false;
+	return true;
 }
 
 bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 {
 	
-	if (this->contentLength == 0)
-		return true;
-	std::string &bodyUnparsed = this->currentRequestContent->getBodyObject().getBodyUnparsed();
-	StringUtils::AddToString(bodyUnparsed, requestBodyLines);
-	if (bodyUnparsed.size() < this->contentLength)
+	if (!this->shouldContinueParsing(requestBodyLines))
 		return false;
+	std::string &bodyUnparsed = this->currentRequestContent->getBodyObject().getBodyUnparsed();
 	bool bodyParsed = false;
 	Logger::Debug("BaseHTTPRequestHandler::parseBody", ERROR , bodyUnparsed);
 	if (this->currentRequestContent->getHasMultiPartFormData())
 		bodyParsed = this->currentRequestContent->parseMultiPartBody(bodyUnparsed, this->contentLength);
+	else if (this->currentRequestContent->isChunkedBody())
+		bodyParsed = this->currentRequestContent->parseChunkedBody(bodyUnparsed);
 	else
 		bodyParsed = this->currentRequestContent->parseBody(bodyUnparsed, this->contentLength);
 	return bodyParsed;

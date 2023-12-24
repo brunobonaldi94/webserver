@@ -218,15 +218,19 @@ size_t StringUtils::FindNthOccurrence(std::string str, char c, size_t n)
 bool StringUtils::EndsWith(std::string const &fullString, std::string const &ending)
 {
   if (fullString.length() >= ending.length())
-  {
     return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
-  }
   else
-  {
     return false;
-  }
 }
 
+ssize_t StringUtils::HexStringToNumber(std::string hextString)
+{
+  ssize_t number = 0;
+  std::stringstream ss;
+  ss << std::hex << hextString;
+  ss >> number;
+  return number;
+}
 
 template <typename T>
 std::string StringUtils::ConvertNumberToString(T number)

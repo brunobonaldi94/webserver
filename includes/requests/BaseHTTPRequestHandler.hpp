@@ -35,17 +35,19 @@ class BaseHTTPRequestHandler {
 		bool getContentNotFound() const;
 		void setClientSockerRequestContentMap(int clientSocket, ServerConfig *serverConfig);
 		bool shouldClearRequestContent(int clientSocket);
+		bool shouldContinueParsing(std::string requestBodyLines);
 		virtual void doGET() = 0;
 		virtual void doPOST() = 0;
 		virtual void doDELETE() = 0;
 		virtual void clearRequestContent(int clientSocket) = 0;
 		bool hasParsedAllRequestContent();
-
-	protected:
-		RequestMethodFunction parseRequest(std::string request);
-		void sendResponse(int statusCode, std::string message);
 		template <typename T>
 		void sendHeader(std::string key, T value);
+		RequestMethodFunction parseRequest(std::string request);
+		RequestContent *getCurrentRequestContent();
+
+	protected:
+		void sendResponse(int statusCode, std::string message);
 		void endHeaders();
 		void sendError(const std::string& content, const StatusCode& status);
 		void sendNotFoundError();
@@ -68,9 +70,8 @@ class BaseHTTPRequestHandler {
 		void writeDefaultResponse(std::string content, std::string mimeType = "text/html");
 		void addCurrentRequestContentAndServerConfig(int clientSocket, ServerConfig *serverConfig);
 		std::string generateRandomString(int length);
-		RequestContent *getCurrentRequestContent();
 		ServerConfig *getCurrentServerConfig();
-
+		
 		size_t contentLength;
 		ADirectoryHandler *_directoryHandler;
 		std::map<int, RequestContent> clientSocketRequestContentMap;

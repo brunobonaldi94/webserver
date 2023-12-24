@@ -30,9 +30,11 @@ class RequestContent
 		bool isMultiPartFormData();
 		MultiPartData getMultiPartData() const;
 		bool parseMultiPartBody(std::string line, ssize_t contentLengthNbr);
+		bool parseChunkedBody(std::string line);
 		bool getHasMultiPartFormData() const;
 		std::string getBoundary() const;
 		Body &getBodyObject();
+		bool isChunkedBody();
 
 	private:
 		Headers headers;
@@ -41,5 +43,6 @@ class RequestContent
     ServerConfig *serverConfig;
 		bool headersFullyRead;
 		bool hasMultiPartFormData;
+		bool hasChunkedBody;
 };
 

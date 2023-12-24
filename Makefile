@@ -43,7 +43,7 @@ BASE_SRCS :=	$(SRCS_DIR)/ATcpListener.cpp \
 
 SRCS = $(BASE_SRCS) $(SRCS_DIR)/main.cpp
 
-SRCS_TEST = $(BASE_SRCS) $(SRCS_DIR)/tests/main.cpp $(SRCS_DIR)/tests/ConfigParserTest.cpp 
+SRCS_TEST = $(BASE_SRCS) $(SRCS_DIR)/tests/main.cpp $(SRCS_DIR)/tests/ConfigParserTest.cpp $(SRCS_DIR)/tests/BaseHTTPRequestHandlerTest.cpp
 
 INCLUDES		:= -I./includes/utils  -I./includes/log -I./includes/errors -I./includes/config/factory -I./includes/config -I./includes/requests -I./includes  -I./includes/tests
 

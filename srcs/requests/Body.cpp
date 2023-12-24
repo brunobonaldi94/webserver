@@ -138,6 +138,48 @@ bool Body::parseBody(std::string bodyLines, ssize_t contentLengthNbr)
   return true;
 }
 
+std::string Body::sliceChuckedBody(std::string line)
+{
+  size_t posEnd = line.find("0\r\n\r\n");
+  if (posEnd != std::string::npos)
+    return line.substr(0, posEnd);
+  throw std::runtime_error("Invalid chunked body");
+}
+
+std::string Body::parseChunkedBodyLine(std::string  line)
+{
+    ssize_t chunkSize;
+    chunkSize = StringUtils::HexStringToNumber(line);
+    if (chunkSize == 0)
+      return "";
+    std::string chunkData;
+    std::istringstream iisLine(line);
+    std::getline(iisLine, chunkData);
+    if (chunkData.size() >= 2 && chunkData.substr(0, 1) == "\r")
+        chunkData = chunkData.substr(2);
+    if (chunkData.size() >= 2 && chunkData.substr(chunkData.size() - 1) == "\r")
+        chunkData = chunkData.substr(0, chunkData.size() - 1);
+    if (chunkData.size() != static_cast<size_t>(chunkSize))
+      throw std::runtime_error("Invalid chunked body");
+    return chunkData;
+}
+
+bool Body::parseChunkedBody(std::string line)
+{
+  std::string linesParsed = "";
+  line = this->sliceChuckedBody(line);
+  std::istringstream iss(line);
+  while (std::getline(iss, line))
+  {
+    if (line.empty())
+      break;
+    linesParsed += this->parseChunkedBodyLine(line);
+  }
+  StringUtils::AddToString(this->body, linesParsed);
+  this->bodyFullyRead = true;
+  return true;
+}
+
 std::string Body::findBoundaryStart(std::string line, std::string boundary)
 {
   if (this->multiPartData.dataHasStarted)
