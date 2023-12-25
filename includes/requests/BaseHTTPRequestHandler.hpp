@@ -25,6 +25,8 @@ class BaseHTTPRequestHandler {
     public:
 		BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler);
 		virtual ~BaseHTTPRequestHandler();
+		BaseHTTPRequestHandler(const BaseHTTPRequestHandler& other);
+		BaseHTTPRequestHandler& operator=(const BaseHTTPRequestHandler& other);
 
 		typedef void (BaseHTTPRequestHandler::*RequestMethodFunction)(void);
 		

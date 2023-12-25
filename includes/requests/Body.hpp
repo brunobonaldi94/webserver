@@ -39,7 +39,7 @@ class Body
     bool getBodyFullyRead() const;
     virtual bool parseBody(std::string line, ssize_t contentLength);
     virtual bool parseChunkedBody(std::string line);
-    std::string parseChunkedBodyLine(std::string line);
+    std::string parseChunkedBodyLine(std::string chunkData, ssize_t chunkSize);
     std::string sliceChuckedBody(std::string line);
     virtual bool parseMultiPartBody(std::string line, ssize_t contentLength, std::string boundary);
     MultiPartData getMultiPartData() const;

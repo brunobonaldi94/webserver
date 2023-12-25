@@ -13,11 +13,12 @@ RequestHandler::~RequestHandler()
 
 RequestHandler::RequestHandler(const RequestHandler& other): BaseHTTPRequestHandler(other._directoryHandler)
 {
-    (void) other;
+    *this = other;
 }
 
 RequestHandler& RequestHandler::operator=(const RequestHandler& other) {
-    if (this != &other) {
+    if (this != &other)
+    {
         
     }
     return *this;

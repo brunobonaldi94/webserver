@@ -6,6 +6,24 @@ BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandl
 
 }
 
+BaseHTTPRequestHandler::BaseHTTPRequestHandler(const BaseHTTPRequestHandler& other)
+{
+	*this = other;
+}
+BaseHTTPRequestHandler &BaseHTTPRequestHandler::operator=(const BaseHTTPRequestHandler& other)
+{
+	if (this != &other)
+	{
+		this->contentLength = other.contentLength;
+		this->_directoryHandler = other._directoryHandler;
+		this->allowDirectoryListing = other.allowDirectoryListing;
+		this->contentNotFound = other.contentNotFound;
+		this->currentServerConfig = other.currentServerConfig;
+		this->currentRequestContent = other.currentRequestContent;
+	}
+	return *this;
+}
+
 BaseHTTPRequestHandler::~BaseHTTPRequestHandler()
 {
 	delete this->_directoryHandler;

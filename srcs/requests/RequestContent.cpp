@@ -31,6 +31,7 @@ RequestContent &RequestContent::operator=(const RequestContent &other)
     this->headersFullyRead = other.headersFullyRead;
     this->hasMultiPartFormData = other.hasMultiPartFormData;
     this->boundary = other.boundary;
+    this->hasChunkedBody = other.hasChunkedBody;
   }
   return *this;
 }

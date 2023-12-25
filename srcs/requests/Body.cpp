@@ -146,15 +146,10 @@ std::string Body::sliceChuckedBody(std::string line)
   throw std::runtime_error("Invalid chunked body");
 }
 
-std::string Body::parseChunkedBodyLine(std::string  line)
+std::string Body::parseChunkedBodyLine(std::string  chunkData, ssize_t chunkSize)
 {
-    ssize_t chunkSize;
-    chunkSize = StringUtils::HexStringToNumber(line);
     if (chunkSize == 0)
       return "";
-    std::string chunkData;
-    std::istringstream iisLine(line);
-    std::getline(iisLine, chunkData);
     if (chunkData.size() >= 2 && chunkData.substr(0, 1) == "\r")
         chunkData = chunkData.substr(2);
     if (chunkData.size() >= 2 && chunkData.substr(chunkData.size() - 1) == "\r")
@@ -173,7 +168,12 @@ bool Body::parseChunkedBody(std::string line)
   {
     if (line.empty())
       break;
-    linesParsed += this->parseChunkedBodyLine(line);
+    ssize_t chunkSize;
+    chunkSize = StringUtils::HexStringToNumber(line);
+    if (chunkSize == 0)
+      break;
+    std::getline(iss, line);
+    linesParsed += this->parseChunkedBodyLine(line, chunkSize);
   }
   StringUtils::AddToString(this->body, linesParsed);
   this->bodyFullyRead = true;

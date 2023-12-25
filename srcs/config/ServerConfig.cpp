@@ -15,11 +15,23 @@ ServerConfig::~ServerConfig()
     VectorUtils<LocationConfig *>::clearVector(this->_locations);
 }
 
-ServerConfig& ServerConfig::operator=(ServerConfig const & other)
+ServerConfig & ServerConfig::operator=(ServerConfig const & other)
 {
     if (this != &other)
     {
         this->_serverContext = other._serverContext;
+        this->_locations = other._locations;
+        this->_port = other._port;
+        this->_host = other._host;
+        this->_serverNames = other._serverNames;
+        this->_errorPage = other._errorPage;
+        this->errorPageCode = other.errorPageCode;
+        this->_maxBodySize = other._maxBodySize;
+        this->_rootPath = other._rootPath;
+        this->_indexFiles = other._indexFiles;
+        this->_autoIndex = other._autoIndex;
+        this->_cgiBinaryPath = other._cgiBinaryPath;
+        this->_cgiExtension = other._cgiExtension;
     }
     return *this;
 }
@@ -138,6 +150,8 @@ void ServerConfig::SetCgiExtension(std::string cgiExtension)
 void ServerConfig::SetValuesFromServerContext()
 {
   std::vector<AContext *> *locationContexts = this->_serverContext->GetSubContextsByName("location");
+  if (locationContexts == NULL)
+    return;
   for (std::vector<AContext *>::iterator it = locationContexts->begin(); it != locationContexts->end(); it++)
   {
     LocationContext *locationContext = static_cast<LocationContext *>(*it);
