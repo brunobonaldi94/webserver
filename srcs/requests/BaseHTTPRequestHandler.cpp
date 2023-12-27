@@ -516,6 +516,8 @@ std::string BaseHTTPRequestHandler::getPath(std::string path)
 		return path;
 	std::string last = pathSplit[pathSplit.size() - 1];
 	size_t posDot = last.find_last_of(".");
+	if (pathSplit.size() > 1 && pathSplit[1] == "delete")
+		return path;
 	if (posDot != std::string::npos && posDot != last.size() - 1)
 	{
 		this->fileName = last;
