@@ -73,8 +73,6 @@ void RequestHandler::doGET() {
             return this->sendJsonResponse("{\"message\": \"" + std::string(e.what()) + "\"}");
         }
     }
-    if (path == "/api/files")
-        return this->sendJsonResponse("{\"files\": [\"file1\", \"file2\"]}");
     if (this->getContentNotFound())
         return this->sendNotFoundError();
     this->sendResponse(HTTPStatus::OK.code, HTTPStatus::OK.description);

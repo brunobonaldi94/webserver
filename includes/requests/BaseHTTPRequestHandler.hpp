@@ -59,6 +59,7 @@ class BaseHTTPRequestHandler {
 		std::vector<std::string> getMethodsAllowed() const;
 		std::string readContent(const std::string path);
 		std::string getContent(const std::string path);
+		std::string getContentByFileName(const std::string fileName);
 	  std::string GetPath() const;
 		std::vector<std::string> getMethodsAllowedForApi() const;
 		void parseHeaders(std::vector<std::string> &headers);
@@ -73,6 +74,7 @@ class BaseHTTPRequestHandler {
 		void addCurrentRequestContentAndServerConfig(int clientSocket, ServerConfig *serverConfig);
 		std::string generateRandomString(int length);
 		ServerConfig *getCurrentServerConfig();
+		std::string getPath(std::string path);
 		
 		size_t contentLength;
 		ADirectoryHandler *_directoryHandler;
@@ -86,6 +88,7 @@ class BaseHTTPRequestHandler {
 		std::string directoryListingPath;
 		bool allowDirectoryListing;
 		bool contentNotFound;
+		std::string fileName;
 		ServerConfig *currentServerConfig;
 		RequestContent *currentRequestContent;
 };

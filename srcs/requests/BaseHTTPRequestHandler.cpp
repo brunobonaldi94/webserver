@@ -81,6 +81,10 @@ bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 		this->clearHeadersBuffers();
 		this->clearRequestContent(clientSocket);
 		this->directoryListingPath.clear();
+		this->allowDirectoryListing = false;
+		this->contentLength = 0;
+		this->contentNotFound = false;
+		this->fileName.clear();
 		return true;
 	}
 	return false;
@@ -94,7 +98,7 @@ bool BaseHTTPRequestHandler::hasParsedAllRequestContent()
 void BaseHTTPRequestHandler::setRequestLines(const std::vector<std::string> requestLines)
 {
 	this->requestMethod = requestLines[0];
-	this->path = requestLines[1];
+	this->path = this->getPath(requestLines[1]);
 	this->requestVersion = requestLines[2];
 }
 
@@ -418,6 +422,8 @@ std::string BaseHTTPRequestHandler::getContent(const std::string path)
 		return content;
 	if (location->GetIndexFileNotFound() && location->GetAutoIndex())
 		return this->createDirectoryListing(location, path);
+	if (!this->fileName.empty())
+		return this->getContentByFileName(this->fileName);
 	std::vector <std::string> indexFiles = location->GetFilesFullPath();
 	for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); it++)
 	{
@@ -501,4 +507,40 @@ RequestContent *BaseHTTPRequestHandler::getCurrentRequestContent()
 ServerConfig *BaseHTTPRequestHandler::getCurrentServerConfig()
 {
 	return this->currentServerConfig;
+}
+
+std::string BaseHTTPRequestHandler::getPath(std::string path)
+{
+	std::vector<std::string> pathSplit = StringUtils::Split(path, "/");
+	if (pathSplit.size() == 0)
+		return path;
+	std::string last = pathSplit[pathSplit.size() - 1];
+	size_t posDot = last.find_last_of(".");
+	if (posDot != std::string::npos && posDot != last.size() - 1)
+	{
+		this->fileName = last;
+		size_t lastSlashPos = path.find_last_of("/");
+		if (lastSlashPos == 0)
+			return "/";
+		return path.substr(0, path.find_last_of("/"));
+	}
+	return path;
+}
+
+std::string BaseHTTPRequestHandler::getContentByFileName(const std::string fileName)
+{
+	std::string content("");
+	std::string path = this->path;
+	bool addSlash = path[path.size() - 1] != '/';
+	LocationConfig *location = this->currentServerConfig->GetLocationConfig(path);
+	if (location == NULL)
+		return content;
+	std::string fullPath = location->GetRootPath() + path + (addSlash ? "/" : "") + fileName;
+	content = this->readContent(fullPath);
+	if (content.empty())
+	{
+		this->sendNotFoundError();
+		return "";
+	}
+	return content;
 }

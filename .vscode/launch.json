@@ -4,7 +4,7 @@
     "name": "(gdb) Launch",
     "type": "cppdbg",
     "request": "launch",
-    "program": "${workspaceFolder}/webserv_test",
+    "program": "${workspaceFolder}/webserv",
     "args": ["webserver2.conf"],
     "stopAtEntry": false,
     "cwd": "${workspaceFolder}",
