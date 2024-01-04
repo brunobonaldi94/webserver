@@ -89,6 +89,7 @@ class BaseHTTPRequestHandler {
 		bool allowDirectoryListing;
 		bool contentNotFound;
 		std::string fileName;
+		std::string fullResourcePath;
 		ServerConfig *currentServerConfig;
 		RequestContent *currentRequestContent;
 };

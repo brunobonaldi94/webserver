@@ -85,6 +85,7 @@ bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 		this->contentLength = 0;
 		this->contentNotFound = false;
 		this->fileName.clear();
+		this->fullResourcePath.clear();
 		return true;
 	}
 	return false;
@@ -309,7 +310,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 			return NULL;
 		}
 		this->checkRedirect();
-		if (isDirectoryListingAllowed(this->path) && this->requestMethod == "GET")
+		if (isDirectoryListingAllowed(this->fullResourcePath) && this->requestMethod == "GET")
 			return this->getMethod("GET");
 		std::vector<std::string> methodsAllowed = this->getMethodsAllowed();
 		if (methodsAllowed.size() == 0)
@@ -511,6 +512,7 @@ ServerConfig *BaseHTTPRequestHandler::getCurrentServerConfig()
 
 std::string BaseHTTPRequestHandler::getPath(std::string path)
 {
+	this->fullResourcePath = path;
 	std::vector<std::string> pathSplit = StringUtils::Split(path, "/");
 	if (pathSplit.size() == 0)
 		return path;
