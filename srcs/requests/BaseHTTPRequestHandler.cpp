@@ -20,6 +20,13 @@ BaseHTTPRequestHandler &BaseHTTPRequestHandler::operator=(const BaseHTTPRequestH
 		this->contentNotFound = other.contentNotFound;
 		this->currentServerConfig = other.currentServerConfig;
 		this->currentRequestContent = other.currentRequestContent;
+		this->directoryListingPath = other.directoryListingPath;
+		this->fileName = other.fileName;
+		this->fullResourcePath = other.fullResourcePath;
+		this->headersBuffer << other.headersBuffer.str();
+		this->path = other.path;
+		this->requestMethod = other.requestMethod;
+		this->requestVersion = other.requestVersion;
 	}
 	return *this;
 }
@@ -52,6 +59,7 @@ void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusC
 {
   this->sendResponse(status.code, status.description);
 	this->writeDefaultResponse(content);
+	this->currentRequestContent->setHasErrorInRequest(true);
 }
 
 void BaseHTTPRequestHandler::sendNotFoundError()
@@ -76,7 +84,7 @@ void BaseHTTPRequestHandler::clearHeadersBuffers()
 
 bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 {
-	if (this->currentRequestContent->hasParsedAllRequest())
+	if (this->currentRequestContent->hasParsedAllRequest() || this->currentRequestContent->getHasErrorInRequest())
 	{
 		this->clearHeadersBuffers();
 		this->clearRequestContent(clientSocket);
@@ -108,7 +116,7 @@ bool BaseHTTPRequestHandler::isValidFirstRequestHeaderLine(std::string firstRequ
 	std::vector<std::string> versionNumber;
 
 	std::vector<std::string> firstRequestLine = StringUtils::Split(firstRequestHeaderLine, " ");
-	if (firstRequestLine.size() < 2 || (firstRequestLine.size() == 2 && firstRequestLine[0] != "GET"))
+	if (firstRequestLine.size() < 3)
 	{
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 			return false;

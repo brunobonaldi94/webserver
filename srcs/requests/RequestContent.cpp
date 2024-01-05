@@ -1,12 +1,12 @@
 #include "RequestContent.hpp"
 
 
-RequestContent::RequestContent(): headersFullyRead(false), hasMultiPartFormData(false), hasChunkedBody(false)
+RequestContent::RequestContent(): headersFullyRead(false), hasMultiPartFormData(false), hasChunkedBody(false), hasErrorInRequest(false)
 {
 
 }
 
-RequestContent::RequestContent(ServerConfig *serverConfig): serverConfig(serverConfig), headersFullyRead(false), hasMultiPartFormData(false), hasChunkedBody(false)
+RequestContent::RequestContent(ServerConfig *serverConfig): serverConfig(serverConfig), headersFullyRead(false), hasMultiPartFormData(false), hasChunkedBody(false), hasErrorInRequest(false)
 {
 
 }
@@ -32,6 +32,7 @@ RequestContent &RequestContent::operator=(const RequestContent &other)
     this->hasMultiPartFormData = other.hasMultiPartFormData;
     this->boundary = other.boundary;
     this->hasChunkedBody = other.hasChunkedBody;
+    this->hasErrorInRequest = other.hasErrorInRequest;
   }
   return *this;
 }
@@ -69,6 +70,7 @@ void RequestContent::clear()
   this->boundary.clear();
   this->hasMultiPartFormData = false;
   this->hasChunkedBody = false;
+  this->hasErrorInRequest = false;
 }
 
 ServerConfig *RequestContent::getServerConfig()
@@ -160,4 +162,14 @@ bool RequestContent::isChunkedBody()
 bool RequestContent::parseChunkedBody(std::string line)
 {
   return this->body.parseChunkedBody(line);
+}
+
+bool RequestContent::getHasErrorInRequest() const
+{
+  return this->hasErrorInRequest;
+}
+
+void RequestContent::setHasErrorInRequest(bool hasErrorInRequest)
+{
+  this->hasErrorInRequest = hasErrorInRequest;
 }

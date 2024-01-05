@@ -35,6 +35,9 @@ class RequestContent
 		std::string getBoundary() const;
 		Body &getBodyObject();
 		bool isChunkedBody();
+		bool getHasErrorInRequest() const;
+		void setHasErrorInRequest(bool hasErrorInRequest);
+
 
 	private:
 		Headers headers;
@@ -44,5 +47,6 @@ class RequestContent
 		bool headersFullyRead;
 		bool hasMultiPartFormData;
 		bool hasChunkedBody;
+		bool hasErrorInRequest;
 };
 
