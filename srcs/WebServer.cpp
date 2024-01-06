@@ -22,7 +22,7 @@ void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, 
 	BaseHTTPRequestHandler::RequestMethodFunction method = this->requestHandler->parseRequestForClientSocket(msg, clientSocket, serverConfig);
 	if (method != NULL)
 		(this->requestHandler->*method)();
-	if (this->requestHandler->hasParsedAllRequestContent())
+	if (this->requestHandler->hasParsedAllRequestContent() || this->requestHandler->getCurrentRequestContent()->getHasErrorInRequest())
 		this->SendToClient(
 			clientSocket,
 			this->requestHandler->headersBufferToString(),
