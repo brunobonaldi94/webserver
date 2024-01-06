@@ -367,7 +367,7 @@ std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *locat
 	struct stat sb;
 
 	std::string content("<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><pre>");
-	content += "<table style=\"width: 25%;text-align: justify;\"><thead><tr><th>Name</th><th>Size</th><th>Last Modified</th></tr></thead>";
+	content += "<table style=\"width: 100%;text-align: justify;\"><thead><tr><th>Name</th><th>Size</th><th>Last Modified</th></tr></thead>";
 	content += "<tbody>";
 
 	std::string port = this->currentServerConfig->GetPort();
