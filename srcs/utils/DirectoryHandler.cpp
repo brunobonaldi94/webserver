@@ -69,6 +69,8 @@ std::vector<std::string> DirectoryHandler::getFilesInDirectory(std::string path,
 bool DirectoryHandler::isInDirectory(std::string path, std::string directory)
 {
   bool directoryExists;
+  if (path.empty())
+    return false;
   std::vector<std::string> files = this->getFilesInDirectory(directory, directoryExists);
   if (!directoryExists)
     return false;

@@ -66,7 +66,7 @@ class BaseHTTPRequestHandler {
 		bool parseBody(std::string &bodyLines);
 		std::vector<std::string> SplitRequest(std::string request);
 		bool checkBodyLimit();
-		std::string createDirectoryListing(LocationConfig *location, std::string path);
+		std::string createDirectoryListing(std::string rootPath, std::string path);
 		bool isDirectoryListingAllowed(std::string path);
 		bool validateServerName();
 		bool checkRedirect();
@@ -75,6 +75,7 @@ class BaseHTTPRequestHandler {
 		std::string generateRandomString(int length);
 		ServerConfig *getCurrentServerConfig();
 		std::string getPath(std::string path);
+		bool checkExecuteCgi(std::string path);
 		
 		size_t contentLength;
 		ADirectoryHandler *_directoryHandler;
@@ -88,6 +89,8 @@ class BaseHTTPRequestHandler {
 		std::string directoryListingPath;
 		bool allowDirectoryListing;
 		bool contentNotFound;
+		bool isCgiRootPath;
+		bool shouldExecuteCgi;
 		std::string fileName;
 		std::string fullResourcePath;
 		ServerConfig *currentServerConfig;

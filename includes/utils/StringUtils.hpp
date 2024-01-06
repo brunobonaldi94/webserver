@@ -33,5 +33,6 @@ public:
   static size_t FindNthOccurrence(std::string str, char c, size_t n);
   static void AddToString(std::string &str, std::string str2);
   static bool EndsWith(std::string const &fullString, std::string const &ending);
+  static bool StartsWith(std::string const &fullString, std::string const &starting);
   static ssize_t HexStringToNumber(std::string hexString);
 };

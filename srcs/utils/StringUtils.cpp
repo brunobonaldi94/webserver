@@ -223,6 +223,14 @@ bool StringUtils::EndsWith(std::string const &fullString, std::string const &end
     return false;
 }
 
+bool StringUtils::StartsWith(std::string const &fullString, std::string const &starting)
+{
+  if (fullString.length() >= starting.length())
+    return (0 == fullString.compare(0, starting.length(), starting));
+  else
+    return false;
+}
+
 ssize_t StringUtils::HexStringToNumber(std::string hextString)
 {
   ssize_t number = 0;
@@ -231,6 +239,7 @@ ssize_t StringUtils::HexStringToNumber(std::string hextString)
   ss >> number;
   return number;
 }
+
 
 template <typename T>
 std::string StringUtils::ConvertNumberToString(T number)

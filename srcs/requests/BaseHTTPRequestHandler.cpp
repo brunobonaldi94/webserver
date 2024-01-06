@@ -1,7 +1,7 @@
 #include "BaseHTTPRequestHandler.hpp"
 
 
-BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler): contentLength(0), _directoryHandler(directoryHandler),  allowDirectoryListing(false), contentNotFound(false), currentServerConfig(NULL), currentRequestContent(NULL)
+BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler): contentLength(0), _directoryHandler(directoryHandler),  allowDirectoryListing(false), contentNotFound(false), isCgiRootPath(false), shouldExecuteCgi(false), currentServerConfig(NULL), currentRequestContent(NULL)
 {
 
 }
@@ -94,6 +94,8 @@ bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 		this->contentNotFound = false;
 		this->fileName.clear();
 		this->fullResourcePath.clear();
+		this->isCgiRootPath = false;
+		this->shouldExecuteCgi = false;
 		return true;
 	}
 	return false;
@@ -266,6 +268,8 @@ bool BaseHTTPRequestHandler::validateServerName()
 
 bool BaseHTTPRequestHandler::checkRedirect()
 {
+	if (this->isCgiRootPath || this->shouldExecuteCgi)
+		return false;
 	std::string path = this->path;
 	LocationConfig *location = this->currentServerConfig->GetLocationConfig(path);
 	if (location == NULL || location->ShouldRedirect() == false)
@@ -362,7 +366,7 @@ std::string BaseHTTPRequestHandler::readContent(const std::string path)
   return content;
 }
 
-std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *location, std::string path)
+std::string BaseHTTPRequestHandler::createDirectoryListing(std::string rootPath, std::string path)
 {
 	struct stat sb;
 
@@ -371,7 +375,7 @@ std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *locat
 	content += "<tbody>";
 
 	std::string port = this->currentServerConfig->GetPort();
-	std::string fullPath = location->GetRootPath() + path;
+	std::string fullPath = rootPath + path;
 	bool directoryExists = false;
 	std::vector<std::string> files = this->_directoryHandler->getFilesInDirectory(fullPath, directoryExists);
 	if (directoryExists == false)
@@ -395,19 +399,36 @@ std::string BaseHTTPRequestHandler::createDirectoryListing(LocationConfig *locat
 	return content;
 }
 
+bool BaseHTTPRequestHandler::checkExecuteCgi(std::string path)
+{
+	if (StringUtils::StartsWith(path, CGI_PATH) && path != CGI_PATH)
+	{
+		std::string fileName = path.substr(std::string(CGI_PATH).size() + 1);
+		std::string cgiExtension = this->currentServerConfig->GetCgiExtension();
+		bool fileExists = this->_directoryHandler->isInDirectory(fileName, "wwwroot/cgi-bin");
+		if (StringUtils::EndsWith(fileName, cgiExtension) && fileExists)
+			this->shouldExecuteCgi = true;
+		return this->shouldExecuteCgi;
+	}
+	return false;
+}
 
 bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 {
-	std::vector<LocationConfig *> locations = this->currentServerConfig->GetLocationConfigs();
+	std::vector<LocationConfig *> locations;
+	if (this->shouldExecuteCgi)
+		return false;
+	locations = this->currentServerConfig->GetLocationConfigs();
 	for (std::vector<LocationConfig *>::iterator it = locations.begin(); it != locations.end(); it++)
 	{
 		std::string locationPath = (*it)->GetPath();
-		if (locationPath == "/" && (*it)->GetAutoIndex() == true && path == "/")
+		bool isAutoIndexOn = (*it)->GetAutoIndex();
+		if (locationPath == "/" && isAutoIndexOn && path == "/")
 			return true;
 		size_t countSlashs = StringUtils::CountChar(locationPath, '/');
 		size_t findNthSlashOcurrence = StringUtils::FindNthOccurrence(path, '/', countSlashs + 1);
 		std::string pathToCompare = path.substr(0, findNthSlashOcurrence);
-		if (pathToCompare == locationPath && locationPath != path && (*it)->GetAutoIndex() == true)
+		if (pathToCompare == locationPath && locationPath != path && isAutoIndexOn)
 		{
 			std::string directory = (*it)->GetRootPath() + locationPath;
 			this->allowDirectoryListing = this->_directoryHandler->isInDirectory(path, directory);
@@ -421,6 +442,11 @@ bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 std::string BaseHTTPRequestHandler::getContent(const std::string path)
 {
 	std::string content("");
+	//TODO: create cgi class
+	if (this->shouldExecuteCgi)
+		return std::string("<h1>TODO: execute cgi</h1>");
+	if (this->isCgiRootPath)
+		return this->createDirectoryListing("wwwroot", path);
 	LocationConfig *location = this->currentServerConfig->GetLocationConfig(path);
 	if (this->allowDirectoryListing)
 	{
@@ -429,8 +455,8 @@ std::string BaseHTTPRequestHandler::getContent(const std::string path)
 	}
 	if (location == NULL)
 		return content;
-	if (location->GetIndexFileNotFound() && location->GetAutoIndex())
-		return this->createDirectoryListing(location, path);
+	if ((location->GetIndexFileNotFound() && location->GetAutoIndex()))
+		return this->createDirectoryListing(location->GetRootPath(), path);
 	if (!this->fileName.empty())
 		return this->getContentByFileName(this->fileName);
 	std::vector <std::string> indexFiles = location->GetFilesFullPath();
@@ -464,7 +490,19 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowedForApi() const
 }
 
 std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
-	std::vector<std::string> methodsAllowed = this->getMethodsAllowedForApi();
+	std::vector<std::string> methodsAllowed;
+	if (this->isCgiRootPath)
+	{
+		methodsAllowed.push_back("GET");
+		return methodsAllowed;
+	}
+	if (this->shouldExecuteCgi)
+	{
+		methodsAllowed.push_back("GET");
+		methodsAllowed.push_back("POST");
+		return methodsAllowed;
+	}
+	methodsAllowed = this->getMethodsAllowedForApi();
 	if (methodsAllowed.size() > 0)
 		return methodsAllowed;
 	LocationConfig *location = this->currentServerConfig->GetLocationConfig(this->path);
@@ -523,6 +561,13 @@ std::string BaseHTTPRequestHandler::getPath(std::string path)
 	this->fullResourcePath = path;
 	std::vector<std::string> pathSplit = StringUtils::Split(path, "/");
 	if (pathSplit.size() == 0)
+		return path;
+	if (path == CGI_PATH)
+	{
+		this->isCgiRootPath = true;
+		return path;
+	}
+	if (this->checkExecuteCgi(path))
 		return path;
 	std::string last = pathSplit[pathSplit.size() - 1];
 	size_t posDot = last.find_last_of(".");
