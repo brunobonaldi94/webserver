@@ -10,7 +10,7 @@ CGIRequestHandler::~CGIRequestHandler()
 {
     if (!this->envp)
         return;
-    for(size_t index; index < this->env.size(); index++)
+    for(size_t index = 0; index < this->env.size(); index++)
         delete[] this->envp[index];
     delete[] this->envp;
 }
@@ -62,7 +62,9 @@ char ** CGIRequestHandler::createEnvp()
         std::string key = it->first;
         std::string value = it->second;
         std::string env = key + "=" + value;
-        this->envp[envp_index] = strdup(env.c_str());
+        char *envp = new char[env.length() + 1];
+        strcpy(envp, env.c_str());
+        this->envp[envp_index] = envp;
         envp_index++;
     }
     this->envp[envp_index] = NULL;
