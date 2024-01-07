@@ -39,6 +39,8 @@ class RequestContent
 		void setHasErrorInRequest(bool hasErrorInRequest);
 		std::string getFirstRequestLine() const;
 		void setFirstRequestLine(std::string firstRequestLine);
+		std::string getQueryString() const;
+		void setQueryString(std::string queryString);
 
 
 	private:
@@ -51,5 +53,6 @@ class RequestContent
 		bool hasChunkedBody;
 		bool hasErrorInRequest;
 		std::string firstRequestLine;
+		std::string queryString;
 };
 

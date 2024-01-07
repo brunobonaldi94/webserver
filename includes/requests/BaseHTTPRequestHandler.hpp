@@ -81,6 +81,7 @@ class BaseHTTPRequestHandler {
 		size_t contentLength;
 		ADirectoryHandler *_directoryHandler;
 		std::map<int, RequestContent> clientSocketRequestContentMap;
+		CGIRequestHandler *_cgiRequestHandler;
     
 		private:
 		std::ostringstream headersBuffer;

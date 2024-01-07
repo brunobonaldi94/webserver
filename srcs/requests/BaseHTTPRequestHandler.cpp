@@ -1,7 +1,7 @@
 #include "BaseHTTPRequestHandler.hpp"
 
 
-BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler): contentLength(0), _directoryHandler(directoryHandler),  allowDirectoryListing(false), contentNotFound(false), isCgiRootPath(false), shouldExecuteCgi(false), currentServerConfig(NULL), currentRequestContent(NULL)
+BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler): contentLength(0), _directoryHandler(directoryHandler),_cgiRequestHandler(NULL), allowDirectoryListing(false), contentNotFound(false), isCgiRootPath(false), shouldExecuteCgi(false), currentServerConfig(NULL), currentRequestContent(NULL) 
 {
 
 }
@@ -27,6 +27,9 @@ BaseHTTPRequestHandler &BaseHTTPRequestHandler::operator=(const BaseHTTPRequestH
 		this->path = other.path;
 		this->requestMethod = other.requestMethod;
 		this->requestVersion = other.requestVersion;
+		this->isCgiRootPath = other.isCgiRootPath;
+		this->shouldExecuteCgi = other.shouldExecuteCgi;
+		this->_cgiRequestHandler = other._cgiRequestHandler;
 	}
 	return *this;
 }
@@ -34,6 +37,7 @@ BaseHTTPRequestHandler &BaseHTTPRequestHandler::operator=(const BaseHTTPRequestH
 BaseHTTPRequestHandler::~BaseHTTPRequestHandler()
 {
 	delete this->_directoryHandler;
+	delete this->_cgiRequestHandler;
 }
 
 void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message)
@@ -564,6 +568,12 @@ std::string BaseHTTPRequestHandler::getPath(std::string path)
 {
 	this->fullResourcePath = path;
 	std::vector<std::string> pathSplit = StringUtils::Split(path, "/");
+	size_t posQueryString = path.find("?");
+	if (posQueryString != std::string::npos)
+	{
+		this->currentRequestContent->setQueryString(path.substr(posQueryString + 1));
+		path = path.substr(0, posQueryString);
+	}
 	if (pathSplit.size() == 0)
 		return path;
 	if (path == CGI_PATH)

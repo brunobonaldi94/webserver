@@ -29,5 +29,4 @@ class DirectoryHandler : public ADirectoryHandler
         std::vector<std::string> getFilesInDirectory(std::string path);
         std::vector<std::string> getFilesInDirectory(std::string path, bool &directoryExists);
         bool isInDirectory(std::string path, std::string directory);
-
 };

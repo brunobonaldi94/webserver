@@ -9,6 +9,7 @@
 #include "StringUtils.hpp"
 #include "RequestContent.hpp"
 #include "ServerConfig.hpp"
+#include <string.h>
 
 class CGIRequestHandler
 {
@@ -23,12 +24,13 @@ class CGIRequestHandler
 
     private:
 		std::string content;
-		std::map<std::string, std::string> env;
 		RequestContent *_requestContent;
-		ServerConfig *_serverConfig;
+		std::map<std::string, std::string> env;
+		char **envp;
 		void setEnv();
 		bool isCGI();
 		char** stringVectorToArray(const std::vector<std::string>& inputStrings);
+		char**  createEnvp(); 
 };
 
 #endif
