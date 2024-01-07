@@ -20,6 +20,7 @@
 #include "Headers.hpp"
 #include "DirectoryHandler.hpp"
 #include "RequestContent.hpp"
+#include "CGIRequestHandler.hpp"
 
 class BaseHTTPRequestHandler {
     public:

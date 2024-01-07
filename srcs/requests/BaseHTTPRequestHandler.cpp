@@ -444,8 +444,11 @@ std::string BaseHTTPRequestHandler::getContent(const std::string path)
 {
 	std::string content("");
 	//TODO: create cgi class
-	if (this->shouldExecuteCgi)
-		return std::string("<h1>TODO: execute cgi</h1>");
+	if (this->shouldExecuteCgi) {
+		CGIRequestHandler cgiHandler(this->currentRequestContent);
+		cgiHandler.execute();
+		return std::string(cgiHandler.response());
+	}
 	if (this->isCgiRootPath)
 		return this->createDirectoryListing("wwwroot", path);
 	LocationConfig *location = this->currentServerConfig->GetLocationConfig(path);
