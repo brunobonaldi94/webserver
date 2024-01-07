@@ -123,6 +123,7 @@ bool BaseHTTPRequestHandler::isValidFirstRequestHeaderLine(std::string firstRequ
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
 			return false;
 	}
+	this->currentRequestContent->setFirstRequestLine(firstRequestHeaderLine);
 	this->setRequestLines(firstRequestLine);
 	std::string baseVersion = "HTTP/";
 	if (this->requestVersion.compare(0, baseVersion.size(), baseVersion) != 0)

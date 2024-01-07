@@ -37,6 +37,8 @@ class RequestContent
 		bool isChunkedBody();
 		bool getHasErrorInRequest() const;
 		void setHasErrorInRequest(bool hasErrorInRequest);
+		std::string getFirstRequestLine() const;
+		void setFirstRequestLine(std::string firstRequestLine);
 
 
 	private:
@@ -48,5 +50,6 @@ class RequestContent
 		bool hasMultiPartFormData;
 		bool hasChunkedBody;
 		bool hasErrorInRequest;
+		std::string firstRequestLine;
 };
 

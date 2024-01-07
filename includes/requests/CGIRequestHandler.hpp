@@ -2,22 +2,25 @@
 #define CGIREQUESTHANDLER_HPP
 
 #include <map>
-#include "BaseHTTPRequestHandler.hpp"
+#include "StringUtils.hpp"
+#include "RequestContent.hpp"
+#include "ServerConfig.hpp"
 
-class CGIRequestHandler : public BaseHTTPRequestHandler
+class CGIRequestHandler
 {
     public:
-		CGIRequestHandler(ADirectoryHandler *directoryHandler);
+		CGIRequestHandler(RequestContent *RequestContent);
 		~CGIRequestHandler();
 		CGIRequestHandler(const CGIRequestHandler& other);
 		CGIRequestHandler& operator=(const CGIRequestHandler& other);
 
 		void execute();
-		void doGET();
-		void doPOST();
 
     private:
 		std::map<std::string, std::string> env;
+		RequestContent *_requestContent;
+		ServerConfig *_serverConfig;
+		void setEnv();
 		bool isCGI();
 };
 

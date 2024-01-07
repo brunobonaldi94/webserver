@@ -68,6 +68,7 @@ void RequestContent::clear()
   this->clearHeaders();
   this->body.clear();
   this->boundary.clear();
+  this->firstRequestLine.clear();
   this->hasMultiPartFormData = false;
   this->hasChunkedBody = false;
   this->hasErrorInRequest = false;
@@ -172,4 +173,14 @@ bool RequestContent::getHasErrorInRequest() const
 void RequestContent::setHasErrorInRequest(bool hasErrorInRequest)
 {
   this->hasErrorInRequest = hasErrorInRequest;
+}
+
+std::string RequestContent::getFirstRequestLine() const
+{
+  return this->firstRequestLine;
+}
+
+void RequestContent::setFirstRequestLine(std::string firstRequestLine)
+{
+  this->firstRequestLine = firstRequestLine;
 }
