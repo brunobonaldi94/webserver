@@ -55,7 +55,7 @@ void CGIRequestHandler::setEnv()
 
 char ** CGIRequestHandler::createEnvp()
 {
-    this->envp = new char *[this->env.size()];
+    this->envp = new char *[this->env.size() + 1];
     size_t envp_index = 0;
     for (std::map<std::string,std::string>::iterator it = this->env.begin(); it != this->env.end(); it++)
     {
@@ -65,5 +65,6 @@ char ** CGIRequestHandler::createEnvp()
         this->envp[envp_index] = strdup(env.c_str());
         envp_index++;
     }
+    this->envp[envp_index] = NULL;
     return this->envp;
 }
