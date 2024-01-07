@@ -184,3 +184,13 @@ void RequestContent::setFirstRequestLine(std::string firstRequestLine)
 {
   this->firstRequestLine = firstRequestLine;
 }
+
+std::string RequestContent::getQueryString() const
+{
+  return this->queryString;
+}
+
+void RequestContent::setQueryString(std::string queryString)
+{
+  this->queryString = queryString;
+}

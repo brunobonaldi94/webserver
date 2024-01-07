@@ -20,6 +20,7 @@
 #include "Headers.hpp"
 #include "DirectoryHandler.hpp"
 #include "RequestContent.hpp"
+#include "CGIRequestHandler.hpp"
 
 class BaseHTTPRequestHandler {
     public:
@@ -80,6 +81,7 @@ class BaseHTTPRequestHandler {
 		size_t contentLength;
 		ADirectoryHandler *_directoryHandler;
 		std::map<int, RequestContent> clientSocketRequestContentMap;
+		CGIRequestHandler *_cgiRequestHandler;
     
 		private:
 		std::ostringstream headersBuffer;

@@ -5,6 +5,7 @@
 #include "StringUtils.hpp"
 #include "RequestContent.hpp"
 #include "ServerConfig.hpp"
+#include <string.h>
 
 class CGIRequestHandler
 {
@@ -14,14 +15,15 @@ class CGIRequestHandler
 		CGIRequestHandler(const CGIRequestHandler& other);
 		CGIRequestHandler& operator=(const CGIRequestHandler& other);
 
-		void execute();
+		std::string execute();
 
     private:
-		std::map<std::string, std::string> env;
 		RequestContent *_requestContent;
-		ServerConfig *_serverConfig;
+		std::map<std::string, std::string> env;
+		char **envp;
 		void setEnv();
 		bool isCGI();
+		char**  createEnvp(); 
 };
 
 #endif

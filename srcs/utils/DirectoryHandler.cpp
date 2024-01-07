@@ -25,6 +25,19 @@ DirectoryHandler::DirectoryHandler() {}
 
 DirectoryHandler::~DirectoryHandler() {}
 
+DirectoryHandler& DirectoryHandler::operator=(const DirectoryHandler& other)
+{
+    if (this != &other)
+    {
+    }
+    return *this;
+}
+
+DirectoryHandler::DirectoryHandler(const DirectoryHandler& other)
+{
+    *this = other;
+}
+
 std::vector<std::string> DirectoryHandler::getFilesInDirectory(std::string path)
 {
     std::vector<std::string> files;
