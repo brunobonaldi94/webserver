@@ -1,7 +1,7 @@
 #include "BaseHTTPRequestHandler.hpp"
 
 
-BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler): contentLength(0), _directoryHandler(directoryHandler),_cgiRequestHandler(NULL), allowDirectoryListing(false), contentNotFound(false), isCgiRootPath(false), shouldExecuteCgi(false), currentServerConfig(NULL), currentRequestContent(NULL) 
+BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler): contentLength(0), _directoryHandler(directoryHandler), allowDirectoryListing(false), contentNotFound(false), isCgiRootPath(false), shouldExecuteCgi(false), currentServerConfig(NULL), currentRequestContent(NULL) 
 {
 
 }
@@ -29,7 +29,6 @@ BaseHTTPRequestHandler &BaseHTTPRequestHandler::operator=(const BaseHTTPRequestH
 		this->requestVersion = other.requestVersion;
 		this->isCgiRootPath = other.isCgiRootPath;
 		this->shouldExecuteCgi = other.shouldExecuteCgi;
-		this->_cgiRequestHandler = other._cgiRequestHandler;
 	}
 	return *this;
 }
@@ -37,7 +36,6 @@ BaseHTTPRequestHandler &BaseHTTPRequestHandler::operator=(const BaseHTTPRequestH
 BaseHTTPRequestHandler::~BaseHTTPRequestHandler()
 {
 	delete this->_directoryHandler;
-	delete this->_cgiRequestHandler;
 }
 
 void BaseHTTPRequestHandler::sendResponse(int statusCode, std::string message)
@@ -97,6 +95,7 @@ bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 		this->contentLength = 0;
 		this->contentNotFound = false;
 		this->fileName.clear();
+		this->scriptName.clear();
 		this->fullResourcePath.clear();
 		this->isCgiRootPath = false;
 		this->shouldExecuteCgi = false;
@@ -412,7 +411,10 @@ bool BaseHTTPRequestHandler::checkExecuteCgi(std::string path)
 		std::string cgiExtension = this->currentServerConfig->GetCgiExtension();
 		bool fileExists = this->_directoryHandler->isInDirectory(fileName, "wwwroot/cgi-bin");
 		if (StringUtils::EndsWith(fileName, cgiExtension) && fileExists)
+		{
+			this->scriptName = fileName;
 			this->shouldExecuteCgi = true;
+		}
 		return this->shouldExecuteCgi;
 	}
 	return false;
@@ -448,10 +450,11 @@ std::string BaseHTTPRequestHandler::getContent(const std::string path)
 {
 	std::string content("");
 	//TODO: create cgi class
-	if (this->shouldExecuteCgi) {
-		CGIRequestHandler cgiHandler(this->currentRequestContent);
+	if (this->shouldExecuteCgi)
+	{
+		CGIRequestHandler cgiHandler(this->currentRequestContent, this->scriptName);
 		cgiHandler.execute();
-		return std::string(cgiHandler.response());
+		return cgiHandler.response();
 	}
 	if (this->isCgiRootPath)
 		return this->createDirectoryListing("wwwroot", path);
@@ -567,6 +570,8 @@ ServerConfig *BaseHTTPRequestHandler::getCurrentServerConfig()
 std::string BaseHTTPRequestHandler::getPath(std::string path)
 {
 	this->fullResourcePath = path;
+	if (path[path.size() -1] == '/' && path.size() > 1)
+		path = path.substr(0, path.size() - 1);
 	std::vector<std::string> pathSplit = StringUtils::Split(path, "/");
 	size_t posQueryString = path.find("?");
 	if (posQueryString != std::string::npos)

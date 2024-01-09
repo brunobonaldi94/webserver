@@ -1,6 +1,6 @@
 #include "CGIRequestHandler.hpp"
 
-CGIRequestHandler::CGIRequestHandler(RequestContent *RequestContent) : _requestContent(RequestContent), envp(NULL)
+CGIRequestHandler::CGIRequestHandler(RequestContent *RequestContent, std::string scriptName) : _requestContent(RequestContent), scriptName(scriptName), envp(NULL)
 {
     this->setEnv();
     this->createEnvp();
@@ -20,10 +20,15 @@ CGIRequestHandler::CGIRequestHandler(const CGIRequestHandler& other)
     *this = other;
 }
 
-CGIRequestHandler& CGIRequestHandler::operator=(const CGIRequestHandler& other) {
+CGIRequestHandler& CGIRequestHandler::operator=(const CGIRequestHandler& other)
+{
     if (this != &other)
     {
         this->_requestContent = other._requestContent;
+        this->env = other.env;
+        this->envp = other.envp;
+        this->content = other.content;
+        this->scriptName = other.scriptName;
     }
     return *this;
 }
@@ -69,14 +74,15 @@ void CGIRequestHandler::execute() {
 
     pipe(pipe_fd);
     pid = fork();
-    if (pid == 0) {
+    if (pid == 0)
+    {
         close(pipe_fd[0]);
         dup2(pipe_fd[1], STDOUT_FILENO);
         const char* pathBinPython = "/usr/bin/python3";
         std::vector<std::string> argsString;
         argsString.push_back(" ");
         argsString.push_back(script_path);
-        if (execve(pathBinPython, this->stringVectorToArray(argsString), NULL) -1) {
+        if (execve(pathBinPython, this->stringVectorToArray(argsString), this->envp) -1) {
             std::cerr << "Erro ao executar o script CGI\n";
             exit(EXIT_FAILURE);
         }
@@ -90,7 +96,7 @@ void CGIRequestHandler::execute() {
         }
         waitpid(pid, NULL, 0);
         close(pipe_fd[0]);
-    } 
+    }
     else {
         std::cerr << "Erro no fork\n";
     }
@@ -98,7 +104,6 @@ void CGIRequestHandler::execute() {
 
 void CGIRequestHandler::setEnv()
 {
-    std::cout << "Setando o env!" << std::endl;
     ServerConfig *serverConfig = this->_requestContent->getServerConfig();
     std::vector<std::string> firstLineSplit = StringUtils::Split(this->_requestContent->getFirstRequestLine(), " ");
     std::string authorization = this->_requestContent->getHeader("Authorization");
@@ -112,8 +117,14 @@ void CGIRequestHandler::setEnv()
     this->env["REQUEST_METHOD"] = firstLineSplit[0];
     this->env["PATH_INFO"] = firstLineSplit[1].replace(0, std::string(CGI_PATH).length(), "");
     this->env["PATH_TRANSLATED"] = "wwwroot" + this->env["PATH_INFO"];
-    this->env["SCRIPT_NAME"] = firstLineSplit[1].substr(firstLineSplit[1].find_last_of("/") + 1);
+    this->env["SCRIPT_NAME"] = this->scriptName;
     this->env["QUERY_STRING"] = this->_requestContent->getQueryString();
+    if (!this->env["QUERY_STRING"].empty())
+    {
+        this->env["PATH_INFO"] = this->env["PATH_INFO"].substr(0, this->env["PATH_INFO"].find("?"));
+        this->env["PATH_TRANSLATED"] = "wwwroot" + this->env["PATH_INFO"];
+        this->env["SCRIPT_NAME"] = this->env["SCRIPT_NAME"].substr(0, this->env["SCRIPT_NAME"].find("?"));
+    }
 }
 
 std::string CGIRequestHandler::response() { return this->content; }

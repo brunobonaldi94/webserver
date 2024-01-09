@@ -14,7 +14,7 @@
 class CGIRequestHandler
 {
     public:
-		CGIRequestHandler(RequestContent *RequestContent);
+		CGIRequestHandler(RequestContent *RequestContent, std::string scriptName);
 		~CGIRequestHandler();
 		CGIRequestHandler(const CGIRequestHandler& other);
 		CGIRequestHandler& operator=(const CGIRequestHandler& other);
@@ -25,6 +25,7 @@ class CGIRequestHandler
     private:
 		std::string content;
 		RequestContent *_requestContent;
+		std::string scriptName;
 		std::map<std::string, std::string> env;
 		char **envp;
 		void setEnv();

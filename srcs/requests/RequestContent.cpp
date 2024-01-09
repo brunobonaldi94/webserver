@@ -33,6 +33,8 @@ RequestContent &RequestContent::operator=(const RequestContent &other)
     this->boundary = other.boundary;
     this->hasChunkedBody = other.hasChunkedBody;
     this->hasErrorInRequest = other.hasErrorInRequest;
+    this->firstRequestLine = other.firstRequestLine;
+    this->queryString = other.queryString;
   }
   return *this;
 }
@@ -69,6 +71,7 @@ void RequestContent::clear()
   this->body.clear();
   this->boundary.clear();
   this->firstRequestLine.clear();
+  this->queryString.clear();
   this->hasMultiPartFormData = false;
   this->hasChunkedBody = false;
   this->hasErrorInRequest = false;

@@ -81,7 +81,6 @@ class BaseHTTPRequestHandler {
 		size_t contentLength;
 		ADirectoryHandler *_directoryHandler;
 		std::map<int, RequestContent> clientSocketRequestContentMap;
-		CGIRequestHandler *_cgiRequestHandler;
     
 		private:
 		std::ostringstream headersBuffer;
@@ -93,6 +92,7 @@ class BaseHTTPRequestHandler {
 		bool contentNotFound;
 		bool isCgiRootPath;
 		bool shouldExecuteCgi;
+		std::string scriptName;
 		std::string fileName;
 		std::string fullResourcePath;
 		ServerConfig *currentServerConfig;
