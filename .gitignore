@@ -9,3 +9,5 @@
 *.log
 srcs/tests/functionals/__pycache__/
 */upload_files/*
+/data/*
+/wwwroot/upload_files/*
