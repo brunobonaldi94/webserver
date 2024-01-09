@@ -53,7 +53,7 @@ void RequestHandler::doGET() {
     if (path == "/get") {
         std::vector<std::string>::iterator it;
         try {
-            std::vector<std::string> files = this->_directoryHandler->getFilesInDirectory("../../data");
+            std::vector<std::string> files = this->_directoryHandler->getFilesInDirectory("./data");
             std::string value;
             for (it = files.begin(); it != files.end(); it++) {
                 if (*it != "." && *it != "..") {
