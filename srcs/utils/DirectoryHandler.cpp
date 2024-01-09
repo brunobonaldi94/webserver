@@ -21,6 +21,14 @@ std::string ADirectoryHandler::getLastModified(struct stat sb)
   return std::string(buffer);
 }
 
+std::string ADirectoryHandler::getFileExtension(std::string path)
+{
+  size_t lastDotPos = path.find_last_of(".");
+  if (lastDotPos == std::string::npos)
+    return "";
+  return path.substr(lastDotPos + 1);
+}
+
 DirectoryHandler::DirectoryHandler() {}
 
 DirectoryHandler::~DirectoryHandler() {}

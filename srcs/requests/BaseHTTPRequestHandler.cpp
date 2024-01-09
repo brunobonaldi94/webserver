@@ -1,7 +1,7 @@
 #include "BaseHTTPRequestHandler.hpp"
 
 
-BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler): contentLength(0), _directoryHandler(directoryHandler), allowDirectoryListing(false), contentNotFound(false), isCgiRootPath(false), shouldExecuteCgi(false), currentServerConfig(NULL), currentRequestContent(NULL) 
+BaseHTTPRequestHandler::BaseHTTPRequestHandler(ADirectoryHandler *directoryHandler): contentLength(0), _directoryHandler(directoryHandler), allowDirectoryListing(false), contentNotFound(false), isCgiRootPath(false), shouldExecuteCgi(false), currentServerConfig(NULL), currentRequestContent(NULL), mimeTypes(MimeTypes())
 {
 
 }
@@ -99,6 +99,7 @@ bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 		this->fullResourcePath.clear();
 		this->isCgiRootPath = false;
 		this->shouldExecuteCgi = false;
+		this->mimeType.clear();
 		return true;
 	}
 	return false;
@@ -367,6 +368,7 @@ std::string BaseHTTPRequestHandler::readContent(const std::string path)
 	else
 		this->contentNotFound = true; 
   f.close();
+	this->mimeType = this->mimeTypes.ExtensionToType(this->_directoryHandler->getFileExtension(path));
   return content;
 }
 
@@ -525,6 +527,8 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowed() const {
 
 void BaseHTTPRequestHandler::writeDefaultResponse(std::string content, std::string content_type) 
 {
+	if (content_type.empty())
+		content_type = this->mimeType;
 	this->sendHeader("Cache-Control", "no-cache, private");
 	this->sendHeader("Content-Type", content_type);
 	this->sendHeader("Content-Length", content.size());
