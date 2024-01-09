@@ -14,7 +14,7 @@
 class CGIRequestHandler
 {
     public:
-		CGIRequestHandler(RequestContent *RequestContent, std::string scriptName);
+		CGIRequestHandler(RequestContent *RequestContent, std::string scriptName, std::string binaryName);
 		~CGIRequestHandler();
 		CGIRequestHandler(const CGIRequestHandler& other);
 		CGIRequestHandler& operator=(const CGIRequestHandler& other);
@@ -26,10 +26,10 @@ class CGIRequestHandler
 		std::string content;
 		RequestContent *_requestContent;
 		std::string scriptName;
+		std::string binaryName;
 		std::map<std::string, std::string> env;
 		char **envp;
 		void setEnv();
-		bool isCGI();
 		char** stringVectorToArray(const std::vector<std::string>& inputStrings);
 		char**  createEnvp(); 
 };

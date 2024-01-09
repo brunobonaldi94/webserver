@@ -1,6 +1,6 @@
 #include "CGIRequestHandler.hpp"
 
-CGIRequestHandler::CGIRequestHandler(RequestContent *RequestContent, std::string scriptName) : _requestContent(RequestContent), scriptName(scriptName), envp(NULL)
+CGIRequestHandler::CGIRequestHandler(RequestContent *RequestContent, std::string scriptName, std::string binaryName) : _requestContent(RequestContent), scriptName(scriptName), binaryName(binaryName), envp(NULL)
 {
     this->setEnv();
     this->createEnvp();
@@ -63,7 +63,7 @@ void CGIRequestHandler::execute() {
     int pipe_fd[2];
     pid_t pid;
 
-    std::string fileName = "cgi.py";
+    std::string fileName = this->scriptName;
     std::string script_path = "../webserver/wwwroot/cgi-bin/" + fileName;
 
     if (access(script_path.c_str(), R_OK) != 0)
@@ -78,16 +78,16 @@ void CGIRequestHandler::execute() {
     {
         close(pipe_fd[0]);
         dup2(pipe_fd[1], STDOUT_FILENO);
-        const char* pathBinPython = "/usr/bin/python3";
+        std::string pathBinPython = "/usr/bin/" + this->binaryName;
         std::vector<std::string> argsString;
         argsString.push_back(" ");
         argsString.push_back(script_path);
-        if (execve(pathBinPython, this->stringVectorToArray(argsString), this->envp) -1) {
+        if (execve(pathBinPython.c_str(), this->stringVectorToArray(argsString), this->envp) -1) {
             std::cerr << "Erro ao executar o script CGI\n";
             exit(EXIT_FAILURE);
         }
     } 
-    else if (pid > 0) {  
+    else if (pid > 0) {
         close(pipe_fd[1]);  
         char buffer[4096];
         ssize_t bytes_read;

@@ -452,7 +452,8 @@ std::string BaseHTTPRequestHandler::getContent(const std::string path)
 	//TODO: create cgi class
 	if (this->shouldExecuteCgi)
 	{
-		CGIRequestHandler cgiHandler(this->currentRequestContent, this->scriptName);
+		std::string binaryPath = this->currentServerConfig->GetCgiBinaryPath();
+		CGIRequestHandler cgiHandler(this->currentRequestContent, this->scriptName, binaryPath);
 		cgiHandler.execute();
 		return cgiHandler.response();
 	}
