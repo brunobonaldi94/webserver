@@ -141,11 +141,11 @@ bool ATcpListener::Init()
 
 void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 {
-	
+	memset(this->m_buffer, 0, sizeof this->m_buffer);
 	ssize_t nbytes = recv(clientSocket, this->m_buffer, sizeof this->m_buffer - 1, 0);
-	this->m_buffer[nbytes] = '\0';
 	if (nbytes > 0)
 	{
+		this->m_buffer[nbytes] = '\0';
 		this->OnMessageReceived(this->m_socketFdToServerConfigs[clientSocket], clientSocket, std::string(this->m_buffer, nbytes));
 		return ;
 	}

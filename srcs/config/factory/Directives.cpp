@@ -297,7 +297,11 @@ bool ClientMaxBodySizeDirective::ValidateSize(std::string size) const
         if (!isdigit(size[i]))
             return false;
     }
-    if (std::toupper(size[size.size() -1]) != 'M')
+    std::string unitsArr[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
+    std::vector<std::string> units;
+    VectorUtils<std::string>::FillVectorFromArray(units, unitsArr, 9);
+    std::string unitSize = std::string(1, std::toupper(size[size.size() -1]));
+    if (!VectorUtils<std::string>::hasElement(units, unitSize) && !isdigit(size[size.size() -1]))
         return false;
     int sizeNumber = std::atoi(size.c_str());
     if (sizeNumber < 0)

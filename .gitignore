@@ -11,3 +11,6 @@ srcs/tests/functionals/__pycache__/
 */upload_files/*
 /data/*
 /wwwroot/upload_files/*
+/wwwroot/YoupiBanane/*
+ubuntu_tester
+ubuntu_cgi_tester
