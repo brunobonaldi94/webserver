@@ -59,6 +59,8 @@ void RequestHandler::doGET() {
                 if (*it != "." && *it != "..") {
                     std::string label = (*it).substr(0, it->find_last_of("_"));
                     std::vector<std::string> labelSplited = StringUtils::Split(label, "_");
+                    if (labelSplited.size() < 2)
+                        continue;
                     label = labelSplited[0] + " " + labelSplited[1];
                     label = renderTemplate("<h4><a href=\"{data}\"></a>{data}", label);
                     std::string btnDelete = renderTemplate(
