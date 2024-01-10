@@ -727,8 +727,8 @@ void CgiDirective::FillDefaultValues()
 {
     if (this->SetDefaultFromParent())
         return ;
-    this->_extension = ".php";
-    this->_binaryPath = "/usr/bin/php-cgi";
+    this->_extension = ".py";
+    this->_binaryPath = "python3";
 }
 
 bool CgiDirective::SetDefaultFromParent()

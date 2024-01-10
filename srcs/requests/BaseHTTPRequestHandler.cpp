@@ -195,7 +195,6 @@ bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 		return false;
 	std::string &bodyUnparsed = this->currentRequestContent->getBodyObject().getBodyUnparsed();
 	bool bodyParsed = false;
-	Logger::Debug("BaseHTTPRequestHandler::parseBody", ERROR , bodyUnparsed);
 	if (this->currentRequestContent->getHasMultiPartFormData())
 		bodyParsed = this->currentRequestContent->parseMultiPartBody(bodyUnparsed, this->contentLength);
 	else if (this->currentRequestContent->isChunkedBody())
@@ -314,6 +313,8 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		std::vector<std::string> firstRequestLine;
 		std::vector<std::string> versionNumber;
 		std::vector<std::string> requestLines = this->SplitRequest(request);
+		if (this->currentRequestContent->getHasErrorInRequest())
+			return NULL;
 		if (requestLines.size() == 0 && this->currentRequestContent->hasParsedAllRequest() == false)
 			return NULL;
 		if (!this->validateServerName())
@@ -372,7 +373,7 @@ std::string BaseHTTPRequestHandler::readContent(const std::string path)
   return content;
 }
 
-std::string BaseHTTPRequestHandler::createDirectoryListing(std::string rootPath, std::string path)
+std::string BaseHTTPRequestHandler::createDirectoryListing(std::string rootPath, std::string path, std::string adder_path)
 {
 	struct stat sb;
 
@@ -381,7 +382,7 @@ std::string BaseHTTPRequestHandler::createDirectoryListing(std::string rootPath,
 	content += "<tbody>";
 
 	std::string port = this->currentServerConfig->GetPort();
-	std::string fullPath = rootPath + path;
+	std::string fullPath = rootPath + adder_path;
 	bool directoryExists = false;
 	std::vector<std::string> files = this->_directoryHandler->getFilesInDirectory(fullPath, directoryExists);
 	if (directoryExists == false)
@@ -412,7 +413,18 @@ bool BaseHTTPRequestHandler::checkExecuteCgi(std::string path)
 		std::string fileName = path.substr(std::string(CGI_PATH).size() + 1);
 		std::string cgiExtension = this->currentServerConfig->GetCgiExtension();
 		bool fileExists = this->_directoryHandler->isInDirectory(fileName, "wwwroot/cgi-bin");
-		if (StringUtils::EndsWith(fileName, cgiExtension) && fileExists)
+		bool hasCgiExtension = StringUtils::EndsWith(fileName, cgiExtension);
+		if (!hasCgiExtension && fileExists)
+		{
+			this->sendError("<h1>Not Implemented</h1>", HTTPStatus::NOT_IMPLEMENTED);
+			return false;
+		}
+		if (!fileExists)
+		{
+			this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+			return false;
+		}	
+		if (fileExists && hasCgiExtension)
 		{
 			this->scriptName = fileName;
 			this->shouldExecuteCgi = true;
@@ -439,9 +451,10 @@ bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 		std::string pathToCompare = path.substr(0, findNthSlashOcurrence);
 		if (pathToCompare == locationPath && locationPath != path && isAutoIndexOn)
 		{
-			std::string directory = (*it)->GetRootPath() + locationPath;
-			this->allowDirectoryListing = this->_directoryHandler->isInDirectory(path, directory);
-			this->directoryListingPath = (*it)->GetRootPath() + path;
+			std::string directory = (*it)->GetRootPath();
+			std::string fileName = this->_directoryHandler->getFileFromPath(path);
+			this->allowDirectoryListing = this->_directoryHandler->isInDirectory(fileName, directory);
+			this->directoryListingPath = directory + "/" + fileName;
 			return this->allowDirectoryListing;
 		}
 	}
@@ -460,7 +473,7 @@ std::string BaseHTTPRequestHandler::getContent(const std::string path)
 		return cgiHandler.response();
 	}
 	if (this->isCgiRootPath)
-		return this->createDirectoryListing("wwwroot", path);
+		return this->createDirectoryListing("wwwroot", path, path);
 	LocationConfig *location = this->currentServerConfig->GetLocationConfig(path);
 	if (this->allowDirectoryListing)
 	{

@@ -29,6 +29,14 @@ std::string ADirectoryHandler::getFileExtension(std::string path)
   return path.substr(lastDotPos + 1);
 }
 
+std::string ADirectoryHandler::getFileFromPath(std::string path)
+{
+  size_t lastSlashPos = path.find_last_of("/");
+  if (lastSlashPos == std::string::npos)
+    return path;
+  return path.substr(lastSlashPos + 1);
+}
+
 DirectoryHandler::DirectoryHandler() {}
 
 DirectoryHandler::~DirectoryHandler() {}

@@ -68,7 +68,7 @@ protected:
 	bool parseBody(std::string &bodyLines);
 	std::vector<std::string> SplitRequest(std::string request);
 	bool checkBodyLimit();
-	std::string createDirectoryListing(std::string rootPath, std::string path);
+	std::string createDirectoryListing(std::string rootPath, std::string path = "", std::string adderPath = "");
 	bool isDirectoryListingAllowed(std::string path);
 	bool validateServerName();
 	bool checkRedirect();

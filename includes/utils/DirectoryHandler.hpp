@@ -17,6 +17,7 @@ class ADirectoryHandler
         virtual bool isInDirectory(std::string path, std::string directory) = 0;
         virtual bool getFileStat(std::string path, struct stat *fileStat);
         std::string getLastModified(struct stat sb);
+        std::string getFileFromPath(std::string path);
         std::string getFileExtension(std::string path);
 };
 

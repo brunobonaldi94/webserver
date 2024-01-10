@@ -30,6 +30,7 @@ class HTTPStatus {
         static StatusCode TEMPORARY_REDIRECT;
         static StatusCode PERMANENT_REDIRECT;
         static StatusCode INTERNAL_SERVER_ERROR;
+        static StatusCode NOT_IMPLEMENTED;
         static bool validateStatusCode(std::string code);
         static bool validateStatusCode(std::string code, int *httpStatusCodes, int size);
 };

@@ -14,6 +14,7 @@ StatusCode HTTPStatus::SEE_OTHER(303, "See Other", "The response to the request 
 StatusCode HTTPStatus::TEMPORARY_REDIRECT(307, "Temporary Redirect", "The requested resource resides temporarily under a different URI.");
 StatusCode HTTPStatus::PERMANENT_REDIRECT(308, "Permanent Redirect", "The requested resource has been assigned a new permanent URI and any future references to this resource SHOULD use one of the returned URIs.");
 StatusCode HTTPStatus::INTERNAL_SERVER_ERROR(500, "Internal Server Error", "The server encountered an unexpected condition which prevented it from fulfilling the request.");
+StatusCode HTTPStatus::NOT_IMPLEMENTED(501, "Not Implemented", "The server does not support the functionality required to fulfill the request.");
 
 std::ostream& operator<<(std::ostream& os, const StatusCode& status) {
     os << status.code << std::endl;
