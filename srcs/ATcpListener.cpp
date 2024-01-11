@@ -146,7 +146,8 @@ void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 	if (nbytes > 0)
 	{
 		this->m_buffer[nbytes] = '\0';
-		this->OnMessageReceived(this->m_socketFdToServerConfigs[clientSocket], clientSocket, std::string(this->m_buffer, nbytes));
+		std::string msg = std::string(this->m_buffer, nbytes);
+		this->OnMessageReceived(this->m_socketFdToServerConfigs[clientSocket], clientSocket, msg);
 		return ;
 	}
 	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);

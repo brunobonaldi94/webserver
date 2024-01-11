@@ -100,6 +100,7 @@ bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 		this->isCgiRootPath = false;
 		this->shouldExecuteCgi = false;
 		this->mimeType.clear();
+		this->pathAdder.clear();
 		return true;
 	}
 	return false;
@@ -453,7 +454,23 @@ bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 		{
 			std::string directory = (*it)->GetRootPath();
 			std::string fileName = this->_directoryHandler->getFileFromPath(path);
-			this->allowDirectoryListing = this->_directoryHandler->isInDirectory(fileName, directory);
+			if (fileName.empty())
+			{
+				if (path[path.size() -1] == '/')
+					path = path.substr(0, path.size() - 1);
+				directory += path.replace(0, locationPath.size(), "");
+				bool directoryExists = this->_directoryHandler->directoryExists(directory);
+				if (directoryExists == false)
+				{
+					this->sendError("<h1>Forbidden</h1>", HTTPStatus::FORBIDDEN);
+					return false;
+				}
+				this->pathAdder = path;
+				this->path = locationPath;
+				return directoryExists;
+			}
+			else
+				this->allowDirectoryListing = this->_directoryHandler->isInDirectory(fileName, directory);
 			this->directoryListingPath = directory + "/" + fileName;
 			return this->allowDirectoryListing;
 		}
@@ -483,7 +500,7 @@ std::string BaseHTTPRequestHandler::getContent(const std::string path)
 	if (location == NULL)
 		return content;
 	if ((location->GetIndexFileNotFound() && location->GetAutoIndex()))
-		return this->createDirectoryListing(location->GetRootPath(), path);
+		return this->createDirectoryListing(location->GetRootPath(), path + this->pathAdder, this->pathAdder);
 	if (!this->fileName.empty())
 		return this->getContentByFileName(this->fileName);
 	std::vector <std::string> indexFiles = location->GetFilesFullPath();

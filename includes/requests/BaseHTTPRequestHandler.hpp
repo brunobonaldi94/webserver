@@ -96,6 +96,7 @@ protected:
 	std::string scriptName;
 	std::string fileName;
 	std::string fullResourcePath;
+	std::string pathAdder;
 	ServerConfig *currentServerConfig;
 	RequestContent *currentRequestContent;
 	MimeTypes mimeTypes;

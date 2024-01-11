@@ -19,6 +19,7 @@ class ADirectoryHandler
         std::string getLastModified(struct stat sb);
         std::string getFileFromPath(std::string path);
         std::string getFileExtension(std::string path);
+        bool directoryExists(std::string path);
 };
 
 class DirectoryHandler : public ADirectoryHandler

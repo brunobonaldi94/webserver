@@ -37,6 +37,12 @@ std::string ADirectoryHandler::getFileFromPath(std::string path)
   return path.substr(lastSlashPos + 1);
 }
 
+bool ADirectoryHandler::directoryExists(std::string path)
+{
+  struct stat sb;
+  return (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
+}
+
 DirectoryHandler::DirectoryHandler() {}
 
 DirectoryHandler::~DirectoryHandler() {}

@@ -13,5 +13,5 @@
 #define BOUNDARY "boundary="
 #define FORM_DATA "form-data"
 #define WHITE_SPACE " \t\n\r\f\v"
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 40960
 #define CGI_PATH "/cgi-bin"
