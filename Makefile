@@ -103,7 +103,7 @@ run_test: test
 	
 valgrind:
 			@valgrind -s --leak-check=full --show-leak-kinds=all \
-			--track-origins=yes --log-fd=9 ./$(NAME) webserver2.conf 9>memcheck.log
+			--track-origins=yes --log-fd=9 ./$(NAME) webserver3.conf 9>memcheck.log
 
 .PHONY:		all clean fclean re run
 

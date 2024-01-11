@@ -37,10 +37,24 @@ std::string ADirectoryHandler::getFileFromPath(std::string path)
   return path.substr(lastSlashPos + 1);
 }
 
-bool ADirectoryHandler::directoryExists(std::string path)
+bool ADirectoryHandler::isValidDirectory(std::string path)
 {
   struct stat sb;
   return (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode));
+}
+
+bool ADirectoryHandler::isValidFile(std::string path)
+{
+  struct stat sb;
+  return (stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode));
+}
+
+std::string ADirectoryHandler::getBaseDirectory(std::string path)
+{
+  size_t lastSlashPos = path.find_last_of("/");
+  if (lastSlashPos == std::string::npos)
+    return path;
+  return path.substr(0, lastSlashPos);
 }
 
 DirectoryHandler::DirectoryHandler() {}

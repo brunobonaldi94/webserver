@@ -19,7 +19,9 @@ class ADirectoryHandler
         std::string getLastModified(struct stat sb);
         std::string getFileFromPath(std::string path);
         std::string getFileExtension(std::string path);
-        bool directoryExists(std::string path);
+        bool isValidDirectory(std::string path);
+        bool isValidFile(std::string path);
+        std::string getBaseDirectory(std::string path);
 };
 
 class DirectoryHandler : public ADirectoryHandler

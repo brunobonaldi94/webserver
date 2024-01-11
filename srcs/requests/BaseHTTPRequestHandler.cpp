@@ -453,26 +453,28 @@ bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 		if (pathToCompare == locationPath && locationPath != path && isAutoIndexOn)
 		{
 			std::string directory = (*it)->GetRootPath();
-			std::string fileName = this->_directoryHandler->getFileFromPath(path);
-			if (fileName.empty())
-			{
-				if (path[path.size() -1] == '/')
+			path.replace(0, locationPath.size(), "");
+			std::string fullPath = directory + path;
+			bool isDirectory = this->_directoryHandler->isValidDirectory(fullPath);
+			if (path[path.size() -1] == '/')
 					path = path.substr(0, path.size() - 1);
-				directory += path.replace(0, locationPath.size(), "");
-				bool directoryExists = this->_directoryHandler->directoryExists(directory);
-				if (directoryExists == false)
-				{
-					this->sendError("<h1>Forbidden</h1>", HTTPStatus::FORBIDDEN);
-					return false;
-				}
+			if (isDirectory)
+			{
+				directory += path;
 				this->pathAdder = path;
 				this->path = locationPath;
-				return directoryExists;
+				return true;
 			}
-			else
-				this->allowDirectoryListing = this->_directoryHandler->isInDirectory(fileName, directory);
-			this->directoryListingPath = directory + "/" + fileName;
-			return this->allowDirectoryListing;
+			bool isFile = this->_directoryHandler->isValidFile(fullPath);
+			if (isFile)
+			{
+				this->allowDirectoryListing = true;
+				this->directoryListingPath = fullPath;
+				return this->allowDirectoryListing;
+
+			}
+			this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+			return false;
 		}
 	}
 	return false;
