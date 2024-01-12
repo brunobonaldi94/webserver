@@ -24,8 +24,8 @@ RequestHandler& RequestHandler::operator=(const RequestHandler& other) {
     return *this;
 }
 
-void RequestHandler::sendJsonResponse(std::string json) {
-    this->sendResponse(HTTPStatus::OK.code, HTTPStatus::OK.description);
+void RequestHandler::sendJsonResponse(std::string json, StatusCode statusCode) {
+    this->sendResponse(statusCode.code, statusCode.description);
 	this->sendHeader("Cache-Control", "no-cache, private");
 	this->sendHeader("Content-Type", "application/json");
 	this->sendHeader("Content-Length", json.size());
@@ -134,7 +134,13 @@ void RequestHandler::doPOST() {
 void RequestHandler::doDELETE() {
     std::string path = this->GetPath();
     std::string filename = path.substr(path.find_last_of("/") + 1);
-    std::remove(("../webserver/data/" + filename).c_str());
+    if (filename.empty())
+        return this->sendJsonResponse("{\"message\": \"Invalid filename\"}", HTTPStatus::BAD_REQUEST);
+    std::string fullPath = "../webserver/data/" + filename;
+    bool fileExists = this->_directoryHandler->isValidFile(fullPath);
+    if (!fileExists)
+        return this->sendJsonResponse("{\"message\": \"File not found\"}", HTTPStatus::NOT_FOUND);
+    std::remove(fullPath.c_str());
 }
 
 void RequestHandler::clearRequestContent(int clientSocket)

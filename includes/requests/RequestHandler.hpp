@@ -17,7 +17,7 @@ class RequestHandler : public BaseHTTPRequestHandler
 		void doPOST();
 		void doDELETE();
 		void clearRequestContent(int clientSocket);
-		void sendJsonResponse(std::string json);
+		void sendJsonResponse(std::string json, StatusCode statusCode = HTTPStatus::OK);
 		void savePostData();
 		void saveDefaultData();
 		void saveMultiPartData();
