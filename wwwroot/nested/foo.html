@@ -226,6 +226,33 @@
         },
         plugins: [],
       };
+     window.onload = () => {
+        const testDelete = () => {
+        fetch("/foo", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          } else if (res.status === 405) {
+            throw new Error("405 - Method Not Allowed");
+          } else {
+            throw new Error("Something went wrong");
+          }
+        })
+        .then((data) => console.log(data))
+        .catch((err) => {
+          const deleteResponse = document.getElementById("delete-reponse");
+          deleteResponse.textContent = err.toString();
+          deleteResponse.classList.add("text-red-500", "text-center", "text-6xl", "animate-slide-up-and-fade");
+        });
+      };
+      const testDeleteButton = document.getElementById("test-delete-button");
+      testDeleteButton.addEventListener("click", testDelete);
+    }
     </script>
   </head>
   <body class="bg-teal-900">
@@ -269,7 +296,14 @@
           class="text-lg hover:-translate-y-1 transition-all p-1 hover:text-gray-800"
           >CGI</a>
       </nav>
-      <h1>Foo Doc</h1>
+      <div class="flex flex-col items-center gap-8">
+        <h1 class="text-4xl text-center text-teal-800">Testing not Allowed Method</h1>
+        <button class="bg-teal-900 text-white p-2 rounded-md w-fit"
+        id="test-delete-button">
+          Delete Http
+        </button>
+        <h1 id="delete-reponse"></h1>
+      </div>
     </div>
   </body>
 </html>

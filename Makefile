@@ -100,12 +100,21 @@ run:	all
 
 run_test: test
 	./$(NAME_TEST)
+
+run_test_siege:
+	@siege -b -t1M http://localhost:8080 & \
+    sleep 3; \
+    ps -p $$(ps -eaf | grep '[w]ebserv' | awk '{print $$2}') -o pid,%mem,vsz,rss,cmd; \
+
+run_test_check_hanging_connection:
+	netstat -tn | grep ESTABLISHED | grep 8080
+
 	
 valgrind:
 			@valgrind -s --leak-check=full --show-leak-kinds=all \
 			--track-origins=yes --log-fd=9 ./$(NAME) webserver2.conf 9>memcheck.log
 
-.PHONY:		all clean fclean re run
+.PHONY:		all clean fclean re runa
 
 exec:
 	echo $@
