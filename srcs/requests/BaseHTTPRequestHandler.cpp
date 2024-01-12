@@ -575,8 +575,6 @@ bool BaseHTTPRequestHandler::getContentNotFound() const
 
 void BaseHTTPRequestHandler::setClientSockerRequestContentMap(int clientSocket, ServerConfig *serverConfig)
 {
-	if (MapUtils<int, RequestContent>::SafeFindMap(this->clientSocketRequestContentMap, clientSocket))
-		return;
 	this->clientSocketRequestContentMap[clientSocket] = RequestContent(serverConfig);
 }
 

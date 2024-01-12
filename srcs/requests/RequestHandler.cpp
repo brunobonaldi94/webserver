@@ -89,7 +89,10 @@ void RequestHandler::saveDefaultData() {
     {
         std::vector<std::string> body = StringUtils::SplitAtFirstDelimiter(*it, "=");
         if (body.size() != 2)
-            throw std::runtime_error("Invalid body");
+        {   
+            Logger::Log(ERROR, "Invalid body");
+            return ;
+        }
         data[body[0]] = body[1];
         dynamic_file_name += body[1] + "_";
     }
