@@ -580,12 +580,8 @@ void BaseHTTPRequestHandler::setClientSockerRequestContentMap(int clientSocket, 
 	std::pair<const int, RequestContent> *foundRequest = MapUtils<int, RequestContent>::SafeFindMap(this->clientSocketRequestContentMap, clientSocket);
 	if (foundRequest)
 	{
-		//std::string host = foundRequest->second.getServerConfig()->GetHost();
-		//std::string port = foundRequest->second.getServerConfig()->GetPort();
 		if (foundRequest->second.getServerConfig()->GetServerId() == serverConfig->GetServerId())
-		{
 			return;
-		}
 	}
 	this->clientSocketRequestContentMap[clientSocket] = RequestContent(serverConfig);
 }
