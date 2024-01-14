@@ -278,7 +278,7 @@
 
     <script>
 
-      function deleteRecord(filename) {
+      async function deleteRecord(filename) {
           const url = `/delete/${filename}`;
 
           const requestOptions = {
@@ -288,17 +288,22 @@
               },
               body: JSON.stringify({}),
           };
-
-          fetch(url, requestOptions)
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error(`Erro na requisição DELETE: ${response.status}`);
-                  }
-                  console.log('Arquivo deletado com sucesso!');
-              })
-              .catch(error => {
-                  console.error('Erro:', error);
-              });
+          let hasSuccess = false;
+          try {
+            const response = await fetch(url, requestOptions);
+            if (!response.ok) {
+              throw new Error(`Erro na requisição DELETE: ${response.status}`);
+            }
+            hasSuccess = true;
+            console.log('Arquivo deletado com sucesso!');
+          } catch(error) {
+            console.error('Erro:', error);
+          }
+          if (hasSuccess) {
+            setTimeout(() => {
+              window.location.replace("/get");
+            }, 1000);
+          }
       }
   </script>
 

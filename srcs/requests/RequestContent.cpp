@@ -197,3 +197,8 @@ void RequestContent::setQueryString(std::string queryString)
 {
   this->queryString = queryString;
 }
+
+bool RequestContent::getHeadersFullyRead()
+{
+  return this->headersFullyRead;
+}

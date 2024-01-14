@@ -24,6 +24,7 @@ class RequestContent
 		bool parseHeader(std::string header);
 		bool hasParsedAllRequest();
 		void setHeadersFullyRead(bool headersFullyRead);
+		bool getHeadersFullyRead();
 		void setBodyFullyRead(bool bodyFullyRead);
 		bool parseBody(std::string line, ssize_t contentLengthNbr);
 		std::string getBody() const;

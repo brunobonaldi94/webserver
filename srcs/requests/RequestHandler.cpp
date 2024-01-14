@@ -62,9 +62,9 @@ void RequestHandler::doGET() {
                     if (labelSplited.size() < 2)
                         continue;
                     label = labelSplited[0] + " " + labelSplited[1];
-                    label = renderTemplate("<h4><a href=\"{data}\"></a>{data}", label);
+                    label = renderTemplate("<div><span>{data}</span>", label);
                     std::string btnDelete = renderTemplate(
-                        "<a href=\"/get\" onclick=\"deleteRecord('{data}')\" id=\"deleteLink\" class=\"ml-5 text-red-600\">Delete</a></h4>", *it);
+                        "<button onclick=\"deleteRecord('{data}')\" id=\"deleteLink\" class=\"ml-5 text-red-600\">Delete</button></div>", *it);
                     value += (label + btnDelete);
                 }
             }
@@ -141,6 +141,7 @@ void RequestHandler::doDELETE() {
     if (!fileExists)
         return this->sendJsonResponse("{\"message\": \"File not found\"}", HTTPStatus::NOT_FOUND);
     std::remove(fullPath.c_str());
+    this->sendJsonResponse("{\"message\": \"File deleted\"}");
 }
 
 void RequestHandler::clearRequestContent(int clientSocket)

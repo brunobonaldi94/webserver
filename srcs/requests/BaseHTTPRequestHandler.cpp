@@ -101,6 +101,7 @@ bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 		this->shouldExecuteCgi = false;
 		this->mimeType.clear();
 		this->pathAdder.clear();
+		this->rawRequest.clear();
 		return true;
 	}
 	return false;
@@ -152,8 +153,14 @@ bool BaseHTTPRequestHandler::isValidFirstRequestHeaderLine(std::string firstRequ
 
 void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> &requestLines)
 {
-	if (requestLines.size() == 0)
+	bool hasParserAllHeader = this->currentRequestContent->getHeadersFullyRead();
+	if (hasParserAllHeader)
 		return;
+	if (requestLines.size() == 0 && !hasParserAllHeader && this->rawRequest.size() < BUFFER_SIZE - 1)
+	{
+		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		return;
+	}
 	std::string contentLengthStr;
 	for (std::vector<std::string>::iterator it = requestLines.begin(); it != requestLines.end(); it++)
 	{
@@ -315,6 +322,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 	{
 		std::vector<std::string> firstRequestLine;
 		std::vector<std::string> versionNumber;
+		StringUtils::AddToString(this->rawRequest, request);
 		std::vector<std::string> requestLines = this->SplitRequest(request);
 		if (this->currentRequestContent->getHasErrorInRequest())
 			return NULL;
@@ -533,6 +541,9 @@ std::vector<std::string> BaseHTTPRequestHandler::getMethodsAllowedForApi() const
 	std::vector<std::string> api = StringUtils::Split(path, "/");
 	if (api.size() < 3 || api[1] != "delete" || !StringUtils::EndsWith(api[2], ".json"))
 		return methodsAllowed;
+	LocationConfig *location = this->currentServerConfig->GetLocationConfig("/delete");
+	if (location)
+		return location->GetAllowedMethods();
 	methodsAllowed.push_back("DELETE");
 	return methodsAllowed;
 }

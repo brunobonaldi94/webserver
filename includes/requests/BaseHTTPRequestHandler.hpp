@@ -101,6 +101,7 @@ protected:
 	RequestContent *currentRequestContent;
 	MimeTypes mimeTypes;
 	std::string mimeType;
+	std::string rawRequest;
 };
 
 template <typename T>

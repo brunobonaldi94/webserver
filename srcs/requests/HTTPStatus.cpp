@@ -15,7 +15,7 @@ StatusCode HTTPStatus::TEMPORARY_REDIRECT(307, "Temporary Redirect", "The reques
 StatusCode HTTPStatus::PERMANENT_REDIRECT(308, "Permanent Redirect", "The requested resource has been assigned a new permanent URI and any future references to this resource SHOULD use one of the returned URIs.");
 StatusCode HTTPStatus::INTERNAL_SERVER_ERROR(500, "Internal Server Error", "The server encountered an unexpected condition which prevented it from fulfilling the request.");
 StatusCode HTTPStatus::NOT_IMPLEMENTED(501, "Not Implemented", "The server does not support the functionality required to fulfill the request.");
-
+StatusCode HTTPStatus::NO_CONTENT(204, "No Content", "The server has fulfilled the request but does not need to return an entity-body, and might want to return updated metainformation.");
 std::ostream& operator<<(std::ostream& os, const StatusCode& status) {
     os << status.code << std::endl;
     os << status.description << std::endl;
