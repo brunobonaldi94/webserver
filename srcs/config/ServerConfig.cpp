@@ -3,6 +3,7 @@
 ServerConfig::ServerConfig(ServerContext *serverContext): _serverContext(serverContext)
 {
     this->SetValuesFromServerContext();
+    this->_serverId = ServerConfig::_serverCount++;
 }
 
 ServerConfig::ServerConfig(ServerConfig const & other)
@@ -200,3 +201,10 @@ std::vector<LocationConfig *> ServerConfig::GetLocationConfigs()
 {
   return this->_locations;
 }
+
+int ServerConfig::GetServerId()
+{
+  return this->_serverId;
+}
+
+int ServerConfig::_serverCount = 0;

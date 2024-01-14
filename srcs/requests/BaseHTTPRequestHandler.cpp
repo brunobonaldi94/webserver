@@ -250,8 +250,10 @@ bool BaseHTTPRequestHandler::checkBodyLimit()
 	return true;
 }
 
-bool BaseHTTPRequestHandler::validateServerName()
+bool BaseHTTPRequestHandler::validateServerName(ServerConfig *serverConfig)
 {
+	if (serverConfig == NULL)
+		serverConfig = this->currentServerConfig;
 	std::string host = this->currentRequestContent->getHeader("Host");
 	if (host.empty())
 		return false;
@@ -260,10 +262,10 @@ bool BaseHTTPRequestHandler::validateServerName()
 		return false;
 	std::string serverName = hostParts[0];
 	std::string port = hostParts[1];
-	std::string portServer = this->currentServerConfig->GetPort();
+	std::string portServer = serverConfig->GetPort();
 	if (portServer != port)
 		return false;
-	std::vector<std::string> serverNames = this->currentServerConfig->GetServerNames();
+	std::vector<std::string> serverNames = serverConfig->GetServerNames();
 	bool hasServer = VectorUtils<std::string>::hasElement(serverNames, serverName);
 	bool isLocalhost = serverName == "localhost" || serverName == "127.0.0.1";
 	bool hasLocalhost = VectorUtils<std::string>::hasElement(serverNames, std::string("localhost")) 
@@ -578,10 +580,12 @@ void BaseHTTPRequestHandler::setClientSockerRequestContentMap(int clientSocket, 
 	std::pair<const int, RequestContent> *foundRequest = MapUtils<int, RequestContent>::SafeFindMap(this->clientSocketRequestContentMap, clientSocket);
 	if (foundRequest)
 	{
-		std::string host = foundRequest->second.getServerConfig()->GetHost();
-		std::string port = foundRequest->second.getServerConfig()->GetPort();
-		if (host == serverConfig->GetHost() && port == serverConfig->GetPort())
+		//std::string host = foundRequest->second.getServerConfig()->GetHost();
+		//std::string port = foundRequest->second.getServerConfig()->GetPort();
+		if (foundRequest->second.getServerConfig()->GetServerId() == serverConfig->GetServerId())
+		{
 			return;
+		}
 	}
 	this->clientSocketRequestContentMap[clientSocket] = RequestContent(serverConfig);
 }

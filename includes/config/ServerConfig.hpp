@@ -22,6 +22,8 @@ private:
     bool _autoIndex;
     std::string _cgiBinaryPath;
     std::string _cgiExtension;
+    static int _serverCount;
+    int _serverId;
     void SetValuesFromServerContext();
 
 
@@ -43,6 +45,7 @@ public:
     bool GetAutoIndex() const;
     std::string GetCgiBinaryPath() const;
     std::string GetCgiExtension() const;
+    int GetServerId();
 
     void SetPort(std::string port);
     void SetHost(std::string host);

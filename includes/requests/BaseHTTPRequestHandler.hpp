@@ -70,7 +70,7 @@ protected:
 	bool checkBodyLimit();
 	std::string createDirectoryListing(std::string rootPath, std::string path = "", std::string adderPath = "");
 	bool isDirectoryListingAllowed(std::string path);
-	bool validateServerName();
+	bool validateServerName(ServerConfig *serverConfig = NULL);
 	bool checkRedirect();
 	void writeDefaultResponse(std::string content, std::string mimeType = "");
 	void addCurrentRequestContentAndServerConfig(int clientSocket, ServerConfig *serverConfig);
