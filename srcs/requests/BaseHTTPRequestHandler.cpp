@@ -102,6 +102,7 @@ bool BaseHTTPRequestHandler::shouldClearRequestContent(int clientSocket)
 		this->mimeType.clear();
 		this->pathAdder.clear();
 		this->rawRequest.clear();
+		this->multipartDatum.clear();
 		return true;
 	}
 	return false;
@@ -196,6 +197,31 @@ bool BaseHTTPRequestHandler::shouldContinueParsing(std::string requestBodyLines)
 	return true;
 }
 
+bool BaseHTTPRequestHandler::parseMultiPartBody(std::string bodyUnparsed)
+{
+	bool bodyParsed = false;
+	std::vector<std::string> multipartDatum = StringUtils::SliceAtSubstring(bodyUnparsed, "--" + this->currentRequestContent->getBoundary() + CRLF);
+	if (multipartDatum.size() == 0)
+	{
+		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		return false;
+	}
+	for (std::vector<std::string>::iterator it = multipartDatum.begin(); it != multipartDatum.end(); it++)
+	{
+		std::string multipartData = "--" + this->currentRequestContent->getBoundary() + CRLF + *it;
+		bodyParsed = this->currentRequestContent->parseMultiPartBody(multipartData, multipartData.size());
+		if (!bodyParsed)
+		{
+			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+			return false;
+		}
+		this->multipartDatum.push_back(this->currentRequestContent->getMultiPartData());
+		if (it + 1 != multipartDatum.end())
+			this->currentRequestContent->resetMultiPartData();
+	}
+	return bodyParsed;
+}
+
 bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 {
 	
@@ -204,7 +230,9 @@ bool BaseHTTPRequestHandler::parseBody(std::string &requestBodyLines)
 	std::string &bodyUnparsed = this->currentRequestContent->getBodyObject().getBodyUnparsed();
 	bool bodyParsed = false;
 	if (this->currentRequestContent->getHasMultiPartFormData())
-		bodyParsed = this->currentRequestContent->parseMultiPartBody(bodyUnparsed, this->contentLength);
+	{
+		bodyParsed = this->parseMultiPartBody(bodyUnparsed);
+	}
 	else if (this->currentRequestContent->isChunkedBody())
 		bodyParsed = this->currentRequestContent->parseChunkedBody(bodyUnparsed);
 	else
@@ -673,4 +701,9 @@ std::string BaseHTTPRequestHandler::getContentByFileName(const std::string fileN
 		return "";
 	}
 	return content;
+}
+
+std::vector<MultiPartData> BaseHTTPRequestHandler::getMultiPartData()
+{
+	return this->multipartDatum;
 }

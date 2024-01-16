@@ -44,6 +44,8 @@ bool MultiPartData::parseHeaders(std::vector<std::string> &headers)
       continue;
     }
   }
+  if (this->isFileData() == false)
+    return !this->contentDisposition.empty();
   return !this->contentDisposition.empty() && !this->contentType.empty();
 }
 
@@ -71,6 +73,11 @@ bool MultiPartData::parseBody(std::string line, ssize_t contentLengthNbr, std::s
   }
   StringUtils::AddToString(this->data, line);
   return this->bodyParsed;
+}
+
+bool MultiPartData::isFileData()
+{
+  return this->contentType.empty() == false && this->fileName.empty() == false;
 }
 
 Body::Body(): bodyFullyRead(false)
@@ -244,4 +251,9 @@ MultiPartData Body::getMultiPartData() const
 std::string &Body::getBodyUnparsed()
 {
   return this->bodyUnparsed;
+}
+
+void Body::resetMultiPartData()
+{
+  this->multiPartData = MultiPartData();
 }

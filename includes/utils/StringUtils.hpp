@@ -19,6 +19,7 @@ public:
   static std::string ExtractWord(std::string::iterator &it, std::string &fileContent);
   static std::string ExtractLine(std::string::iterator &it, std::string &fileContent);
   static std::vector<std::string> Split(std::string str, std::string delimiters);
+  static std::vector<std::string> SliceAtSubstring(std::string str, std::string substring);
   static std::string UpperCase(std::string str);
   static std::string LowerCase(std::string str);
   static std::string ForEach(std::string str, int (* fun)(int));

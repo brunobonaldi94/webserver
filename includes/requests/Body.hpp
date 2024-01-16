@@ -22,6 +22,7 @@ struct MultiPartData
   bool parseBody(std::string line, ssize_t contentLengthNbr, std::string boundary);
   void setContentDisposition(std::string contentDisposition);
   bool hasFoundBoundaryEnd(std::string line, std::string boundary);
+  bool isFileData();
 };
 
 class Body
@@ -44,6 +45,8 @@ class Body
     virtual bool parseMultiPartBody(std::string line, ssize_t contentLength, std::string boundary);
     MultiPartData getMultiPartData() const;
     std::string &getBodyUnparsed();
+  	void resetMultiPartData();
+
   private:
     std::string body;
     std::string bodyUnparsed;

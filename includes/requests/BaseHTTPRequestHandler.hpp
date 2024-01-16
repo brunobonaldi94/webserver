@@ -49,7 +49,7 @@ class BaseHTTPRequestHandler {
 	void sendHeader(std::string key, T value);
 	RequestMethodFunction parseRequest(std::string request);
 	RequestContent *getCurrentRequestContent();
-
+	std::vector<MultiPartData> getMultiPartData();
 protected:
 	void sendResponse(int statusCode, std::string message);
 	void endHeaders();
@@ -78,7 +78,9 @@ protected:
 	ServerConfig *getCurrentServerConfig();
 	std::string getPath(std::string path);
 	bool checkExecuteCgi(std::string path);
+	bool parseMultiPartBody(std::string bodyUnparsed);
 	
+
 	size_t contentLength;
 	ADirectoryHandler *_directoryHandler;
 	std::map<int, RequestContent> clientSocketRequestContentMap;
@@ -102,6 +104,7 @@ protected:
 	MimeTypes mimeTypes;
 	std::string mimeType;
 	std::string rawRequest;
+	std::vector<MultiPartData> multipartDatum;
 };
 
 template <typename T>

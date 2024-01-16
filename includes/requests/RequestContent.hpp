@@ -29,7 +29,7 @@ class RequestContent
 		bool parseBody(std::string line, ssize_t contentLengthNbr);
 		std::string getBody() const;
 		bool isMultiPartFormData();
-		MultiPartData getMultiPartData() const;
+		MultiPartData getMultiPartData();
 		bool parseMultiPartBody(std::string line, ssize_t contentLengthNbr);
 		bool parseChunkedBody(std::string line);
 		bool getHasMultiPartFormData() const;
@@ -42,6 +42,7 @@ class RequestContent
 		void setFirstRequestLine(std::string firstRequestLine);
 		std::string getQueryString() const;
 		void setQueryString(std::string queryString);
+		void resetMultiPartData();
 
 
 	private:

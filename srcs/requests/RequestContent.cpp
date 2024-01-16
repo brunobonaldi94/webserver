@@ -130,7 +130,7 @@ bool RequestContent::isMultiPartFormData()
   return this->hasMultiPartFormData;
 }
 
-MultiPartData RequestContent::getMultiPartData() const
+MultiPartData RequestContent::getMultiPartData()
 {
   return this->body.getMultiPartData();
 }
@@ -201,4 +201,9 @@ void RequestContent::setQueryString(std::string queryString)
 bool RequestContent::getHeadersFullyRead()
 {
   return this->headersFullyRead;
+}
+
+void RequestContent::resetMultiPartData()
+{
+  this->body.resetMultiPartData();
 }

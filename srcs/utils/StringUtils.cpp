@@ -104,6 +104,25 @@ std::vector<std::string> StringUtils::Split(std::string str, std::string delimit
 	return strSplit;
 }
 
+std::vector<std::string> StringUtils::SliceAtSubstring(std::string str, std::string substring)
+{
+  std::vector<std::string> vec;
+  size_t pos = 0;
+  std::string curString;
+
+  while ((pos = str.find(substring)) != std::string::npos)
+  {
+    curString = str.substr(0, pos);
+    str.erase(0, pos + substring.length());
+    if (!curString.empty())
+      vec.push_back(curString);
+  }
+  if (!str.empty())
+    vec.push_back(str);
+
+  return vec;
+}
+
 std::string StringUtils::UpperCase(std::string str)
 {
   return StringUtils::ForEach(str, std::toupper);

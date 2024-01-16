@@ -102,13 +102,26 @@ void RequestHandler::saveDefaultData() {
 
 void RequestHandler::saveMultiPartData()
 {
-    RequestContent *requestContent = this->getCurrentRequestContent();
-    MultiPartData multiPartData = requestContent->getMultiPartData();
-    std::string filename = "wwwroot/upload_files/" + multiPartData.fileName;
-    std::string data = multiPartData.data;
-    std::ofstream file(filename.c_str(), std::ios::out | std::ios::binary);
-    file << data;
-    file.close();
+    std::vector<MultiPartData> multiPartData = this->getMultiPartData();
+    for (std::vector<MultiPartData>::iterator it = multiPartData.begin(); it != multiPartData.end(); it++)
+    {
+        if (it->isFileData())
+        {
+            std::string filename = "wwwroot/upload_files/" + it->fileName;
+            std::ofstream file(filename.c_str(), std::ios::out | std::ios::binary);
+            file << it->data;
+            file.close();
+        }
+        else
+            Logger::Log(INFO, "Body received: " + it->data);
+    }
+    // RequestContent *requestContent = this->getCurrentRequestContent();
+    // MultiPartData multiPartData = requestContent->getMultiPartData();
+    // std::string filename = "wwwroot/upload_files/" + multiPartData.fileName;
+    // std::string data = multiPartData.data;
+    // std::ofstream file(filename.c_str(), std::ios::out | std::ios::binary);
+    // file << data;
+    // file.close();
 }
 
 void RequestHandler::savePostData()
