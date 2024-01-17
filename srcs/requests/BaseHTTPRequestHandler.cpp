@@ -268,6 +268,11 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(std::string reques
 		requestHeaderLines.push_back(line);
 	}
 	this->parseHeaders(requestHeaderLines);
+	if (!this->checkBodyLimit())
+	{
+			this->sendError("<h1>Request Entity Too Large</h1>", HTTPStatus::CONTENT_TOO_LARGE);
+			throw std::runtime_error("Bad Request");
+	}
 	std::string requestBodyLines((std::istreambuf_iterator<char>(iss)), std::istreambuf_iterator<char>());
 	this->parseBody(requestBodyLines);
 	return requestHeaderLines;
@@ -359,11 +364,6 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		if (!this->validateServerName())
 		{
 			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
-			return NULL;
-		}
-		if (!this->checkBodyLimit())
-		{
-			this->sendError("<h1>Request Entity Too Large</h1>", HTTPStatus::CONTENT_TOO_LARGE);
 			return NULL;
 		}
 		this->checkRedirect();
