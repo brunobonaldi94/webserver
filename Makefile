@@ -96,7 +96,7 @@ fclean:		clean
 re:			fclean all
 
 run:	all
-	./$(NAME)
+	./$(NAME) webserver.conf
 
 run_test: test
 	./$(NAME_TEST)
@@ -112,7 +112,7 @@ run_test_check_hanging_connection:
 	
 valgrind:
 			@valgrind -s --leak-check=full --show-leak-kinds=all \
-			--track-origins=yes --log-fd=9 ./$(NAME) webserver2.conf 9>memcheck.log
+			--track-origins=yes --log-fd=9 ./$(NAME) webserver.conf 9>memcheck.log
 
 .PHONY:		all clean fclean re runa
 

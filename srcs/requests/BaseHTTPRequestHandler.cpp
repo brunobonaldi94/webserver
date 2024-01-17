@@ -460,7 +460,7 @@ bool BaseHTTPRequestHandler::checkExecuteCgi(std::string path)
 		}
 		if (!fileExists)
 		{
-			this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+			this->sendNotFoundError();
 			return false;
 		}	
 		if (fileExists && hasCgiExtension)
