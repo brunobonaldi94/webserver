@@ -1,4 +1,5 @@
 import os
+import sys
 
 env_keys = [
   "AUTH_TYPE"
@@ -21,7 +22,15 @@ def print_envs(keys):
     if value:
       print(f"<p>{key}: {value}</p>")
 
+def print_args():
+  for arg in sys.argv:
+    print(f"<p>{arg}</p>")
+     
+
 print("<html><body>")
 print("<h1>Python Script Test</h1>")
+print("<h2>Environment Variables</h2>")
 print_envs(env_keys)
+print("<h2>Arguments</h2>")
+print_args()
 print("</body></html>")

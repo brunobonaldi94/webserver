@@ -1,6 +1,6 @@
 #include "CGIRequestHandler.hpp"
 
-CGIRequestHandler::CGIRequestHandler(RequestContent *RequestContent, std::string scriptName, std::string binaryName) : _requestContent(RequestContent), scriptName(scriptName), binaryName(binaryName), envp(NULL)
+CGIRequestHandler::CGIRequestHandler(RequestContent *RequestContent, std::string scriptName, std::string binaryName) : _requestContent(RequestContent), scriptName(scriptName), binaryName(binaryName), envp(NULL), timeout(5)
 {
     this->setEnv();
     this->createEnvp();
@@ -76,16 +76,34 @@ void CGIRequestHandler::execute() {
     pid = fork();
     if (pid == 0)
     {
-        close(pipe_fd[0]);
-        dup2(pipe_fd[1], STDOUT_FILENO);
-        std::string pathBinPython = "/usr/bin/" + this->binaryName;
-        std::vector<std::string> argsString;
-        argsString.push_back(" ");
-        argsString.push_back(script_path);
-        if (execve(pathBinPython.c_str(), this->stringVectorToArray(argsString), this->envp) -1) {
-            std::cerr << "Erro ao executar o script CGI\n";
-            exit(EXIT_FAILURE);
+        pid_t cgi_pid = fork();
+        if (cgi_pid == 0)
+        {
+            close(pipe_fd[0]);
+            dup2(pipe_fd[1], STDOUT_FILENO);
+            std::string pathBinPython = "/usr/bin/" + this->binaryName;
+            std::vector<std::string> argsString;
+            argsString.push_back(" ");
+            argsString.push_back(script_path);
+            if (this->env["REQUEST_METHOD"] == "POST")
+                argsString.push_back(this->_requestContent->getBody());
+            if (execve(pathBinPython.c_str(), this->stringVectorToArray(argsString), this->envp) == -1) {
+                std::cerr << "Erro ao executar o script CGI\n";
+                exit(EXIT_FAILURE);
+            }
         }
+        pid_t timeout_pid = fork();
+        if (timeout_pid == 0) {
+            sleep(this->timeout);
+            _exit(0);
+        }
+        pid_t exited_pid = wait(NULL);
+        if (exited_pid == cgi_pid)
+            kill(timeout_pid, SIGKILL);
+        else
+            kill(cgi_pid, SIGKILL);
+         wait(NULL); // Collect the other process
+        _exit(0); // Or some more informative status
     } 
     else if (pid > 0) {
         close(pipe_fd[1]);  

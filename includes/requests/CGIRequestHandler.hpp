@@ -29,6 +29,7 @@ class CGIRequestHandler
 		std::string binaryName;
 		std::map<std::string, std::string> env;
 		char **envp;
+		int timeout;
 		void setEnv();
 		char** stringVectorToArray(const std::vector<std::string>& inputStrings);
 		char**  createEnvp(); 
