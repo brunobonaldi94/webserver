@@ -14,3 +14,5 @@ srcs/tests/functionals/__pycache__/
 /wwwroot/YoupiBanane/*
 ubuntu_tester
 ubuntu_cgi_tester
+*/YoupiBanane
+.vscode/*
