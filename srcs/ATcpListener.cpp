@@ -79,6 +79,7 @@ void ATcpListener::AddToPfds(int newfd)
 		struct pollfd pfd;
 		pfd.fd = newfd;
 		pfd.events = POLLIN;
+		pfd.revents = 0;
 		this->pfds.push_back(pfd);
 }
 
@@ -119,7 +120,8 @@ void ATcpListener::HandleNewConnection(int clientSocket)
 
 void ATcpListener::RemoveFromPfds(int i)
 {
-		this->pfds.erase(this->pfds.begin() + i);
+		 if (i >= 0 && i < static_cast<int>(this->pfds.size())) 
+        this->pfds.erase(this->pfds.begin() + i);
 }
 
 bool ATcpListener::Init()

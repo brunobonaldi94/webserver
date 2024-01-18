@@ -149,7 +149,7 @@ void RequestHandler::doDELETE() {
     std::string filename = path.substr(path.find_last_of("/") + 1);
     if (filename.empty())
         return this->sendJsonResponse("{\"message\": \"Invalid filename\"}", HTTPStatus::BAD_REQUEST);
-    std::string fullPath = "../webserver/data/" + filename;
+    std::string fullPath = "./data/" + filename;
     bool fileExists = this->_directoryHandler->isValidFile(fullPath);
     if (!fileExists)
         return this->sendJsonResponse("{\"message\": \"File not found\"}", HTTPStatus::NOT_FOUND);

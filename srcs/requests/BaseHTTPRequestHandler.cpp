@@ -74,7 +74,7 @@ void BaseHTTPRequestHandler::sendNotFoundError()
 	else
 	{
 		StatusCode status(code, HTTPStatus::NOT_FOUND.description, HTTPStatus::NOT_FOUND.details);
-		this->sendError(content, HTTPStatus::NOT_FOUND);
+		this->sendError(content, status);
 	}
 }
 

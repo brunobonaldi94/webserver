@@ -92,12 +92,7 @@ bool ConfigParser::ParseConfigFile()
       it = this->_fileContent.begin();
       word.clear();
     }
-    this->PrintContexts();
-    StringUtils::PrintSeparator();
-    StringUtils::PrintSeparator();
-    StringUtils::PrintSeparator();
     this->FillDefaultValues();
-    this->PrintContexts();
     return true;
   }
   catch(const std::exception& e) 

@@ -64,7 +64,7 @@ void CGIRequestHandler::execute() {
     pid_t pid;
 
     std::string fileName = this->scriptName;
-    std::string script_path = "../webserver/wwwroot/cgi-bin/" + fileName;
+    std::string script_path = "./wwwroot/cgi-bin/" + fileName;
 
     if (access(script_path.c_str(), R_OK) != 0)
 	{
