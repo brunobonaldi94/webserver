@@ -35,6 +35,12 @@ int ATcpListener::BindSocket(struct addrinfo *addrinfo)
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (listener < 0) 
             continue;
+
+				if (fcntl(listener, F_SETFL, O_NONBLOCK) < 0) {
+            close(listener);
+            continue;
+        }
+
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
         if (bind(listener, p->ai_addr, p->ai_addrlen) < 0)
 				{

@@ -16,6 +16,7 @@
 #include <sstream>
 #include <vector>
 #include <csignal>
+#include <fcntl.h>
 #include "Logger.hpp"
 #include "requests/RequestHandler.hpp"
 #include "StringUtils.hpp"
