@@ -115,6 +115,7 @@ void ATcpListener::HandleNewConnection(int clientSocket)
 	{
 		this->AddToPfds(newfd);
 		this->AddToSocketFdToServerConfig(newfd, this->listenFds[clientSocket]);
+		this->AddToBufferMap(newfd);
 	}
 }
 
@@ -122,6 +123,16 @@ void ATcpListener::RemoveFromPfds(int i)
 {
 		 if (i >= 0 && i < static_cast<int>(this->pfds.size())) 
         this->pfds.erase(this->pfds.begin() + i);
+}
+
+void ATcpListener::RemoveFromBufferMap(int i)
+{
+		MapUtils<int, std::string>::SafeRemoveMap(this->m_bufferMap, i);
+}
+
+void ATcpListener::AddToBufferMap(int newfd)
+{
+		this->m_bufferMap[newfd] = "";
 }
 
 bool ATcpListener::Init()
@@ -173,6 +184,7 @@ void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex, ssize
 		close(this->pfds[socketIndex].fd);
 		this->RemoveFromPfds(socketIndex);
 		this->RemoveFromSocketFdToServerConfig(clientSocket);
+		this->RemoveFromBufferMap(clientSocket);
 }
 
 bool ATcpListener::Run()
@@ -191,14 +203,20 @@ bool ATcpListener::Run()
 		}
 		for (int i = 0; i < socketCount; i++)
 		{
-			if (this->pfds[i].revents & POLLIN)
+			short revents = this->pfds[i].revents;
+			int clientSocket = this->pfds[i].fd;
+			if (revents & POLLIN)
 			{
-				if (this->IsListeningSocket(this->pfds[i].fd))
-					this->HandleNewConnection(this->pfds[i].fd);
+				if (this->IsListeningSocket(clientSocket))
+					this->HandleNewConnection(clientSocket);
 				else
-					this->HandleOnGoingConnection(this->pfds[i].fd, i);
+					this->HandleOnGoingConnection(clientSocket, i);
 			}
-		}	
+			if (revents & POLLOUT)
+				this->OnMessageReceived(this->m_socketFdToServerConfigs[clientSocket], clientSocket, this->m_bufferMap[clientSocket]);
+			if (revents & POLLHUP || revents & POLLERR || revents & POLLNVAL || revents & POLLRDHUP)
+				this->OnClientDisconnected(clientSocket, i, 0);
+		}		
 	}
 	return true;
 }

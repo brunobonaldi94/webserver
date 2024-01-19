@@ -71,6 +71,8 @@ private:
 	void RemoveFromListenFds(int i);
 	void AddToSocketFdToServerConfig(int newfd, ServerConfig * ServerConfig);
 	void RemoveFromSocketFdToServerConfig(int i);
+	void RemoveFromBufferMap(int i);
+	void AddToBufferMap(int newfd);
 
 
 	//int														m_socket;		// Internal FD for the listening socket
@@ -81,5 +83,6 @@ private:
 	std::map<int, ServerConfig*> listenFds;
 	std::map<int, ServerConfig*> m_socketFdToServerConfigs;
 	bool 													m_isRunning;	// Flag indicating the listener is running
+	std::map<int, std::string> 	 m_bufferMap;
 	static void StaticStop(int signal);
 };
