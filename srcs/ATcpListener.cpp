@@ -182,7 +182,7 @@ bool ATcpListener::Run()
 	std::signal(SIGQUIT, ATcpListener::StaticStop);
 	while (this->m_isRunning)
 	{
-		int poll_count = poll(&this->pfds[0], this->pfds.size(), -1);
+		int poll_count = poll(&this->pfds[0], this->pfds.size(), 0);
 		int socketCount = this->pfds.size();
 		if (poll_count == -1)
 		{
