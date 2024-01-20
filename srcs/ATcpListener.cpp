@@ -212,7 +212,6 @@ bool ATcpListener::Run()
 			if (revents & POLLOUT)
 			{
 				this->SendReponseToClient(clientSocket, i);
-				break;
 			}
 			if (revents & POLLHUP || revents & POLLERR || revents & POLLNVAL || revents & POLLRDHUP)
 				this->OnClientDisconnected(clientSocket, i, 0);

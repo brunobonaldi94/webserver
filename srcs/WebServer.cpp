@@ -37,12 +37,13 @@ bool WebServer::SendReponseToClient(int clientSocket, int socketIndex)
 			return true;
 	if (this->requestHandler->hasParsedAllRequestContent() || this->requestHandler->getCurrentRequestContent()->getHasErrorInRequest())
 	{
-			this->SendToClient(
+			bool msgSent = this->SendToClient(
 				clientSocket,
 				this->requestHandler->headersBufferToString(),
 				this->requestHandler->headersBufferToString().size()
 			);
-			Logger::Log(SUCCESS, "Response sent to client: " + StringUtils::ConvertNumberToString(clientSocket));
+			if (!msgSent)
+				Logger::Log(ERROR, "Failed to send message to client socket: " + StringUtils::ConvertNumberToString(clientSocket));
 			ATcpListener::OnClientDisconnected(clientSocket, socketIndex, 0);
 	}
 	this->requestHandler->shouldClearRequestContent(clientSocket);
