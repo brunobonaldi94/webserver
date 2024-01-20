@@ -50,10 +50,11 @@ class BaseHTTPRequestHandler {
 	RequestMethodFunction parseRequest(std::string request);
 	RequestContent *getCurrentRequestContent();
 	std::vector<MultiPartData> getMultiPartData();
+
 protected:
 	void sendResponse(int statusCode, std::string message);
 	void endHeaders();
-	void sendError(const std::string& content, const StatusCode& status);
+	void sendError(const std::string& content, const StatusCode& status, bool shouldCreateHtml = true);
 	void sendNotFoundError();
 	void writeContent(const std::string content);
 	void setRequestLines(const std::vector<std::string> requestLines);
@@ -79,6 +80,7 @@ protected:
 	std::string getPath(std::string path);
 	bool checkExecuteCgi(std::string path);
 	bool parseMultiPartBody(std::string bodyUnparsed);
+	std::string createHtmlTemplate(std::string title, std::string body = "");
 	
 
 	size_t contentLength;

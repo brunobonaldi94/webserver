@@ -57,10 +57,13 @@ std::string BaseHTTPRequestHandler::GetPath() const
 	return this->path;
 }
 
-void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status)
+void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusCode& status, bool shouldCreateHtml)
 {
   this->sendResponse(status.code, status.description);
-	this->writeDefaultResponse(content);
+	if (shouldCreateHtml)
+		this->writeDefaultResponse(this->createHtmlTemplate(content), "text/html");
+	else
+		this->writeDefaultResponse(content, "text/html");
 	this->currentRequestContent->setHasErrorInRequest(true);
 }
 
@@ -70,12 +73,23 @@ void BaseHTTPRequestHandler::sendNotFoundError()
 	int code = this->currentServerConfig->GetErrorPageCode();
 	std::string content = this->readContent(page);
 	if (content.empty())
-		this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+		this->sendError("Not Found", HTTPStatus::NOT_FOUND);
 	else
 	{
 		StatusCode status(code, HTTPStatus::NOT_FOUND.description, HTTPStatus::NOT_FOUND.details);
-		this->sendError(content, status);
+		this->sendError(content, status, false);
 	}
+}
+
+std::string BaseHTTPRequestHandler::createHtmlTemplate(std::string title, std::string body)
+{
+	std::string content("<html><head><title>" + title + "</title><link rel=\"icon\" href=\"data:,\" /></head>""<body>");
+	if (body.empty())
+		content += "<h1>" + title + "</h1>";
+	else
+		content += body;
+	content += "</body></html>";
+	return content;
 }
 
 void BaseHTTPRequestHandler::clearHeadersBuffers()
@@ -127,7 +141,7 @@ bool BaseHTTPRequestHandler::isValidFirstRequestHeaderLine(std::string firstRequ
 	std::vector<std::string> firstRequestLine = StringUtils::Split(firstRequestHeaderLine, " ");
 	if (firstRequestLine.size() < 3)
 	{
-			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+			this->sendError("Bad Request", HTTPStatus::BAD_REQUEST);
 			return false;
 	}
 	this->currentRequestContent->setFirstRequestLine(firstRequestHeaderLine);
@@ -146,7 +160,7 @@ bool BaseHTTPRequestHandler::isValidFirstRequestHeaderLine(std::string firstRequ
 	if (std::atoi(versionNumber[0].c_str()) != 1 ||
 		std::atoi(versionNumber[1].c_str()) != 1)
 	{
-		this->sendError("<h1>HTTP Version Not Supported</h1>", HTTPStatus::HTTP_VERSION_NOT_SUPPORTED);
+		this->sendError("HTTP Version Not Supported", HTTPStatus::HTTP_VERSION_NOT_SUPPORTED);
 		return false;
 	}
 	return true;
@@ -159,7 +173,7 @@ void BaseHTTPRequestHandler::parseHeaders(std::vector<std::string> &requestLines
 		return;
 	if (requestLines.size() == 0 && !hasParserAllHeader && this->rawRequest.size() < BUFFER_SIZE - 1)
 	{
-		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		this->sendError("Bad Request", HTTPStatus::BAD_REQUEST);
 		return;
 	}
 	std::string contentLengthStr;
@@ -203,7 +217,7 @@ bool BaseHTTPRequestHandler::parseMultiPartBody(std::string bodyUnparsed)
 	std::vector<std::string> multipartDatum = StringUtils::SliceAtSubstring(bodyUnparsed, "--" + this->currentRequestContent->getBoundary() + CRLF);
 	if (multipartDatum.size() == 0)
 	{
-		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		this->sendError("Bad Request", HTTPStatus::BAD_REQUEST);
 		return false;
 	}
 	for (std::vector<std::string>::iterator it = multipartDatum.begin(); it != multipartDatum.end(); it++)
@@ -212,7 +226,7 @@ bool BaseHTTPRequestHandler::parseMultiPartBody(std::string bodyUnparsed)
 		bodyParsed = this->currentRequestContent->parseMultiPartBody(multipartData, multipartData.size());
 		if (!bodyParsed)
 		{
-			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+			this->sendError("Bad Request", HTTPStatus::BAD_REQUEST);
 			return false;
 		}
 		this->multipartDatum.push_back(this->currentRequestContent->getMultiPartData());
@@ -252,7 +266,7 @@ std::vector<std::string> BaseHTTPRequestHandler::SplitRequest(std::string reques
 	std::getline(iss, line);
 	if (isBodyUnparsedEmpty && !this->isValidFirstRequestHeaderLine(line))
 	{
-		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		this->sendError("Bad Request", HTTPStatus::BAD_REQUEST);
 		throw std::runtime_error("Bad Request");
 	}
 	if (!isBodyUnparsedEmpty)
@@ -337,7 +351,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 	this->addCurrentRequestContentAndServerConfig(clientSocket, serverConfig);
 	if (this->currentServerConfig == NULL)
 	{
-		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		this->sendError("Bad Request", HTTPStatus::BAD_REQUEST);
 		return NULL;
 	}
 	BaseHTTPRequestHandler::RequestMethodFunction method = this->parseRequest(request);
@@ -358,12 +372,12 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 			return NULL;
 		if (!this->checkBodyLimit())
 		{
-			this->sendError("<h1>Request Entity Too Large</h1>", HTTPStatus::CONTENT_TOO_LARGE);
+			this->sendError("Request Entity Too Large", HTTPStatus::CONTENT_TOO_LARGE);
 			return NULL;
 		}
 		if (!this->validateServerName())
 		{
-			this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+			this->sendError("Bad Request", HTTPStatus::BAD_REQUEST);
 			return NULL;
 		}
 		this->checkRedirect();
@@ -377,7 +391,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 		}
 		if (!VectorUtils<std::string>::hasElement(methodsAllowed, this->requestMethod))
 		{
-			this->sendError("<h1>Method Not Allowed</h1>", HTTPStatus::METHOD_NOT_ALLOWED);
+			this->sendError("Method Not Allowed", HTTPStatus::METHOD_NOT_ALLOWED);
 			return NULL;
 		}
 		BaseHTTPRequestHandler::RequestMethodFunction method = this->getMethod(this->requestMethod);
@@ -385,7 +399,7 @@ BaseHTTPRequestHandler::RequestMethodFunction BaseHTTPRequestHandler::parseReque
 	}
 	catch (const std::exception &e)
 	{
-		this->sendError("<h1>Bad Request</h1>", HTTPStatus::BAD_REQUEST);
+		this->sendError("Bad Request", HTTPStatus::BAD_REQUEST);
 		return NULL;
 	}
 }
@@ -426,7 +440,7 @@ std::string BaseHTTPRequestHandler::createDirectoryListing(std::string rootPath,
 	std::vector<std::string> files = this->_directoryHandler->getFilesInDirectory(fullPath, directoryExists);
 	if (directoryExists == false)
 	{
-		this->sendError("<h1>Forbidden</h1>", HTTPStatus::FORBIDDEN);
+		this->sendError("Forbidden", HTTPStatus::FORBIDDEN);
 		return "";
 	}
 	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
@@ -455,7 +469,7 @@ bool BaseHTTPRequestHandler::checkExecuteCgi(std::string path)
 		bool hasCgiExtension = StringUtils::EndsWith(fileName, cgiExtension);
 		if (!hasCgiExtension && fileExists)
 		{
-			this->sendError("<h1>Not Implemented</h1>", HTTPStatus::NOT_IMPLEMENTED);
+			this->sendError("Not Implemented", HTTPStatus::NOT_IMPLEMENTED);
 			return false;
 		}
 		if (!fileExists)
@@ -511,7 +525,7 @@ bool BaseHTTPRequestHandler::isDirectoryListingAllowed(std::string path)
 				return this->allowDirectoryListing;
 
 			}
-			this->sendError("<h1>Not Found</h1>", HTTPStatus::NOT_FOUND);
+			this->sendError("Not Found", HTTPStatus::NOT_FOUND);
 			return false;
 		}
 	}
