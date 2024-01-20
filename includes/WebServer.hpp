@@ -17,4 +17,7 @@ class WebServer : public ATcpListener
 	void OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes);
 	// Handler for when a message is received from the client
 	void OnMessageReceived(ServerConfig *ServerConfig, int clientSocket, std::string msg);
+
+	// Send a message to a client
+	void SendReponseToClient(int clientSocket);
 };

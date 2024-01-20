@@ -35,6 +35,12 @@ int ATcpListener::BindSocket(struct addrinfo *addrinfo)
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (listener < 0) 
             continue;
+
+				if (fcntl(listener, F_SETFL, O_NONBLOCK) < 0) {
+            close(listener);
+            continue;
+        }
+
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
         if (bind(listener, p->ai_addr, p->ai_addrlen) < 0)
 				{
@@ -78,8 +84,8 @@ void ATcpListener::AddToPfds(int newfd)
 {
 		struct pollfd pfd;
 		pfd.fd = newfd;
-		pfd.events = POLLIN;
-		pfd.revents = 0;
+		pfd.events = POLLIN | POLLOUT;
+		pfd.revents = 0x000;
 		this->pfds.push_back(pfd);
 }
 
@@ -155,7 +161,7 @@ void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);
 }
 
-void ATcpListener::SendToClient(int clientSocket, std::string msg, int length) const
+void ATcpListener::SendToClient(int clientSocket, std::string msg, int length)
 {
 	if (send(clientSocket, msg.c_str(), length, 0) == -1)
 		Logger::Log(ERROR, "send");
@@ -191,14 +197,22 @@ bool ATcpListener::Run()
 		}
 		for (int i = 0; i < socketCount; i++)
 		{
-			if (this->pfds[i].revents & POLLIN)
+			short revents = this->pfds[i].revents;
+			int clientSocket = this->pfds[i].fd;
+			if (revents & POLLIN)
 			{
-				if (this->IsListeningSocket(this->pfds[i].fd))
-					this->HandleNewConnection(this->pfds[i].fd);
+				if (this->IsListeningSocket(clientSocket))
+					this->HandleNewConnection(clientSocket);
 				else
-					this->HandleOnGoingConnection(this->pfds[i].fd, i);
+					this->HandleOnGoingConnection(clientSocket, i);
 			}
-		}	
+			if (revents & POLLOUT)
+			{
+				this->SendReponseToClient(clientSocket);
+			}
+			if (revents & POLLHUP || revents & POLLERR || revents & POLLNVAL || revents & POLLRDHUP)
+				this->OnClientDisconnected(clientSocket, i, 0);
+		}		
 	}
 	return true;
 }

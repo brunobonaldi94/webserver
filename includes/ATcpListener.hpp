@@ -16,6 +16,7 @@
 #include <sstream>
 #include <vector>
 #include <csignal>
+#include <fcntl.h>
 #include "Logger.hpp"
 #include "requests/RequestHandler.hpp"
 #include "StringUtils.hpp"
@@ -55,7 +56,9 @@ protected:
 	virtual void OnMessageReceived(ServerConfig *serverConfig, int clientSocket, std::string msg) = 0;
 
 	// Send a message to a client
-	void SendToClient(int clientSocket, std::string msg, int length) const;
+	void SendToClient(int clientSocket, std::string msg, int length);
+
+	virtual void SendReponseToClient(int clientSocket) = 0;
 
 	BaseHTTPRequestHandler *requestHandler;
 
