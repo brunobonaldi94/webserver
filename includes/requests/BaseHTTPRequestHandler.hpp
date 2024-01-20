@@ -80,7 +80,7 @@ protected:
 	std::string getPath(std::string path);
 	bool checkExecuteCgi(std::string path);
 	bool parseMultiPartBody(std::string bodyUnparsed);
-	std::string createHtmlTemplate(std::string title, std::string body = "");
+	std::string createHtmlTemplate(std::string title, StatusCode status, std::string body = "");
 	
 
 	size_t contentLength;

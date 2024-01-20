@@ -61,7 +61,7 @@ void BaseHTTPRequestHandler::sendError(const std::string& content, const StatusC
 {
   this->sendResponse(status.code, status.description);
 	if (shouldCreateHtml)
-		this->writeDefaultResponse(this->createHtmlTemplate(content), "text/html");
+		this->writeDefaultResponse(this->createHtmlTemplate(content, status), "text/html");
 	else
 		this->writeDefaultResponse(content, "text/html");
 	this->currentRequestContent->setHasErrorInRequest(true);
@@ -81,11 +81,14 @@ void BaseHTTPRequestHandler::sendNotFoundError()
 	}
 }
 
-std::string BaseHTTPRequestHandler::createHtmlTemplate(std::string title, std::string body)
+std::string BaseHTTPRequestHandler::createHtmlTemplate(std::string title, StatusCode status, std::string body)
 {
 	std::string content("<html><head><title>" + title + "</title><link rel=\"icon\" href=\"data:,\" /></head>""<body>");
 	if (body.empty())
+	{
 		content += "<h1>" + title + "</h1>";
+		content += "<h2 class=\"text-red-500 text-center text-6xl animate-slide-up-and-fade\">Error: "+ StringUtils::ConvertNumberToString(status.code) + " - " + status.details +"</h2>";
+	}
 	else
 		content += body;
 	content += "</body></html>";

@@ -44,6 +44,7 @@ bool WebServer::SendReponseToClient(int clientSocket, int socketIndex)
 			);
 			if (!msgSent)
 				Logger::Log(ERROR, "Failed to send message to client socket: " + StringUtils::ConvertNumberToString(clientSocket));
+			Logger::Log(SUCCESS, "Response sent to client socket: " + StringUtils::ConvertNumberToString(clientSocket));
 			ATcpListener::OnClientDisconnected(clientSocket, socketIndex, 0);
 	}
 	this->requestHandler->shouldClearRequestContent(clientSocket);
