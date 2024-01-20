@@ -161,10 +161,14 @@ void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);
 }
 
-void ATcpListener::SendToClient(int clientSocket, std::string msg, int length)
+bool ATcpListener::SendToClient(int clientSocket, std::string msg, int length)
 {
 	if (send(clientSocket, msg.c_str(), length, 0) == -1)
+	{
 		Logger::Log(ERROR, "send");
+		return false;
+	}
+	return true;
 }
 
 void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex, ssize_t nbytes)
@@ -189,13 +193,12 @@ bool ATcpListener::Run()
 	while (this->m_isRunning)
 	{
 		int poll_count = poll(&this->pfds[0], this->pfds.size(), 0);
-		int socketCount = this->pfds.size();
 		if (poll_count == -1)
 		{
 			Logger::Log(ERROR, "poll error");
 			return false;
 		}
-		for (int i = 0; i < socketCount; i++)
+		for (int i = 0; i < static_cast<int>(this->pfds.size()); i++)
 		{
 			short revents = this->pfds[i].revents;
 			int clientSocket = this->pfds[i].fd;
@@ -208,7 +211,8 @@ bool ATcpListener::Run()
 			}
 			if (revents & POLLOUT)
 			{
-				this->SendReponseToClient(clientSocket);
+				this->SendReponseToClient(clientSocket, i);
+				break;
 			}
 			if (revents & POLLHUP || revents & POLLERR || revents & POLLNVAL || revents & POLLRDHUP)
 				this->OnClientDisconnected(clientSocket, i, 0);

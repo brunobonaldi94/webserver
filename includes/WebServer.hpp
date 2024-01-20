@@ -19,5 +19,5 @@ class WebServer : public ATcpListener
 	void OnMessageReceived(ServerConfig *ServerConfig, int clientSocket, std::string msg);
 
 	// Send a message to a client
-	void SendReponseToClient(int clientSocket);
+	bool SendReponseToClient(int clientSocket, int socketIndex);
 };

@@ -31,17 +31,22 @@ void WebServer::OnMessageReceived(ServerConfig *serverConfig, int clientSocket, 
 	}
 }
 
-void WebServer::SendReponseToClient(int clientSocket)
+bool WebServer::SendReponseToClient(int clientSocket, int socketIndex)
 {
-		if (this->requestHandler->getCurrentRequestContent() == NULL)
-			return;
-		if (this->requestHandler->hasParsedAllRequestContent() || this->requestHandler->getCurrentRequestContent()->getHasErrorInRequest())
-			ATcpListener::SendToClient(
+	if (this->requestHandler->getCurrentRequestContent() == NULL)
+			return true;
+	if (this->requestHandler->hasParsedAllRequestContent() || this->requestHandler->getCurrentRequestContent()->getHasErrorInRequest())
+	{
+			this->SendToClient(
 				clientSocket,
 				this->requestHandler->headersBufferToString(),
 				this->requestHandler->headersBufferToString().size()
 			);
-		this->requestHandler->shouldClearRequestContent(clientSocket);
+			Logger::Log(SUCCESS, "Response sent to client: " + StringUtils::ConvertNumberToString(clientSocket));
+			ATcpListener::OnClientDisconnected(clientSocket, socketIndex, 0);
+	}
+	this->requestHandler->shouldClearRequestContent(clientSocket);
+	return true;
 }
 
 // Handler for client disconnections
@@ -49,5 +54,5 @@ void WebServer::OnClientDisconnected(int clientSocket, int socketIndex, ssize_t 
 {
 	ATcpListener::OnClientDisconnected(clientSocket, socketIndex, nbytes);
 	this->requestHandler->clearRequestContent(clientSocket);
-	std::cout << "Client disconnected: " << clientSocket << std::endl;
+	Logger::Log(WARNING,"Client disconnected: " + StringUtils::ConvertNumberToString(clientSocket));
 }

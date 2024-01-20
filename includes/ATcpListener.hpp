@@ -56,9 +56,9 @@ protected:
 	virtual void OnMessageReceived(ServerConfig *serverConfig, int clientSocket, std::string msg) = 0;
 
 	// Send a message to a client
-	void SendToClient(int clientSocket, std::string msg, int length);
+	bool SendToClient(int clientSocket, std::string msg, int length);
 
-	virtual void SendReponseToClient(int clientSocket) = 0;
+	virtual bool SendReponseToClient(int clientSocket, int socketIndex) = 0;
 
 	BaseHTTPRequestHandler *requestHandler;
 

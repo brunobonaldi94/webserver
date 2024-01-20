@@ -1,7 +1,7 @@
 #pragma once
 
 #define SPACE " \t"
-#define DEBUG true
+#define DEBUG false
 #define CRLF "\r\n"
 #define CR '\r'
 #define LF '\n'
