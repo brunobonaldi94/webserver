@@ -56,7 +56,9 @@ protected:
 	virtual void OnMessageReceived(ServerConfig *serverConfig, int clientSocket, std::string msg) = 0;
 
 	// Send a message to a client
-	void SendToClient(int clientSocket, std::string msg, int length) const;
+	void SendToClient(int clientSocket, std::string msg, int length);
+
+	virtual void SendReponseToClient(int clientSocket) = 0;
 
 	BaseHTTPRequestHandler *requestHandler;
 
@@ -72,8 +74,6 @@ private:
 	void RemoveFromListenFds(int i);
 	void AddToSocketFdToServerConfig(int newfd, ServerConfig * ServerConfig);
 	void RemoveFromSocketFdToServerConfig(int i);
-	void RemoveFromBufferMap(int i);
-	void AddToBufferMap(int newfd);
 
 
 	//int														m_socket;		// Internal FD for the listening socket
@@ -84,6 +84,5 @@ private:
 	std::map<int, ServerConfig*> listenFds;
 	std::map<int, ServerConfig*> m_socketFdToServerConfigs;
 	bool 													m_isRunning;	// Flag indicating the listener is running
-	std::map<int, std::string> 	 m_bufferMap;
 	static void StaticStop(int signal);
 };

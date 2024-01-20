@@ -84,8 +84,8 @@ void ATcpListener::AddToPfds(int newfd)
 {
 		struct pollfd pfd;
 		pfd.fd = newfd;
-		pfd.events = POLLIN;
-		pfd.revents = 0;
+		pfd.events = POLLIN | POLLOUT;
+		pfd.revents = 0x000;
 		this->pfds.push_back(pfd);
 }
 
@@ -121,7 +121,6 @@ void ATcpListener::HandleNewConnection(int clientSocket)
 	{
 		this->AddToPfds(newfd);
 		this->AddToSocketFdToServerConfig(newfd, this->listenFds[clientSocket]);
-		this->AddToBufferMap(newfd);
 	}
 }
 
@@ -129,16 +128,6 @@ void ATcpListener::RemoveFromPfds(int i)
 {
 		 if (i >= 0 && i < static_cast<int>(this->pfds.size())) 
         this->pfds.erase(this->pfds.begin() + i);
-}
-
-void ATcpListener::RemoveFromBufferMap(int i)
-{
-		MapUtils<int, std::string>::SafeRemoveMap(this->m_bufferMap, i);
-}
-
-void ATcpListener::AddToBufferMap(int newfd)
-{
-		this->m_bufferMap[newfd] = "";
 }
 
 bool ATcpListener::Init()
@@ -172,7 +161,7 @@ void ATcpListener::HandleOnGoingConnection(int clientSocket, int socketIndex)
 	this->OnClientDisconnected(clientSocket, socketIndex, nbytes);
 }
 
-void ATcpListener::SendToClient(int clientSocket, std::string msg, int length) const
+void ATcpListener::SendToClient(int clientSocket, std::string msg, int length)
 {
 	if (send(clientSocket, msg.c_str(), length, 0) == -1)
 		Logger::Log(ERROR, "send");
@@ -190,7 +179,6 @@ void ATcpListener::OnClientDisconnected(int clientSocket, int socketIndex, ssize
 		close(this->pfds[socketIndex].fd);
 		this->RemoveFromPfds(socketIndex);
 		this->RemoveFromSocketFdToServerConfig(clientSocket);
-		this->RemoveFromBufferMap(clientSocket);
 }
 
 bool ATcpListener::Run()
@@ -219,7 +207,9 @@ bool ATcpListener::Run()
 					this->HandleOnGoingConnection(clientSocket, i);
 			}
 			if (revents & POLLOUT)
-				this->OnMessageReceived(this->m_socketFdToServerConfigs[clientSocket], clientSocket, this->m_bufferMap[clientSocket]);
+			{
+				this->SendReponseToClient(clientSocket);
+			}
 			if (revents & POLLHUP || revents & POLLERR || revents & POLLNVAL || revents & POLLRDHUP)
 				this->OnClientDisconnected(clientSocket, i, 0);
 		}		
